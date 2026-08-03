@@ -1,0 +1,33 @@
+{
+  "name": "Conecta MX",
+  "short_name": "ConectaMX",
+  "description": "La plataforma que ayuda a los negocios de México a conseguir más clientes y medir su inversión.",
+  "lang": "es-MX",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1565C0",
+  "categories": ["business", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Directorio",
+      "url": "/#/directory"
+    },
+    {
+      "name": "Empleo",
+      "url": "/#/jobs"
+    },
+    {
+      "name": "Eventos",
+      "url": "/#/events"
+    }
+  ]
+}
