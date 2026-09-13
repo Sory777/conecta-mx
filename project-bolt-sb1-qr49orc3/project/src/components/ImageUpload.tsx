@@ -41,12 +41,12 @@ export function ImageUpload({ value, onChange, folder = 'businesses', label = 'I
       <label className="label">{label}</label>
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={onFile} className="hidden" />
       {value ? (
-        <div className={`relative overflow-hidden rounded-xl border border-slate-200 ${aspect}`}>
+        <div className={`relative overflow-hidden rounded border border-line ${aspect}`}>
           <img src={value} alt="preview" className="h-full w-full object-cover" />
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute right-2 top-2 rounded-full bg-slate-900/70 p-1 text-white transition hover:bg-rose-500"
+            className="absolute right-2 top-2 rounded-full bg-ink/70 p-1 text-ink-invert transition hover:bg-rose-500"
             aria-label="Quitar imagen"
           >
             <X className="h-4 w-4" />
@@ -55,7 +55,7 @@ export function ImageUpload({ value, onChange, folder = 'businesses', label = 'I
             type="button"
             onClick={pick}
             disabled={busy}
-            className="absolute bottom-2 left-2 rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow hover:bg-white"
+            className="absolute bottom-2 left-2 rounded bg-surface/90 px-2.5 py-1.5 text-xs font-medium shadow hover:bg-surface"
           >
             Cambiar
           </button>
@@ -65,11 +65,11 @@ export function ImageUpload({ value, onChange, folder = 'businesses', label = 'I
           type="button"
           onClick={pick}
           disabled={busy}
-          className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-slate-400 transition hover:border-[#1565C0] hover:text-[#1565C0] ${aspect}`}
+          className={`flex w-full flex-col items-center justify-center gap-2 rounded border-2 border-dashed border-line bg-surface-soft p-6 text-muted transition hover:border-gold hover:text-gold ${aspect}`}
         >
           {busy ? <Loader2 className="h-7 w-7 animate-spin" /> : <ImagePlus className="h-7 w-7" />}
           <span className="text-sm font-medium">{busy ? 'Subiendo...' : 'Toca para subir una foto'}</span>
-          {hint ? <span className="text-xs text-slate-400">{hint}</span> : <span className="text-xs text-slate-400">JPG, PNG, WebP · máx 4MB</span>}
+          {hint ? <span className="text-xs text-muted">{hint}</span> : <span className="text-xs text-muted">JPG, PNG, WebP · máx 4MB</span>}
         </button>
       )}
     </div>

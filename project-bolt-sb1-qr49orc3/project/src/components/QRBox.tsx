@@ -20,7 +20,7 @@ export function QRBox({ value, size = 200, filename = 'mng-qr.png', label, onDow
     QRCode.toCanvas(
       canvasRef.current,
       value,
-      { width: size, margin: 2, color: { dark: '#0D47A1', light: '#ffffff' } },
+      { width: size, margin: 2, color: { dark: '#141210', light: '#ffffff' } },
       (err) => {
         if (err) console.error(err);
         else if (canvasRef.current) setDataUrl(canvasRef.current.toDataURL('image/png'));
@@ -30,10 +30,10 @@ export function QRBox({ value, size = 200, filename = 'mng-qr.png', label, onDow
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="rounded-2xl border-2 border-slate-100 bg-white p-3 shadow-sm">
+      <div className="rounded border-2 border-line bg-white p-3 shadow-sm">
         <canvas ref={canvasRef} width={size} height={size} />
       </div>
-      {label && <p className="max-w-xs text-center text-xs text-slate-500 break-all">{label}</p>}
+      {label && <p className="max-w-xs text-center text-xs text-muted break-all">{label}</p>}
       {dataUrl && (
         <button
           onClick={() => { downloadDataUrl(dataUrl, filename); onDownload?.(); }}

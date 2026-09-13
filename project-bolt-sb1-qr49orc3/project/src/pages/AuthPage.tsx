@@ -65,13 +65,13 @@ export function AuthPage({ mode, onSuccess, onSwitch }: AuthPageProps) {
   return (
     <div className="mx-auto max-w-md px-4 py-8">
       <div className="mb-6 text-center">
-        <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl mng-gradient text-white`}>
+        <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded mng-gradient text-gold`}>
           {mode === 'login' ? <LogIn className="h-6 w-6" /> : <UserPlus className="h-6 w-6" />}
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-800">
+        <h1 className="text-2xl font-extrabold text-ink dark:text-ink-invert">
           {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-muted">
           {mode === 'login' ? 'Accede a tu panel de negocio' : 'Registra tu negocio y empieza a crecer'}
         </p>
       </div>
@@ -80,9 +80,9 @@ export function AuthPage({ mode, onSuccess, onSwitch }: AuthPageProps) {
         <div className="mb-5 grid gap-3 sm:grid-cols-3">
           {benefits.map((b) => (
             <div key={b.title} className="card p-3 text-center">
-              <b.icon className="mx-auto h-5 w-5 text-[#1565C0]" />
-              <p className="mt-1.5 text-xs font-bold text-slate-700">{b.title}</p>
-              <p className="mt-0.5 text-[11px] leading-tight text-slate-500">{b.desc}</p>
+              <b.icon className="mx-auto h-5 w-5 text-gold" />
+              <p className="mt-1.5 text-xs font-bold text-ink dark:text-ink-invert">{b.title}</p>
+              <p className="mt-0.5 text-[11px] leading-tight text-muted">{b.desc}</p>
             </div>
           ))}
         </div>
@@ -92,7 +92,7 @@ export function AuthPage({ mode, onSuccess, onSwitch }: AuthPageProps) {
         <div>
           <label className="label">Email</label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               type="email"
               className="input pl-9"
@@ -106,7 +106,7 @@ export function AuthPage({ mode, onSuccess, onSwitch }: AuthPageProps) {
         <div>
           <label className="label">Contraseña</label>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               type="password"
               className="input pl-9"
@@ -123,9 +123,9 @@ export function AuthPage({ mode, onSuccess, onSwitch }: AuthPageProps) {
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-slate-500">
+      <p className="mt-4 text-center text-sm text-muted">
         {mode === 'login' ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-        <button onClick={onSwitch} className="font-bold text-[#1565C0] hover:underline">
+        <button onClick={onSwitch} className="font-bold text-gold hover:underline">
           {mode === 'login' ? 'Regístrate gratis' : 'Inicia sesión'}
         </button>
       </p>

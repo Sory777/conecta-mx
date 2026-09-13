@@ -4,7 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1565C0" />
+    <meta name="theme-color" content="#141210" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('cmx_theme');
+          var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (dark) document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
     <meta name="description" content="Conecta MX — Directorio nacional de negocios, bolsa de empleo y eventos en los 32 estados de México. Registra tu negocio gratis y conéctate con tu comunidad." />
     <meta name="keywords" content="negocios México, directorio, estados, bolsa de empleo, Conecta MX, comercio local" />
     <meta name="author" content="Conecta MX" />

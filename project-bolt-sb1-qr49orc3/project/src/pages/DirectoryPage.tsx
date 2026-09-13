@@ -125,15 +125,15 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-5">
-        <h1 className="text-2xl font-extrabold text-slate-800">Negocios</h1>
-        <p className="text-sm text-slate-500">{filtered.length} de {businesses.length} negocios</p>
+        <h1 className="text-2xl font-extrabold text-ink dark:text-ink-invert">Negocios</h1>
+        <p className="text-sm text-muted">{filtered.length} de {businesses.length} negocios</p>
       </div>
 
       {/* Search bar */}
       <div className="card p-3">
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -148,17 +148,17 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
             >
               <SlidersHorizontal className="h-4 w-4" /> Filtros
             </button>
-            <div className="flex rounded-lg border border-slate-200 p-0.5">
+            <div className="flex rounded border border-line p-0.5">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`rounded-md p-2 ${viewMode === 'grid' ? 'bg-[#0D47A1] text-white' : 'text-slate-400'}`}
+                className={`rounded p-2 ${viewMode === 'grid' ? 'bg-ink text-ink-invert' : 'text-muted'}`}
                 aria-label="Vista cuadrícula"
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`rounded-md p-2 ${viewMode === 'list' ? 'bg-[#0D47A1] text-white' : 'text-slate-400'}`}
+                className={`rounded p-2 ${viewMode === 'list' ? 'bg-ink text-ink-invert' : 'text-muted'}`}
                 aria-label="Vista lista"
               >
                 <List className="h-4 w-4" />
@@ -189,9 +189,9 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
 
         {smartCategories.length > 0 && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-slate-400">Búsqueda inteligente:</span>
+            <span className="text-xs text-muted">Búsqueda inteligente:</span>
             {smartCategories.map((c) => (
-              <span key={c} className="chip bg-blue-50 text-xs text-blue-700">{c}</span>
+              <span key={c} className="chip bg-gold-soft text-xs text-gold">{c}</span>
             ))}
           </div>
         )}
@@ -201,7 +201,7 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
       <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1">
         <button
           onClick={() => setCategory('')}
-          className={`chip whitespace-nowrap ${!category ? 'bg-[#0D47A1] text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
+          className={`chip whitespace-nowrap ${!category ? 'border-ink bg-ink text-ink-invert' : ''}`}
         >
           Todas
         </button>
@@ -211,7 +211,7 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
             <button
               key={c.name}
               onClick={() => setCategory(c.name)}
-              className={`chip whitespace-nowrap ${category === c.name ? 'bg-[#0D47A1] text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
+              className={`chip whitespace-nowrap ${category === c.name ? 'border-ink bg-ink text-ink-invert' : ''}`}
             >
               <Icon className="h-3.5 w-3.5" /> {c.name}
             </button>
@@ -244,34 +244,34 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
                 <div key={b.id} className="card flex items-center gap-3 p-3">
                   <button onClick={() => onOpenBusiness(b)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
                     {b.imageUrl ? (
-                      <img src={b.imageUrl} alt={b.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
+                      <img src={b.imageUrl} alt={b.name} className="h-16 w-16 shrink-0 rounded object-cover" />
                     ) : (
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                        <Icon className="h-7 w-7 text-slate-400" />
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-surface-soft">
+                        <Icon className="h-7 w-7 text-muted" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="truncate text-sm font-bold text-slate-800">{b.name}</p>
-                        {b.verified && <span className="shrink-0 text-xs text-[#1565C0]">✓</span>}
+                        <p className="truncate text-sm font-bold text-ink dark:text-ink-invert">{b.name}</p>
+                        {b.verified && <span className="shrink-0 text-xs text-gold">✓</span>}
                       </div>
-                      <p className="truncate text-xs text-slate-500">{b.category} · {b.municipality}</p>
+                      <p className="truncate text-xs text-muted">{b.category} · {b.municipality}</p>
                       <div className="mt-1 flex items-center gap-2">
-                        {b.rating > 0 && <span className="text-xs font-medium text-amber-500">★ {b.rating}</span>}
-                        <span className={`text-xs font-medium ${openInfo.open ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {b.rating > 0 && <span className="text-xs font-medium text-gold">★ {b.rating}</span>}
+                        <span className={`text-xs font-medium ${openInfo.open ? 'text-emerald-600' : 'text-muted'}`}>
                           {openInfo.label}
                         </span>
                       </div>
                     </div>
                   </button>
                   <div className="flex shrink-0 gap-1">
-                    <button onClick={() => toggleFavorite(b.id)} className="rounded-lg p-2 text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Favorito">
+                    <button onClick={() => toggleFavorite(b.id)} className="rounded p-2 text-muted hover:bg-rose-50 hover:text-rose-500" aria-label="Favorito">
                       <Heart className={`h-4 w-4 ${favorites.has(b.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
                     </button>
-                    <button onClick={() => shareBusiness(b)} className="rounded-lg p-2 text-slate-300 hover:bg-blue-50 hover:text-[#1565C0]" aria-label="Compartir">
+                    <button onClick={() => shareBusiness(b)} className="rounded p-2 text-muted hover:bg-gold-soft hover:text-gold" aria-label="Compartir">
                       <Share2 className="h-4 w-4" />
                     </button>
-                    <button onClick={() => copyLink(b)} className="rounded-lg p-2 text-slate-300 hover:bg-slate-100 hover:text-slate-600" aria-label="Copiar enlace">
+                    <button onClick={() => copyLink(b)} className="rounded p-2 text-muted hover:bg-surface-soft hover:text-ink dark:hover:text-ink-invert" aria-label="Copiar enlace">
                       <Copy className="h-4 w-4" />
                     </button>
                   </div>

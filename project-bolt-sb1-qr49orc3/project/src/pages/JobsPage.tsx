@@ -86,8 +86,8 @@ export function JobsPage({ jobs, savedJobs, onToggleSave, onChange }: JobsPagePr
     <div className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800">Bolsa de Empleo</h1>
-          <p className="text-sm text-slate-500">{filtered.length} vacantes</p>
+          <h1 className="text-2xl font-extrabold text-ink dark:text-ink-invert">Bolsa de Empleo</h1>
+          <p className="text-sm text-muted">{filtered.length} vacantes</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => { setCvJob(undefined); setShowCV(true); }} className="btn-outline text-sm">
@@ -101,7 +101,7 @@ export function JobsPage({ jobs, savedJobs, onToggleSave, onChange }: JobsPagePr
 
       <div className="card p-3">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -131,17 +131,17 @@ export function JobsPage({ jobs, savedJobs, onToggleSave, onChange }: JobsPagePr
           />
         </div>
         <div className="mt-2 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+          <label className="flex items-center gap-2 text-xs font-medium text-muted">
             <input
               type="checkbox"
               checked={showOnlySaved}
               onChange={(e) => setShowOnlySaved(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+              className="h-4 w-4 rounded border-line text-gold"
             />
             <Heart className={`h-4 w-4 ${showOnlySaved ? 'fill-rose-500 text-rose-500' : ''}`} /> Solo guardadas ({savedJobs.length})
           </label>
           {hasFilters && (
-            <button onClick={() => { setQuery(''); setMuni(''); setCategory(''); setContract(''); setSalaryMin(''); setShowOnlySaved(false); }} className="inline-flex items-center gap-1 text-xs font-medium text-[#1565C0] hover:underline">
+            <button onClick={() => { setQuery(''); setMuni(''); setCategory(''); setContract(''); setSalaryMin(''); setShowOnlySaved(false); }} className="inline-flex items-center gap-1 text-xs font-medium text-gold hover:underline">
               <X className="h-3.5 w-3.5" /> Limpiar
             </button>
           )}

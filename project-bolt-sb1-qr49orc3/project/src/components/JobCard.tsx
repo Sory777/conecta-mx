@@ -12,45 +12,45 @@ interface JobCardProps {
 export function JobCard({ job, saved, onToggleSave, onApplyCV }: JobCardProps) {
   const apply = jobApplyLink(job);
   return (
-    <div className="card flex flex-col p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <div className="card flex flex-col p-4 transition-all duration-300 hover:-translate-y-1 hover:border-gold hover:shadow-lg">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="text-base font-bold text-slate-800">{job.title}</h3>
-          <p className="text-sm font-medium text-[#1565C0]">{job.companyName}</p>
+          <h3 className="font-serif text-base font-bold">{job.title}</h3>
+          <p className="text-sm font-medium text-gold">{job.companyName}</p>
         </div>
         <button
           onClick={() => onToggleSave(job.id)}
-          className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-rose-50"
+          className="rounded p-1.5 text-muted transition-colors hover:bg-rose-50 dark:hover:bg-rose-950/40"
           aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
         >
           <Heart className={`h-5 w-5 ${saved ? 'fill-rose-500 text-rose-500' : ''}`} />
         </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
-        <span className="chip bg-slate-100 text-slate-600">
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+        <span className="chip">
           <MapPin className="h-3.5 w-3.5" /> {job.municipality}
         </span>
-        <span className="chip bg-slate-100 text-slate-600">
+        <span className="chip">
           <Briefcase className="h-3.5 w-3.5" /> {job.contractType}
         </span>
         {job.salary && (
-          <span className="chip bg-emerald-50 text-emerald-700">
+          <span className="chip border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-400">
             <Wallet className="h-3.5 w-3.5" /> {job.salary}
           </span>
         )}
       </div>
 
-      <p className="mt-3 line-clamp-2 text-sm text-slate-600">{job.description}</p>
+      <p className="mt-3 line-clamp-2 text-sm text-muted">{job.description}</p>
 
       {job.requirements && (
-        <p className="mt-2 line-clamp-2 text-xs text-slate-500">
+        <p className="mt-2 line-clamp-2 text-xs text-muted">
           <span className="font-semibold">Requisitos:</span> {job.requirements}
         </p>
       )}
 
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
-        <span className="text-xs text-slate-400">{timeAgo(job.createdAt)}</span>
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-line pt-3">
+        <span className="text-xs text-muted">{timeAgo(job.createdAt)}</span>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => onApplyCV(job)} className="btn-primary px-3 py-2 text-xs">
             <FileText className="h-4 w-4" /> Postular con CV

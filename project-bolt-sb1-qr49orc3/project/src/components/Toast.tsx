@@ -34,7 +34,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const icon = (type: ToastType) => {
     if (type === 'success') return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
     if (type === 'error') return <XCircle className="h-5 w-5 text-rose-500" />;
-    return <Info className="h-5 w-5 text-[#1565C0]" />;
+    return <Info className="h-5 w-5 text-gold" />;
   };
 
   return (
@@ -44,11 +44,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="animate-toast-in flex items-start gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-lg min-w-[260px] max-w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-800"
+            className="card animate-toast-in flex items-start gap-3 px-4 py-3 shadow-lg min-w-[260px] max-w-[calc(100vw-2rem)]"
           >
             {icon(t.type)}
-            <p className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-200">{t.message}</p>
-            <button onClick={() => remove(t.id)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300" aria-label="Cerrar">
+            <p className="flex-1 text-sm font-medium">{t.message}</p>
+            <button onClick={() => remove(t.id)} className="text-muted hover:text-ink dark:hover:text-ink-invert" aria-label="Cerrar">
               <X className="h-4 w-4" />
             </button>
           </div>

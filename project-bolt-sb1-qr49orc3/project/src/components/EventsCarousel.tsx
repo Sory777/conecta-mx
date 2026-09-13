@@ -36,9 +36,9 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
 
   if (count === 0) {
     return (
-      <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 p-10 text-center">
-        <Calendar className="mx-auto h-8 w-8 text-slate-300" />
-        <p className="mt-2 text-sm font-medium text-slate-500">No hay eventos publicados{canManage ? '' : ' en este municipio'}.</p>
+      <div className="rounded border-2 border-dashed border-line bg-surface-soft p-10 text-center">
+        <Calendar className="mx-auto h-8 w-8 text-muted" />
+        <p className="mt-2 text-sm font-medium text-muted">No hay eventos publicados{canManage ? '' : ' en este municipio'}.</p>
         {canManage && onAdd && (
           <button onClick={onAdd} className="btn-primary mt-3 text-xs">
             <Plus className="h-4 w-4" /> Publicar evento
@@ -91,17 +91,19 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
           return (
             <div
               key={ev.id}
-              className="absolute w-64 cursor-pointer overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl transition-all duration-700 ease-out sm:w-72"
+              className="card absolute w-64 cursor-pointer overflow-hidden transition-all duration-700 ease-out sm:w-72"
               style={{
                 transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                 opacity,
                 zIndex: 10 - absOffset,
                 pointerEvents: absOffset <= 1 ? 'auto' : 'none',
                 backfaceVisibility: 'hidden',
+                boxShadow: isActive ? '0 20px 40px -12px rgba(20,18,16,0.35)' : 'none',
+                borderColor: isActive ? 'rgb(var(--gold))' : 'rgb(var(--border))',
               }}
               onClick={() => (isActive ? undefined : goTo(i))}
             >
-              <div className="relative h-48 overflow-hidden bg-slate-100">
+              <div className="relative h-48 overflow-hidden bg-surface-soft">
                 <img
                   src={ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80'}
                   alt={ev.title}
@@ -109,40 +111,40 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
                   className="h-full w-full object-cover"
                   onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80'; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent" />
                 {ev.category && (
-                  <span className="absolute left-3 top-3 badge bg-[#1565C0] text-white shadow">
+                  <span className="absolute left-3 top-3 badge bg-ink text-ink-invert shadow">
                     {ev.category}
                   </span>
                 )}
                 {canManage && onDelete && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onDelete(ev.id); }}
-                    className="absolute right-3 top-3 rounded-full bg-slate-900/70 p-1.5 text-white transition hover:bg-rose-500"
+                    className="absolute right-3 top-3 rounded-full bg-ink/70 p-1.5 text-ink-invert transition hover:bg-rose-500"
                     aria-label="Eliminar evento"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                  <h3 className="line-clamp-1 text-lg font-extrabold">{ev.title}</h3>
-                  <div className="mt-1 flex items-center gap-2 text-xs text-white/90">
+                <div className="absolute bottom-0 left-0 right-0 p-3 text-ink-invert">
+                  <h3 className="line-clamp-1 font-serif text-lg font-bold">{ev.title}</h3>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-ink-invert/85">
                     <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {ev.municipality}</span>
                   </div>
                 </div>
               </div>
               <div className="space-y-1.5 p-3">
-                <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <Calendar className="h-3.5 w-3.5 text-[#1565C0]" /> {fmtDate(ev.date)}
-                  {ev.time && <><span className="text-slate-300">·</span><Clock className="h-3.5 w-3.5 text-[#1565C0]" /> {ev.time}</>}
+                <div className="flex items-center gap-2 text-xs">
+                  <Calendar className="h-3.5 w-3.5 text-gold" /> {fmtDate(ev.date)}
+                  {ev.time && <><span className="text-muted">·</span><Clock className="h-3.5 w-3.5 text-gold" /> {ev.time}</>}
                 </div>
                 {ev.location && (
-                  <p className="flex items-start gap-1.5 text-xs text-slate-500">
+                  <p className="flex items-start gap-1.5 text-xs text-muted">
                     <MapPin className="mt-0.5 h-3 w-3 shrink-0" /> {ev.location}
                   </p>
                 )}
                 {ev.description && (
-                  <p className="line-clamp-2 text-xs text-slate-600">{ev.description}</p>
+                  <p className="line-clamp-2 text-xs text-muted">{ev.description}</p>
                 )}
               </div>
             </div>
@@ -155,18 +157,18 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
           <button
             onClick={prev}
             disabled={active === 0}
-            className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/90 p-2.5 shadow-lg transition-all hover:bg-white hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
+            className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded border border-line bg-surface p-2.5 shadow-lg transition-all hover:border-gold hover:text-gold disabled:opacity-30"
             aria-label="Anterior"
           >
-            <ChevronLeft className="h-5 w-5 text-slate-700" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={next}
             disabled={active === count - 1}
-            className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/90 p-2.5 shadow-lg transition-all hover:bg-white hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
+            className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded border border-line bg-surface p-2.5 shadow-lg transition-all hover:border-gold hover:text-gold disabled:opacity-30"
             aria-label="Siguiente"
           >
-            <ChevronRight className="h-5 w-5 text-slate-700" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </>
       )}
@@ -177,8 +179,8 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
             <button
               key={i}
               onClick={() => goTo(i)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? 'w-7 bg-[#1565C0]' : 'w-2 bg-slate-300 hover:bg-slate-400'
+              className={`h-1.5 rounded transition-all duration-300 ${
+                i === active ? 'w-7 bg-gold' : 'w-1.5 bg-line hover:bg-muted'
               }`}
               aria-label={`Ir a ${i + 1}`}
             />

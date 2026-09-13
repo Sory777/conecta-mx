@@ -41,25 +41,25 @@ export function ReportButton({ itemType, itemId }: ReportButtonProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
+        className="flex items-center gap-1.5 rounded px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-950/40"
         aria-label="Reportar"
       >
         <Flag className="h-3.5 w-3.5" /> Reportar
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Reportar contenido" maxWidth="max-w-md">
         <div className="space-y-4">
-          <p className="text-sm text-slate-500">Ayúdanos a mantener Conecta MX seguro. Reporta si este contenido es:</p>
+          <p className="text-sm text-muted">Ayúdanos a mantener Conecta MX seguro. Reporta si este contenido es:</p>
           <div className="space-y-2">
             {REPORT_REASONS.map((r) => (
               <button
                 key={r.value}
                 onClick={() => setReason(r.value as ReportReason)}
-                className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm transition-colors ${
-                  reason === r.value ? 'border-[#1565C0] bg-blue-50 text-[#0D47A1]' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                className={`flex w-full items-center gap-3 rounded border p-3 text-left text-sm transition-colors ${
+                  reason === r.value ? 'border-gold bg-gold-soft text-gold' : 'border-line text-muted hover:bg-surface-soft'
                 }`}
               >
-                <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${reason === r.value ? 'border-[#1565C0] bg-[#1565C0]' : 'border-slate-300'}`}>
-                  {reason === r.value && <span className="h-2 w-2 rounded-full bg-white" />}
+                <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${reason === r.value ? 'border-gold bg-gold' : 'border-line'}`}>
+                  {reason === r.value && <span className="h-2 w-2 rounded-full bg-on-gold" />}
                 </span>
                 {r.label}
               </button>

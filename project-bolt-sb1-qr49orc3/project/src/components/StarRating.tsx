@@ -26,14 +26,14 @@ export function StarRating({ value, size = 16, showNumber = false, reviewCount, 
             >
               <Star
                 style={{ width: size, height: size }}
-                className={filled ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}
+                className={filled ? 'fill-gold text-gold' : 'fill-line text-line'}
               />
             </button>
           );
         })}
       </div>
       {showNumber && (
-        <span className="text-xs font-medium text-slate-500">
+        <span className="text-xs font-medium text-muted">
           {value > 0 ? value.toFixed(1) : 'Sin reseñas'}
           {reviewCount !== undefined && reviewCount > 0 && ` (${reviewCount})`}
         </span>
