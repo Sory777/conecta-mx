@@ -110,8 +110,8 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
   if (loading) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-        <RefreshCw className="mx-auto h-8 w-8 animate-spin text-slate-300" />
-        <p className="mt-3 text-sm text-slate-500">Cargando tus estadísticas...</p>
+        <RefreshCw className="mx-auto h-8 w-8 animate-spin text-muted" />
+        <p className="mt-3 text-sm text-muted">Cargando tus estadísticas...</p>
       </div>
     );
   }
@@ -120,21 +120,21 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
     return (
       <div className="mx-auto max-w-4xl px-4 py-20 text-center">
         <AlertCircle className="mx-auto h-8 w-8 text-rose-400" />
-        <p className="mt-3 text-sm text-slate-500">No se pudieron cargar tus estadísticas.</p>
+        <p className="mt-3 text-sm text-muted">No se pudieron cargar tus estadísticas.</p>
         <button onClick={() => window.location.reload()} className="btn-outline mt-4 text-sm">Reintentar</button>
       </div>
     );
   }
 
   const metricCards = [
-    { icon: Eye, label: 'Vistas totales', value: analytics['view'] || 0, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { icon: Users, label: 'Usuarios únicos', value: uniqueVisitors, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { icon: MessageCircle, label: 'Clics WhatsApp', value: analytics['whatsapp_click'] || 0, color: 'text-green-600', bg: 'bg-green-50' },
-    { icon: MapPin, label: 'Cómo llegar', value: analytics['directions_click'] || 0, color: 'text-orange-600', bg: 'bg-orange-50' },
-    { icon: Share2, label: 'Compartidos', value: analytics['share'] || 0, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { icon: Heart, label: 'Favoritos', value: analytics['favorite'] || 0, color: 'text-rose-600', bg: 'bg-rose-50' },
-    { icon: Phone, label: 'Clics llamar', value: analytics['call_click'] || 0, color: 'text-cyan-600', bg: 'bg-cyan-50' },
-    { icon: Star, label: 'Reseñas nuevas', value: analytics['review'] || 0, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { icon: Eye, label: 'Vistas totales', value: analytics['view'] || 0 },
+    { icon: Users, label: 'Usuarios únicos', value: uniqueVisitors },
+    { icon: MessageCircle, label: 'Clics WhatsApp', value: analytics['whatsapp_click'] || 0 },
+    { icon: MapPin, label: 'Cómo llegar', value: analytics['directions_click'] || 0 },
+    { icon: Share2, label: 'Compartidos', value: analytics['share'] || 0 },
+    { icon: Heart, label: 'Favoritos', value: analytics['favorite'] || 0 },
+    { icon: Phone, label: 'Clics llamar', value: analytics['call_click'] || 0 },
+    { icon: Star, label: 'Reseñas nuevas', value: analytics['review'] || 0 },
   ];
 
   return (
@@ -142,8 +142,8 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800">Mi Panel</h1>
-          <p className="text-sm text-slate-500">{business.name} · Plan {PLAN_LABELS[business.plan]}</p>
+          <h1 className="text-2xl font-extrabold text-ink dark:text-ink-invert">Mi Panel</h1>
+          <p className="text-sm text-muted">{business.name} · Plan {PLAN_LABELS[business.plan]}</p>
         </div>
         <button onClick={() => onNavigate('business', { id: business.id })} className="btn-outline text-sm">
           <Eye className="h-4 w-4" /> Ver mi perfil público
@@ -152,20 +152,20 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
 
       {/* Conecta Index */}
       <div className="mb-5 card overflow-hidden">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#0D47A1] to-[#1565C0] px-5 py-4 text-white">
+        <div className="mng-gradient flex items-center justify-between px-5 py-4 text-ink-invert">
           <div className="flex items-center gap-3">
-            <Award className="h-8 w-8" />
+            <Award className="h-8 w-8 text-gold" />
             <div>
-              <p className="text-sm font-medium text-white/80">Índice Conecta</p>
-              <p className="text-3xl font-extrabold">{conectaIndex}<span className="text-lg text-white/60">/100</span></p>
+              <p className="text-sm font-medium text-ink-invert/70">Índice Conecta</p>
+              <p className="font-serif text-3xl font-bold">{conectaIndex}<span className="text-lg text-ink-invert/50">/100</span></p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-white/70">
+            <p className="text-xs text-ink-invert/60">
               {conectaIndex >= 80 ? 'Excelente' : conectaIndex >= 60 ? 'Bien' : conectaIndex >= 40 ? 'Regular' : 'Necesita mejorar'}
             </p>
-            <div className="mt-1 h-2 w-24 overflow-hidden rounded-full bg-white/20">
-              <div className="h-full bg-white transition-all" style={{ width: `${conectaIndex}%` }} />
+            <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full bg-gold transition-all" style={{ width: `${conectaIndex}%` }} />
             </div>
           </div>
         </div>
@@ -175,11 +175,11 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {metricCards.map((m) => (
           <div key={m.label} className="card p-3">
-            <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg ${m.bg}`}>
-              <m.icon className={`h-4 w-4 ${m.color}`} />
+            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded bg-gold-soft">
+              <m.icon className="h-4 w-4 text-gold" />
             </div>
-            <p className="text-2xl font-extrabold text-slate-800">{m.value}</p>
-            <p className="text-xs font-medium text-slate-500">{m.label}</p>
+            <p className="text-2xl font-extrabold text-ink dark:text-ink-invert">{m.value}</p>
+            <p className="text-xs font-medium text-muted">{m.label}</p>
           </div>
         ))}
       </div>
@@ -187,19 +187,19 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {/* Publications summary */}
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <div className="card p-4">
-          <Package className="h-5 w-5 text-[#1565C0]" />
-          <p className="mt-2 text-2xl font-extrabold text-slate-800">{products.length}</p>
-          <p className="text-xs text-slate-500">Publicaciones totales</p>
+          <Package className="h-5 w-5 text-gold" />
+          <p className="mt-2 text-2xl font-extrabold text-ink dark:text-ink-invert">{products.length}</p>
+          <p className="text-xs text-muted">Publicaciones totales</p>
         </div>
         <div className="card p-4">
-          <AlertCircle className="h-5 w-5 text-amber-500" />
-          <p className="mt-2 text-2xl font-extrabold text-slate-800">{expiringCount}</p>
-          <p className="text-xs text-slate-500">Próximas a vencer</p>
+          <AlertCircle className="h-5 w-5 text-gold" />
+          <p className="mt-2 text-2xl font-extrabold text-ink dark:text-ink-invert">{expiringCount}</p>
+          <p className="text-xs text-muted">Próximas a vencer</p>
         </div>
         <div className="card p-4">
-          <Clock className="h-5 w-5 text-slate-400" />
-          <p className="mt-2 text-2xl font-extrabold text-slate-800">{expiredCount}</p>
-          <p className="text-xs text-slate-500">Expiradas</p>
+          <Clock className="h-5 w-5 text-muted" />
+          <p className="mt-2 text-2xl font-extrabold text-ink dark:text-ink-invert">{expiredCount}</p>
+          <p className="text-xs text-muted">Expiradas</p>
         </div>
       </div>
 
@@ -207,17 +207,17 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {topProducts.length > 0 && (
         <div className="mb-5 card p-4">
           <div className="mb-3 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-[#1565C0]" />
-            <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Publicaciones más vistas</h2>
+            <BarChart3 className="h-4 w-4 text-gold" />
+            <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Publicaciones más vistas</h2>
           </div>
           <div className="space-y-2">
             {topProducts.map((p, i) => (
-              <div key={p.id} className="flex items-center gap-3 rounded-xl border border-slate-100 p-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">{i + 1}</span>
-                {p.imageUrl && <img src={p.imageUrl} alt={p.name} className="h-10 w-10 rounded-lg object-cover" />}
+              <div key={p.id} className="flex items-center gap-3 rounded border border-line p-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-soft text-xs font-bold text-muted">{i + 1}</span>
+                {p.imageUrl && <img src={p.imageUrl} alt={p.name} className="h-10 w-10 rounded object-cover" />}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-800">{p.name}</p>
-                  <p className="text-xs text-slate-500">{p.views} vistas · {p.whatsappClicks} clics WhatsApp</p>
+                  <p className="truncate text-sm font-semibold text-ink dark:text-ink-invert">{p.name}</p>
+                  <p className="text-xs text-muted">{p.views} vistas · {p.whatsappClicks} clics WhatsApp</p>
                 </div>
                 {p.price > 0 && <span className="text-sm font-bold text-emerald-600">${p.price}</span>}
               </div>
@@ -230,14 +230,14 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {recommendations.length > 0 && (
         <div className="mb-5 card p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Lightbulb className="h-4 w-4 text-amber-500" />
-            <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Recomendaciones para mejorar</h2>
+            <Lightbulb className="h-4 w-4 text-gold" />
+            <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Recomendaciones para mejorar</h2>
           </div>
           <div className="space-y-2">
             {recommendations.map((r, i) => (
-              <div key={i} className="flex items-start gap-2.5 rounded-xl bg-amber-50 p-3">
-                <r.icon className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                <p className="text-sm text-amber-900">{r.text}</p>
+              <div key={i} className="flex items-start gap-2.5 rounded bg-gold-soft p-3">
+                <r.icon className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                <p className="text-sm text-ink dark:text-ink-invert">{r.text}</p>
               </div>
             ))}
           </div>

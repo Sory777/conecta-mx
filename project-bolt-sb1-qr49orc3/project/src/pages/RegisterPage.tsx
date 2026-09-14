@@ -49,7 +49,7 @@ function Field({ label, children, hint, error }: { label: string; children: Reac
     <div>
       <label className="label">{label}</label>
       {children}
-      {hint && !error && <p className="mt-1 text-xs text-slate-400">{hint}</p>}
+      {hint && !error && <p className="mt-1 text-xs text-muted">{hint}</p>}
       {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
     </div>
   );
@@ -144,32 +144,32 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
       <div className="mb-5 text-center">
-        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl mng-gradient text-white">
+        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded mng-gradient text-gold">
           <Store className="h-6 w-6" />
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-800">Registrar negocio</h1>
-        <p className="text-sm text-slate-500">Crea tu cuenta y empieza a conseguir más clientes</p>
+        <h1 className="text-2xl font-extrabold text-ink dark:text-ink-invert">Registrar negocio</h1>
+        <p className="text-sm text-muted">Crea tu cuenta y empieza a conseguir más clientes</p>
       </div>
 
       <form onSubmit={submit} className="card space-y-4 p-5">
-        <div className="rounded-xl bg-blue-50 p-3 text-xs text-blue-700 flex gap-2">
+        <div className="rounded bg-gold-soft p-3 text-xs text-gold flex gap-2">
           <Info className="h-4 w-4 shrink-0" />
           <span>Los primeros 30 negocios registrados obtienen membresía <strong>Fundador</strong> gratis para siempre.</span>
         </div>
 
         {/* Account credentials */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-          <p className="mb-3 text-sm font-bold text-slate-700">Datos de tu cuenta</p>
+        <div className="rounded border border-line bg-surface-soft p-4">
+          <p className="mb-3 text-sm font-bold text-ink dark:text-ink-invert">Datos de tu cuenta</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Email *" error={errors.email}>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                 <input type="email" className="input pl-9" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="tu@correo.com" />
               </div>
             </Field>
             <Field label="Contraseña *" hint="Mínimo 6 caracteres" error={errors.password}>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                 <input type="password" className="input pl-9" value={form.password} onChange={(e) => set('password', e.target.value)} placeholder="******" />
               </div>
             </Field>
@@ -218,7 +218,7 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
 
         <div>
           <label className="label">Ubicación GPS (para verificación)</label>
-          <p className="mb-2 text-xs text-slate-500">Comparte tu ubicación actual para que los clientes te encuentren en el mapa y verifiquemos tu negocio.</p>
+          <p className="mb-2 text-xs text-muted">Comparte tu ubicación actual para que los clientes te encuentren en el mapa y verifiquemos tu negocio.</p>
           <GeoButton coords={form.coords} onSet={(c) => set('coords', c)} />
         </div>
 
@@ -247,14 +247,14 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
           hint="Sube una foto desde tu galería o déjala vacía para una imagen por defecto"
         />
 
-        <label className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3">
+        <label className="flex items-start gap-2.5 rounded bg-surface-soft p-3">
           <input
             type="checkbox"
             checked={form.acceptTerms}
             onChange={(e) => set('acceptTerms', e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+            className="mt-0.5 h-4 w-4 rounded border-line text-gold"
           />
-          <span className="text-xs text-slate-600">
+          <span className="text-xs text-muted">
             Acepto los términos y condiciones de Conecta MX y autorizo la publicación de mi información de contacto.
           </span>
         </label>
@@ -305,7 +305,7 @@ function GeoButton({ coords, onSet }: { coords: { lat: number; lng: number } | n
         <button type="button" onClick={capture} className="btn-ghost px-3 py-1.5 text-xs">
           <LocateFixed className="h-3.5 w-3.5" /> Actualizar
         </button>
-        <button type="button" onClick={() => onSet(null)} className="text-xs text-slate-400 hover:text-rose-500">
+        <button type="button" onClick={() => onSet(null)} className="text-xs text-muted hover:text-rose-500">
           Quitar
         </button>
       </div>

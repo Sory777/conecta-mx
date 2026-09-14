@@ -70,17 +70,19 @@ export function FeaturedCarousel({ businesses, onOpen }: FeaturedCarouselProps) 
           return (
             <div
               key={b.id}
-              className="absolute w-64 cursor-pointer overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl transition-all duration-700 ease-out sm:w-72"
+              className="card absolute w-64 cursor-pointer overflow-hidden transition-all duration-700 ease-out sm:w-72"
               style={{
                 transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                 opacity,
                 zIndex: 10 - absOffset,
                 pointerEvents: absOffset <= 1 ? 'auto' : 'none',
                 backfaceVisibility: 'hidden',
+                boxShadow: isActive ? '0 20px 40px -12px rgba(20,18,16,0.35)' : 'none',
+                borderColor: isActive ? 'rgb(var(--gold))' : 'rgb(var(--border))',
               }}
               onClick={() => (isActive ? onOpen(b) : goTo(i))}
             >
-              <div className="relative h-44 overflow-hidden bg-slate-100">
+              <div className="relative h-44 overflow-hidden bg-surface-soft">
                 <img
                   src={b.imageUrl || 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=600&q=80'}
                   alt={b.name}
@@ -88,15 +90,15 @@ export function FeaturedCarousel({ businesses, onOpen }: FeaturedCarouselProps) 
                   className="h-full w-full object-cover"
                   onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=600&q=80'; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 {b.verified && (
-                  <span className="absolute left-3 top-3 badge bg-[#1565C0] text-white shadow">
-                    <BadgeCheck className="h-3.5 w-3.5" /> Verificado
+                  <span className="absolute left-3 top-3 badge bg-ink text-ink-invert shadow">
+                    <BadgeCheck className="h-3.5 w-3.5 text-gold" /> Verificado
                   </span>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                  <h3 className="line-clamp-1 text-lg font-extrabold">{b.name}</h3>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-white/90">
+                <div className="absolute bottom-0 left-0 right-0 p-3 text-ink-invert">
+                  <h3 className="line-clamp-1 font-serif text-lg font-bold">{b.name}</h3>
+                  <div className="mt-0.5 flex items-center gap-2 text-xs text-ink-invert/85">
                     <span className="inline-flex items-center gap-1">{(() => { const Icon = categoryIcon(b.category); return <Icon className="h-3 w-3" />; })()} {b.category}</span>
                     <span className="inline-flex items-center gap-0.5">
                       <MapPin className="h-3 w-3" /> {b.municipality}
@@ -106,14 +108,14 @@ export function FeaturedCarousel({ businesses, onOpen }: FeaturedCarouselProps) 
               </div>
               <div className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  <span className="text-sm font-bold text-slate-700">{b.rating || 'N/A'}</span>
+                  <Star className="h-4 w-4 fill-gold text-gold" />
+                  <span className="text-sm font-bold">{b.rating || 'N/A'}</span>
                   {b.reviewCount > 0 && (
-                    <span className="text-xs text-slate-400">({b.reviewCount})</span>
+                    <span className="text-xs text-muted">({b.reviewCount})</span>
                   )}
                 </div>
                 {b.promotion && (
-                  <span className="line-clamp-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                  <span className="line-clamp-1 rounded bg-gold-soft px-2 py-0.5 text-xs font-medium text-gold">
                     {b.promotion}
                   </span>
                 )}
@@ -128,18 +130,18 @@ export function FeaturedCarousel({ businesses, onOpen }: FeaturedCarouselProps) 
           <button
             onClick={prev}
             disabled={active === 0}
-            className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/90 p-2.5 shadow-lg transition-all hover:bg-white hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
+            className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded border border-line bg-surface p-2.5 shadow-lg transition-all hover:border-gold hover:text-gold disabled:opacity-30"
             aria-label="Anterior"
           >
-            <ChevronLeft className="h-5 w-5 text-slate-700" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={next}
             disabled={active === count - 1}
-            className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/90 p-2.5 shadow-lg transition-all hover:bg-white hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
+            className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded border border-line bg-surface p-2.5 shadow-lg transition-all hover:border-gold hover:text-gold disabled:opacity-30"
             aria-label="Siguiente"
           >
-            <ChevronRight className="h-5 w-5 text-slate-700" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </>
       )}
@@ -150,8 +152,8 @@ export function FeaturedCarousel({ businesses, onOpen }: FeaturedCarouselProps) 
             <button
               key={i}
               onClick={() => goTo(i)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? 'w-7 bg-[#1565C0]' : 'w-2 bg-slate-300 hover:bg-slate-400'
+              className={`h-1.5 rounded transition-all duration-300 ${
+                i === active ? 'w-7 bg-gold' : 'w-1.5 bg-line hover:bg-muted'
               }`}
               aria-label={`Ir a ${i + 1}`}
             />

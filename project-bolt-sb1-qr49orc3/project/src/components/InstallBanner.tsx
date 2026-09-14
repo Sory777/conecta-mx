@@ -21,21 +21,21 @@ export function InstallBanner() {
 
   if (canInstall) {
     return (
-      <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm animate-slide-up rounded-2xl border border-slate-200 bg-white p-4 shadow-xl md:left-auto md:right-4">
+      <div className="card fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm animate-slide-up p-4 shadow-xl md:left-auto md:right-4">
         <button
           onClick={() => setDismissed(true)}
-          className="absolute right-2 top-2 rounded-full p-1.5 text-slate-400 hover:bg-slate-100"
+          className="absolute right-2 top-2 rounded-full p-1.5 text-muted hover:bg-surface-soft"
           aria-label="Cerrar"
         >
           <X className="h-4 w-4" />
         </button>
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl mng-gradient text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded mng-gradient text-gold">
             <Smartphone className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-slate-800">Instala Conecta MX</p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="text-sm font-bold">Instala Conecta MX</p>
+            <p className="mt-0.5 text-xs text-muted">
               Accede más rápido y recibe notificaciones de nuevas vacantes y eventos.
             </p>
             <button
@@ -52,21 +52,21 @@ export function InstallBanner() {
 
   if (isIOS && !showIOSHint) {
     return (
-      <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm animate-slide-up rounded-2xl border border-slate-200 bg-white p-4 shadow-xl md:left-auto md:right-4">
+      <div className="card fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm animate-slide-up p-4 shadow-xl md:left-auto md:right-4">
         <button
           onClick={() => setDismissed(true)}
-          className="absolute right-2 top-2 rounded-full p-1.5 text-slate-400 hover:bg-slate-100"
+          className="absolute right-2 top-2 rounded-full p-1.5 text-muted hover:bg-surface-soft"
           aria-label="Cerrar"
         >
           <X className="h-4 w-4" />
         </button>
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl mng-gradient text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded mng-gradient text-gold">
             <Smartphone className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-slate-800">Instala Conecta MX en tu iPhone</p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="text-sm font-bold">Instala Conecta MX en tu iPhone</p>
+            <p className="mt-0.5 text-xs text-muted">
               Toca el botón <strong>Compartir</strong> y luego <strong>"Añadir a pantalla de inicio"</strong>.
             </p>
             <button
@@ -83,32 +83,32 @@ export function InstallBanner() {
 
   if (isIOS && showIOSHint) {
     return (
-      <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm animate-slide-up rounded-2xl border border-slate-200 bg-white p-4 shadow-xl md:left-auto md:right-4">
+      <div className="card fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm animate-slide-up p-4 shadow-xl md:left-auto md:right-4">
         <button
           onClick={() => setDismissed(true)}
-          className="absolute right-2 top-2 rounded-full p-1.5 text-slate-400 hover:bg-slate-100"
+          className="absolute right-2 top-2 rounded-full p-1.5 text-muted hover:bg-surface-soft"
           aria-label="Cerrar"
         >
           <X className="h-4 w-4" />
         </button>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg mng-gradient text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded mng-gradient text-gold">
               <Smartphone className="h-4 w-4" />
             </div>
-            <p className="text-sm font-bold text-slate-800">Cómo instalar en iPhone</p>
+            <p className="text-sm font-bold">Cómo instalar en iPhone</p>
           </div>
-          <ol className="space-y-2 text-xs text-slate-600">
+          <ol className="space-y-2 text-xs text-muted">
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1565C0] text-[10px] font-bold text-white">1</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-on-gold">1</span>
               <span>Toca el botón de Compartir <strong>Share</strong> en Safari.</span>
             </li>
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1565C0] text-[10px] font-bold text-white">2</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-on-gold">2</span>
               <span>Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong>.</span>
             </li>
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1565C0] text-[10px] font-bold text-white">3</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-on-gold">3</span>
               <span>Toca <strong>"Añadir"</strong>. ¡Listo! Conecta MX aparecerá como una app.</span>
             </li>
           </ol>

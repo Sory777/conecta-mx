@@ -65,17 +65,19 @@ export function ProductCarousel({ products, business, onDelete, onTrack }: Produ
             return (
               <div
                 key={p.id}
-                className="absolute flex w-56 flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl transition-all duration-500 ease-out sm:w-64"
+                className="card absolute flex w-56 flex-col overflow-hidden transition-all duration-500 ease-out sm:w-64"
                 style={{
                   transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                   opacity,
                   zIndex: 10 - absOffset,
                   pointerEvents: isActive ? 'auto' : 'none',
                   backfaceVisibility: 'hidden',
+                  boxShadow: isActive ? '0 16px 32px -10px rgba(20,18,16,0.3)' : 'none',
+                  borderColor: isActive ? 'rgb(var(--gold))' : 'rgb(var(--border))',
                 }}
                 onClick={() => !isActive && goTo(i)}
               >
-                <div className="relative aspect-square overflow-hidden bg-slate-100">
+                <div className="relative aspect-square overflow-hidden bg-surface-soft">
                   <img
                     src={p.imageUrl || 'https://images.unsplash.com/photo-1526168107505-1c44b1ca7e07?w=400&q=80'}
                     alt={p.name}
@@ -88,9 +90,9 @@ export function ProductCarousel({ products, business, onDelete, onTrack }: Produ
                   )}
                 </div>
                 <div className="flex flex-1 flex-col p-3">
-                  <h3 className="line-clamp-1 text-sm font-bold text-slate-800">{p.name}</h3>
-                  {p.description && <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{p.description}</p>}
-                  <p className="mt-1.5 text-lg font-extrabold text-[#1565C0]">${p.price}</p>
+                  <h3 className="line-clamp-1 text-sm font-bold">{p.name}</h3>
+                  {p.description && <p className="mt-0.5 line-clamp-2 text-xs text-muted">{p.description}</p>}
+                  <p className="mt-1.5 font-serif text-lg font-bold text-gold">${p.price}</p>
                   {isActive && (
                     <div className="mt-3 flex items-center gap-1.5">
                       <a
@@ -104,7 +106,7 @@ export function ProductCarousel({ products, business, onDelete, onTrack }: Produ
                       </a>
                       <button
                         onClick={() => onDelete(p.id)}
-                        className="rounded-lg p-2 text-slate-300 hover:bg-rose-50 hover:text-rose-500"
+                        className="rounded p-2 text-muted hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-950/40"
                         aria-label="Eliminar"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -122,18 +124,18 @@ export function ProductCarousel({ products, business, onDelete, onTrack }: Produ
             <button
               onClick={prev}
               disabled={active === 0}
-              className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all hover:bg-white hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
+              className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded border border-line bg-surface p-2 shadow-lg transition-all hover:border-gold hover:text-gold disabled:opacity-30"
               aria-label="Anterior"
             >
-              <ChevronLeft className="h-5 w-5 text-slate-700" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               onClick={next}
               disabled={active === count - 1}
-              className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all hover:bg-white hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
+              className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded border border-line bg-surface p-2 shadow-lg transition-all hover:border-gold hover:text-gold disabled:opacity-30"
               aria-label="Siguiente"
             >
-              <ChevronRight className="h-5 w-5 text-slate-700" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </>
         )}
@@ -145,8 +147,8 @@ export function ProductCarousel({ products, business, onDelete, onTrack }: Produ
             <button
               key={i}
               onClick={() => goTo(i)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? 'w-6 bg-[#1565C0]' : 'w-2 bg-slate-300 hover:bg-slate-400'
+              className={`h-1.5 rounded transition-all duration-300 ${
+                i === active ? 'w-6 bg-gold' : 'w-1.5 bg-line hover:bg-muted'
               }`}
               aria-label={`Ir al producto ${i + 1}`}
             />

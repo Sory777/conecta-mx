@@ -74,8 +74,8 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
   if (authLoading) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#1565C0]" />
-        <p className="mt-3 text-sm text-slate-500">Verificando permisos...</p>
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-line border-t-gold" />
+        <p className="mt-3 text-sm text-muted">Verificando permisos...</p>
       </div>
     );
   }
@@ -85,13 +85,13 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4">
         <div className="w-full card p-6">
           <div className="mb-5 text-center">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded bg-surface-soft text-muted">
               <Lock className="h-7 w-7" />
             </div>
-            <h1 className="text-xl font-extrabold text-slate-800">Acceso restringido</h1>
-            <p className="mt-1 text-sm text-slate-500">Esta área es solo para administradores autorizados.</p>
+            <h1 className="text-xl font-extrabold text-ink dark:text-ink-invert">Acceso restringido</h1>
+            <p className="mt-1 text-sm text-muted">Esta área es solo para administradores autorizados.</p>
           </div>
-          <p className="text-center text-xs text-slate-400">
+          <p className="text-center text-xs text-muted">
             Necesitas iniciar sesión con una cuenta de administrador para acceder.
           </p>
         </div>
@@ -145,12 +145,12 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-5 flex items-center gap-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl mng-gradient text-white">
+        <div className="flex h-10 w-10 items-center justify-center rounded mng-gradient text-gold">
           <Shield className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800">Panel de administración</h1>
-          <p className="text-sm text-slate-500">Gestiona negocios, reportes y monitoreo del sistema</p>
+          <h1 className="text-2xl font-extrabold text-ink dark:text-ink-invert">Panel de administración</h1>
+          <p className="text-sm text-muted">Gestiona negocios, reportes y monitoreo del sistema</p>
         </div>
       </div>
 
@@ -158,12 +158,12 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       {(stats.pendingValidation > 0 || pendingReports > 0) && (
         <div className="mb-5 flex flex-wrap gap-2">
           {stats.pendingValidation > 0 && (
-            <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            <div className="flex items-center gap-2 rounded bg-gold-soft px-3 py-2 text-sm text-gold">
               <AlertCircle className="h-4 w-4" /> {stats.pendingValidation} negocios esperando validación
             </div>
           )}
           {pendingReports > 0 && (
-            <button onClick={() => setTab('reports')} className="flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 hover:bg-rose-100">
+            <button onClick={() => setTab('reports')} className="flex items-center gap-2 rounded bg-rose-50 px-3 py-2 text-sm text-rose-700 hover:bg-rose-100">
               <Flag className="h-4 w-4" /> {pendingReports} reportes pendientes
             </button>
           )}
@@ -191,37 +191,37 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       {/* Stats */}
       <div className="mb-5 grid gap-3 sm:grid-cols-4">
         <div className="card p-4">
-          <p className="text-xs font-medium text-slate-500">Total negocios</p>
-          <p className="mt-1 text-2xl font-extrabold text-slate-800">{stats.total}</p>
+          <p className="text-xs font-medium text-muted">Total negocios</p>
+          <p className="mt-1 text-2xl font-extrabold text-ink dark:text-ink-invert">{stats.total}</p>
           {stats.newToday > 0 && <p className="text-xs text-emerald-600">+{stats.newToday} hoy</p>}
         </div>
         <div className="card p-4">
-          <p className="text-xs font-medium text-slate-500">Plan Gratis</p>
-          <p className="mt-1 text-2xl font-extrabold text-slate-600">{stats.byPlan.free}</p>
+          <p className="text-xs font-medium text-muted">Plan Gratis</p>
+          <p className="mt-1 text-2xl font-extrabold text-muted">{stats.byPlan.free}</p>
         </div>
         <div className="card p-4">
-          <p className="text-xs font-medium text-slate-500">Destacados</p>
-          <p className="mt-1 text-2xl font-extrabold text-amber-600">{stats.byPlan.featured}</p>
+          <p className="text-xs font-medium text-muted">Destacados</p>
+          <p className="mt-1 text-2xl font-extrabold text-gold">{stats.byPlan.featured}</p>
         </div>
         <div className="card p-4">
-          <p className="text-xs font-medium text-slate-500">Premium</p>
+          <p className="text-xs font-medium text-muted">Premium</p>
           <p className="mt-1 text-2xl font-extrabold text-emerald-600">{stats.byPlan.premium}</p>
         </div>
       </div>
 
       {/* Top municipalities */}
       <div className="card mb-5 p-4">
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-          <BarChart3 className="h-4 w-4 text-[#1565C0]" /> Top estados
+        <div className="flex items-center gap-2 text-sm font-bold text-ink dark:text-ink-invert">
+          <BarChart3 className="h-4 w-4 text-gold" /> Top estados
         </div>
         <div className="mt-3 space-y-2">
           {stats.topMunis.map(([m, count]) => (
             <div key={m} className="flex items-center gap-2">
-              <span className="w-32 truncate text-xs font-medium text-slate-600">{m}</span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+              <span className="w-32 truncate text-xs font-medium text-muted">{m}</span>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-soft">
                 <div className="h-full mng-gradient" style={{ width: `${(count / stats.total) * 100}%` }} />
               </div>
-              <span className="w-6 text-right text-xs font-bold text-slate-700">{count}</span>
+              <span className="w-6 text-right text-xs font-bold text-ink dark:text-ink-invert">{count}</span>
             </div>
           ))}
         </div>
@@ -230,7 +230,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       {/* Filters */}
       <div className="card mb-4 p-3">
         <div className="relative mb-2">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar negocio..." className="input pl-9" />
         </div>
         <div className="grid gap-2 sm:grid-cols-3">
@@ -255,7 +255,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-surface-soft text-left text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-3 py-2.5 font-semibold">Negocio</th>
                 <th className="hidden px-3 py-2.5 font-semibold sm:table-cell">Estado</th>
@@ -266,26 +266,26 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                 <th className="px-3 py-2.5"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {filtered.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-50">
+                <tr key={b.id} className="hover:bg-surface-soft">
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{(() => { const Icon = categoryIcon(b.category); return <Icon className="h-4 w-4 text-slate-500" />; })()}</span>
+                      <span className="text-lg">{(() => { const Icon = categoryIcon(b.category); return <Icon className="h-4 w-4 text-muted" />; })()}</span>
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-slate-800">{b.name}</p>
-                        <p className="truncate text-xs text-slate-400">{b.category}</p>
+                        <p className="truncate font-semibold text-ink dark:text-ink-invert">{b.name}</p>
+                        <p className="truncate text-xs text-muted">{b.category}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="hidden px-3 py-2.5 text-slate-600 sm:table-cell">{b.municipality}</td>
+                  <td className="hidden px-3 py-2.5 text-muted sm:table-cell">{b.municipality}</td>
                   <td className="hidden px-3 py-2.5 md:table-cell">
                     <StarRating value={b.rating} size={12} showNumber />
                   </td>
                   <td className="px-3 py-2.5">
                     <button
                       onClick={() => toggleVerified(b.id)}
-                      className={`badge ${b.verified ? 'bg-[#1565C0] text-white' : 'bg-slate-100 text-slate-500'}`}
+                      className={`badge ${b.verified ? 'bg-ink text-ink-invert' : 'bg-surface-soft text-muted'}`}
                     >
                       <BadgeCheck className="h-3.5 w-3.5" /> {b.verified ? 'Sí' : 'No'}
                     </button>
@@ -294,7 +294,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                     <select
                       value={b.plan}
                       onChange={(e) => changePlan(b.id, e.target.value as Plan)}
-                      className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium"
+                      className="rounded border border-line bg-surface px-2 py-1 text-xs font-medium"
                     >
                       <option value="free">Gratis</option>
                       <option value="featured">Destacado</option>
@@ -302,12 +302,12 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                     </select>
                   </td>
                   <td className="px-3 py-2.5 text-right">
-                    <button onClick={() => setQrBusiness(b)} className="rounded-lg p-1.5 text-slate-300 hover:bg-[#1565C0] hover:text-white" aria-label="Generar QR" title="Generar QR del negocio">
+                    <button onClick={() => setQrBusiness(b)} className="rounded p-1.5 text-muted hover:bg-ink hover:text-ink-invert" aria-label="Generar QR" title="Generar QR del negocio">
                       <QrCode className="h-4 w-4" />
                     </button>
                   </td>
                   <td className="px-3 py-2.5 text-right">
-                    <button onClick={() => remove(b.id, b.name)} className="rounded-lg p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Eliminar">
+                    <button onClick={() => remove(b.id, b.name)} className="rounded p-1.5 text-muted hover:bg-rose-50 hover:text-rose-500" aria-label="Eliminar">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </td>
@@ -317,7 +317,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
           </table>
         </div>
         {filtered.length === 0 && (
-          <p className="py-10 text-center text-sm text-slate-400">No hay negocios que coincidan.</p>
+          <p className="py-10 text-center text-sm text-muted">No hay negocios que coincidan.</p>
         )}
       </div>
       {qrBusiness && (
@@ -329,7 +329,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
               label={`${localStorage.getItem('cmx_public_url') || `${window.location.origin}${window.location.pathname}`}#/business/${qrBusiness.id}`}
               onDownload={() => {}}
             />
-            <p className="text-center text-xs text-slate-500">
+            <p className="text-center text-xs text-muted">
               Descarga el PNG, imprímelo y entrégaselo al negocio. Este QR es exclusivo del plan que vendes aparte.
             </p>
           </div>
@@ -342,7 +342,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         <>
           <div className="card mb-4 p-3">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
               <input value={cvFilter} onChange={(e) => setCvFilter(e.target.value)} placeholder="Buscar por nombre, puesto o empresa..." className="input pl-9" />
             </div>
           </div>
@@ -351,31 +351,31 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
               <div key={c.id} className="card p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="text-base font-bold text-slate-800">{c.fullName}</h3>
-                    <p className="text-sm font-medium text-[#1565C0]">{c.position}</p>
+                    <h3 className="text-base font-bold text-ink dark:text-ink-invert">{c.fullName}</h3>
+                    <p className="text-sm font-medium text-gold">{c.position}</p>
                   </div>
-                  <button onClick={() => deleteCV(c.id)} className="rounded-lg p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Eliminar CV">
+                  <button onClick={() => deleteCV(c.id)} className="rounded p-1.5 text-muted hover:bg-rose-50 hover:text-rose-500" aria-label="Eliminar CV">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
                 {c.companyName && (
-                  <p className="mt-1 text-xs text-slate-500">Postuló a: <strong>{c.companyName}</strong></p>
+                  <p className="mt-1 text-xs text-muted">Postuló a: <strong>{c.companyName}</strong></p>
                 )}
-                <div className="mt-2 space-y-1 text-xs text-slate-600">
-                  <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-400" /> {c.email}</p>
-                  <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-400" /> {c.phone}</p>
-                  <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-400" /> {c.municipality}</p>
+                <div className="mt-2 space-y-1 text-xs text-muted">
+                  <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-muted" /> {c.email}</p>
+                  <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-muted" /> {c.phone}</p>
+                  <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-muted" /> {c.municipality}</p>
                 </div>
                 {c.experience && (
-                  <p className="mt-2 text-xs text-slate-600"><span className="font-semibold">Experiencia:</span> {c.experience}</p>
+                  <p className="mt-2 text-xs text-muted"><span className="font-semibold">Experiencia:</span> {c.experience}</p>
                 )}
                 {c.education && (
-                  <p className="mt-1 text-xs text-slate-600"><span className="font-semibold">Educación:</span> {c.education}</p>
+                  <p className="mt-1 text-xs text-muted"><span className="font-semibold">Educación:</span> {c.education}</p>
                 )}
                 {c.skills && (
-                  <p className="mt-1 text-xs text-slate-600"><span className="font-semibold">Habilidades:</span> {c.skills}</p>
+                  <p className="mt-1 text-xs text-muted"><span className="font-semibold">Habilidades:</span> {c.skills}</p>
                 )}
-                <div className="mt-3 flex gap-2 border-t border-slate-100 pt-2">
+                <div className="mt-3 flex gap-2 border-t border-line pt-2">
                   <a href={`mailto:${c.email}?subject=${encodeURIComponent(`Tu currículum para ${c.position}`)}`} className="btn-outline flex-1 px-3 py-2 text-xs">
                     <Mail className="h-3.5 w-3.5" /> Contactar
                   </a>
@@ -387,7 +387,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
             ))}
           </div>
           {filteredCVs.length === 0 && (
-            <p className="py-10 text-center text-sm text-slate-400">No hay currículums todavía.</p>
+            <p className="py-10 text-center text-sm text-muted">No hay currículums todavía.</p>
           )}
         </>
       )}
@@ -395,10 +395,10 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       {tab === 'reports' && (
         <>
           <div className="mb-3">
-            <p className="text-sm text-slate-500">Reportes enviados por usuarios. Resuelve o descarta según corresponda.</p>
+            <p className="text-sm text-muted">Reportes enviados por usuarios. Resuelve o descarta según corresponda.</p>
           </div>
           {reports.length === 0 ? (
-            <p className="py-10 text-center text-sm text-slate-400">No hay reportes.</p>
+            <p className="py-10 text-center text-sm text-muted">No hay reportes.</p>
           ) : (
             <div className="space-y-3">
               {reports.map((r) => (
@@ -406,21 +406,21 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`badge ${r.status === 'pending' ? 'bg-rose-100 text-rose-700' : r.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                        <span className={`badge ${r.status === 'pending' ? 'bg-rose-100 text-rose-700' : r.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-surface-soft text-muted'}`}>
                           {r.status === 'pending' ? 'Pendiente' : r.status === 'resolved' ? 'Resuelto' : 'Descartado'}
                         </span>
-                        <span className="text-xs text-slate-500">{r.item_type}</span>
+                        <span className="text-xs text-muted">{r.item_type}</span>
                       </div>
-                      <p className="mt-1 text-sm font-semibold text-slate-700">{r.reason}</p>
-                      {r.details && <p className="mt-1 text-xs text-slate-500">{r.details}</p>}
-                      <p className="mt-1 text-xs text-slate-400">{new Date(r.created_at).toLocaleString('es-MX')}</p>
+                      <p className="mt-1 text-sm font-semibold text-ink dark:text-ink-invert">{r.reason}</p>
+                      {r.details && <p className="mt-1 text-xs text-muted">{r.details}</p>}
+                      <p className="mt-1 text-xs text-muted">{new Date(r.created_at).toLocaleString('es-MX')}</p>
                     </div>
                     {r.status === 'pending' && (
                       <div className="flex gap-1.5">
                         <button onClick={() => resolveReport(r.id, 'resolved')} className="btn-outline px-3 py-1.5 text-xs text-emerald-600">
                           Resolver
                         </button>
-                        <button onClick={() => resolveReport(r.id, 'dismissed')} className="btn-outline px-3 py-1.5 text-xs text-slate-500">
+                        <button onClick={() => resolveReport(r.id, 'dismissed')} className="btn-outline px-3 py-1.5 text-xs text-muted">
                           Descartar
                         </button>
                       </div>
@@ -437,50 +437,50 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="card p-4">
-              <Package className="h-5 w-5 text-[#1565C0]" />
-              <p className="mt-2 text-2xl font-extrabold text-slate-800">{stats.total}</p>
-              <p className="text-xs text-slate-500">Negocios registrados</p>
+              <Package className="h-5 w-5 text-gold" />
+              <p className="mt-2 text-2xl font-extrabold text-ink dark:text-ink-invert">{stats.total}</p>
+              <p className="text-xs text-muted">Negocios registrados</p>
             </div>
             <div className="card p-4">
               <Package className="h-5 w-5 text-emerald-600" />
-              <p className="mt-2 text-2xl font-extrabold text-slate-800">{productCount}</p>
-              <p className="text-xs text-slate-500">Publicaciones</p>
+              <p className="mt-2 text-2xl font-extrabold text-ink dark:text-ink-invert">{productCount}</p>
+              <p className="text-xs text-muted">Publicaciones</p>
             </div>
             <div className="card p-4">
-              <AlertCircle className="h-5 w-5 text-amber-500" />
-              <p className="mt-2 text-2xl font-extrabold text-slate-800">{stats.pendingValidation}</p>
-              <p className="text-xs text-slate-500">Pendientes de validar</p>
+              <AlertCircle className="h-5 w-5 text-gold" />
+              <p className="mt-2 text-2xl font-extrabold text-ink dark:text-ink-invert">{stats.pendingValidation}</p>
+              <p className="text-xs text-muted">Pendientes de validar</p>
             </div>
             <div className="card p-4">
               <Flag className="h-5 w-5 text-rose-500" />
-              <p className="mt-2 text-2xl font-extrabold text-slate-800">{pendingReports}</p>
-              <p className="text-xs text-slate-500">Reportes pendientes</p>
+              <p className="mt-2 text-2xl font-extrabold text-ink dark:text-ink-invert">{pendingReports}</p>
+              <p className="text-xs text-muted">Reportes pendientes</p>
             </div>
           </div>
 
           <div className="mt-5 card p-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-              <Map className="h-4 w-4 text-[#1565C0]" /> Estados más activos
+            <div className="flex items-center gap-2 text-sm font-bold text-ink dark:text-ink-invert">
+              <Map className="h-4 w-4 text-gold" /> Estados más activos
             </div>
             <div className="mt-3 space-y-2">
               {stats.topMunis.map(([m, count]) => (
                 <div key={m} className="flex items-center gap-2">
-                  <span className="w-32 truncate text-xs font-medium text-slate-600">{m}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                  <span className="w-32 truncate text-xs font-medium text-muted">{m}</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-soft">
                     <div className="h-full mng-gradient" style={{ width: `${(count / stats.total) * 100}%` }} />
                   </div>
-                  <span className="w-6 text-right text-xs font-bold text-slate-700">{count}</span>
+                  <span className="w-6 text-right text-xs font-bold text-ink dark:text-ink-invert">{count}</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="mt-5 card p-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-              <Clock className="h-4 w-4 text-[#1565C0]" /> Negocios nuevos hoy
+            <div className="flex items-center gap-2 text-sm font-bold text-ink dark:text-ink-invert">
+              <Clock className="h-4 w-4 text-gold" /> Negocios nuevos hoy
             </div>
             <p className="mt-2 text-3xl font-extrabold text-emerald-600">+{stats.newToday}</p>
-            <p className="text-xs text-slate-500">negocios registrados en las últimas 24 horas</p>
+            <p className="text-xs text-muted">negocios registrados en las últimas 24 horas</p>
           </div>
         </>
       )}

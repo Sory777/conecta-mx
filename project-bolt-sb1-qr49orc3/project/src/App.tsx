@@ -185,17 +185,17 @@ function AppInner() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-paper">
         <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#1565C0]" />
-          <p className="mt-3 text-sm text-slate-500">Cargando...</p>
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-line border-t-gold" />
+          <p className="mt-3 text-sm text-muted">Cargando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-paper text-ink dark:text-ink-invert">
       <Navbar current={route.name} onNavigate={(r) => navigate(r)} user={user} business={business} isAdmin={isAdmin} onSignOut={() => { /* handled in navbar */ }} />
       <main className="flex-1">
         {route.name === 'home' && (
@@ -227,7 +227,7 @@ function AppInner() {
         )}
         {route.name === 'business' && !currentBusiness && (
           <div className="mx-auto max-w-md px-4 py-20 text-center">
-            <p className="text-lg font-bold text-slate-700">Negocio no encontrado</p>
+            <p className="text-lg font-bold">Negocio no encontrado</p>
             <button onClick={() => navigate('directory')} className="btn-primary mt-4">Ver directorio</button>
           </div>
         )}

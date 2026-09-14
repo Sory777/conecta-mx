@@ -113,17 +113,17 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
       </button>
 
       {/* Hero image */}
-      <div className="relative overflow-hidden rounded-2xl">
+      <div className="relative overflow-hidden rounded">
         <img
           src={business.imageUrl || 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=1000&q=80'}
           alt={business.name}
           className="h-48 w-full object-cover sm:h-64"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <div className="flex flex-wrap items-center gap-2">
-            {business.verified && <span className="badge bg-[#1565C0] text-white"><BadgeCheck className="h-3.5 w-3.5" /> Verificado</span>}
-            {business.founding && <span className="badge bg-amber-400 text-amber-900"><Sparkles className="h-3.5 w-3.5" /> Fundador</span>}
+            {business.verified && <span className="badge bg-ink text-ink-invert"><BadgeCheck className="h-3.5 w-3.5" /> Verificado</span>}
+            {business.founding && <span className="badge bg-gold text-on-gold"><Sparkles className="h-3.5 w-3.5" /> Fundador</span>}
             <span className="badge bg-emerald-500 text-white">{PLAN_LABELS[business.plan]}</span>
           </div>
           <h1 className="mt-2 text-2xl font-extrabold sm:text-3xl">{business.name}</h1>
@@ -137,7 +137,7 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
       {/* Status + rating row */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className={`badge ${status.open ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-white'}`}>
+          <span className={`badge ${status.open ? 'bg-emerald-500 text-white' : 'bg-ink text-ink-invert'}`}>
             <Clock className="h-3.5 w-3.5" /> {status.label}
           </span>
           <StarRating value={business.rating} showNumber reviewCount={business.reviewCount} />
@@ -156,15 +156,15 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
       </div>
 
       {business.hours && (
-        <p className="mt-2 text-xs text-slate-500"><Clock className="mr-1 inline h-3.5 w-3.5" /> {business.hours}</p>
+        <p className="mt-2 text-xs text-muted"><Clock className="mr-1 inline h-3.5 w-3.5" /> {business.hours}</p>
       )}
 
       {/* Description */}
       <div className="card mt-4 p-4">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Descripción</h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-700">{business.description}</p>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Descripción</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink dark:text-ink-invert">{business.description}</p>
         {business.promotion && (
-          <div className="mt-3 rounded-xl bg-amber-50 px-3 py-2.5 text-sm font-medium text-amber-700">
+          <div className="mt-3 rounded bg-gold-soft px-3 py-2.5 text-sm font-medium text-gold">
             <Sparkles className="mr-1 inline h-4 w-4" /> {business.promotion}
           </div>
         )}
@@ -172,19 +172,19 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
 
       {/* Contact */}
       <div className="card mt-4 p-4">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Contacto</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Contacto</h2>
         <div className="mt-2 space-y-2 text-sm">
           {business.phone && (
-            <p className="flex items-center gap-2 text-slate-700">
-              <Phone className="h-4 w-4 text-slate-400" /> {formatPhone(business.phone)}
+            <p className="flex items-center gap-2 text-ink dark:text-ink-invert">
+              <Phone className="h-4 w-4 text-muted" /> {formatPhone(business.phone)}
             </p>
           )}
-          <p className="flex items-center gap-2 text-slate-700">
+          <p className="flex items-center gap-2 text-ink dark:text-ink-invert">
             <MessageCircle className="h-4 w-4 text-emerald-500" /> WhatsApp: {formatPhone(business.whatsapp)}
           </p>
           {business.address && (
-            <p className="flex items-start gap-2 text-slate-700">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" /> {business.address}
+            <p className="flex items-start gap-2 text-ink dark:text-ink-invert">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted" /> {business.address}
             </p>
           )}
           <div className="flex flex-wrap gap-2 pt-1">
@@ -222,7 +222,7 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
       {/* Products */}
       <div className="card mt-4 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-muted">
             Publicaciones
           </h2>
           <button
@@ -232,10 +232,10 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
             <Plus className="h-4 w-4" /> Agregar
           </button>
         </div>
-        <p className="mt-0.5 text-xs text-slate-400">{products.length} / {productLimit === Infinity ? '∞' : productLimit} publicaciones</p>
+        <p className="mt-0.5 text-xs text-muted">{products.length} / {productLimit === Infinity ? '∞' : productLimit} publicaciones</p>
 
         {products.length === 0 ? (
-          <p className="mt-3 rounded-xl bg-slate-50 px-3 py-6 text-center text-sm text-slate-400">
+          <p className="mt-3 rounded bg-surface-soft px-3 py-6 text-center text-sm text-muted">
             Aún no hay publicaciones. ¡Agrega la primera!
           </p>
         ) : (
@@ -246,7 +246,7 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
       {/* Job postings */}
       <div className="card mt-4 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-muted">
             <Briefcase className="mr-1 inline h-3.5 w-3.5" /> Vacantes de empleo
           </h2>
           <button
@@ -256,10 +256,10 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
             <Plus className="h-4 w-4" /> Publicar vacante
           </button>
         </div>
-        <p className="mt-0.5 text-xs text-slate-400">Publica ofertas de trabajo para tu negocio</p>
+        <p className="mt-0.5 text-xs text-muted">Publica ofertas de trabajo para tu negocio</p>
 
         {businessJobs.length === 0 ? (
-          <p className="mt-3 rounded-xl bg-slate-50 px-3 py-6 text-center text-sm text-slate-400">
+          <p className="mt-3 rounded bg-surface-soft px-3 py-6 text-center text-sm text-muted">
             No hay vacantes publicadas. ¡Publica la primera!
           </p>
         ) : (
@@ -267,25 +267,25 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
             {businessJobs.map((j) => {
               const apply = jobApplyLink(j);
               return (
-                <div key={j.id} className="rounded-xl border border-slate-100 p-3">
+                <div key={j.id} className="rounded border border-line p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-bold text-slate-800">{j.title}</p>
-                      <div className="mt-1 flex flex-wrap gap-1.5 text-xs text-slate-500">
-                        <span className="chip bg-slate-100 text-slate-600">{j.contractType}</span>
+                      <p className="text-sm font-bold text-ink dark:text-ink-invert">{j.title}</p>
+                      <div className="mt-1 flex flex-wrap gap-1.5 text-xs text-muted">
+                        <span className="chip bg-surface-soft text-muted">{j.contractType}</span>
                         {j.salary && <span className="chip bg-emerald-50 text-emerald-700">{j.salary}</span>}
                       </div>
                     </div>
-                    <button onClick={() => deleteJob(j.id)} className="text-slate-300 hover:text-rose-500" aria-label="Eliminar vacante">
+                    <button onClick={() => deleteJob(j.id)} className="text-muted hover:text-rose-500" aria-label="Eliminar vacante">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                  <p className="mt-2 text-sm text-slate-600">{j.description}</p>
+                  <p className="mt-2 text-sm text-muted">{j.description}</p>
                   {j.requirements && (
-                    <p className="mt-1 text-xs text-slate-500"><span className="font-semibold">Requisitos:</span> {j.requirements}</p>
+                    <p className="mt-1 text-xs text-muted"><span className="font-semibold">Requisitos:</span> {j.requirements}</p>
                   )}
-                  <div className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-2">
-                    <span className="text-xs text-slate-400">{timeAgo(j.createdAt)}</span>
+                  <div className="mt-2 flex items-center gap-2 border-t border-line pt-2">
+                    <span className="text-xs text-muted">{timeAgo(j.createdAt)}</span>
                     <div className="ml-auto flex gap-2">
                       {apply && apply.type === 'wa' && (
                         <a href={apply.href} target="_blank" rel="noopener noreferrer" className="btn-wa px-3 py-1.5 text-xs">
@@ -309,32 +309,32 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
       {/* Reviews */}
       <div className="card mt-4 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Reseñas ({reviews.length})</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Reseñas ({reviews.length})</h2>
           <button onClick={() => setShowReview(true)} className="btn-ghost px-2 py-1 text-xs">
             <Star className="h-4 w-4" /> Dejar reseña
           </button>
         </div>
         {reviews.length === 0 ? (
-          <p className="mt-3 rounded-xl bg-slate-50 px-3 py-6 text-center text-sm text-slate-400">
+          <p className="mt-3 rounded bg-surface-soft px-3 py-6 text-center text-sm text-muted">
             Sin reseñas aún. ¡Sé el primero en opinar!
           </p>
         ) : (
           <div className="mt-3 space-y-3">
             {reviews.map((r) => (
-              <div key={r.id} className="rounded-xl border border-slate-100 p-3">
+              <div key={r.id} className="rounded border border-line p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">{r.author}</p>
+                    <p className="text-sm font-semibold text-ink dark:text-ink-invert">{r.author}</p>
                     <StarRating value={r.rating} size={14} />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">{timeAgo(r.createdAt)}</span>
-                    <button onClick={() => deleteReview(r.id)} className="text-slate-300 hover:text-rose-500" aria-label="Eliminar">
+                    <span className="text-xs text-muted">{timeAgo(r.createdAt)}</span>
+                    <button onClick={() => deleteReview(r.id)} className="text-muted hover:text-rose-500" aria-label="Eliminar">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
-                <p className="mt-1.5 text-sm text-slate-600">{r.comment}</p>
+                <p className="mt-1.5 text-sm text-muted">{r.comment}</p>
               </div>
             ))}
           </div>
@@ -433,7 +433,7 @@ function AddProductForm({ onAdd, businessCategory }: { onAdd: (p: Omit<Product, 
               key={t.value}
               type="button"
               onClick={() => toggleTag(t.value)}
-              className={`chip text-xs ${tags.includes(t.value) ? 'bg-[#0D47A1] text-white' : 'bg-slate-100 text-slate-600'}`}
+              className={`chip text-xs ${tags.includes(t.value) ? 'bg-ink text-ink-invert' : 'bg-surface-soft text-muted'}`}
             >
               {t.label}
             </button>

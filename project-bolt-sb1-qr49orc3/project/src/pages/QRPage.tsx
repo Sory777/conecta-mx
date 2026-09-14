@@ -88,21 +88,21 @@ export function QRPage({ onTrack }: QRPageProps) {
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
       <div className="mb-5 text-center">
-        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl mng-gradient text-white">
+        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded mng-gradient text-gold">
           <QrCode className="h-6 w-6" />
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-800">Comparte la app</h1>
-        <p className="text-sm text-slate-500">Envía el enlace o muestra el QR a usuarios y negocios</p>
+        <h1 className="text-2xl font-extrabold text-ink dark:text-ink-invert">Comparte la app</h1>
+        <p className="text-sm text-muted">Envía el enlace o muestra el QR a usuarios y negocios</p>
       </div>
 
       {/* Preview URL warning */}
       {isPreview && !editingUrl && (
-        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div className="mb-4 rounded border border-gold/40 bg-gold-soft p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
             <div className="flex-1">
-              <p className="text-sm font-bold text-amber-800">Estás usando una URL de preview</p>
-              <p className="mt-1 text-xs text-amber-700">
+              <p className="text-sm font-bold text-gold">Estás usando una URL de preview</p>
+              <p className="mt-1 text-xs text-gold">
                 La URL actual (<span className="break-all">{publicUrl}</span>) es temporal y no funciona
                 cuando alguien la abre desde afuera de Bolt. Publica tu app (botón <strong>Publish</strong> arriba a la derecha)
                 y luego ingresa aquí la URL pública que Bolt te dé (ej. <strong>mi-app.netlify.app</strong>).
@@ -118,8 +118,8 @@ export function QRPage({ onTrack }: QRPageProps) {
       {/* URL editor */}
       {editingUrl && (
         <div className="mb-4 card p-4">
-          <p className="mb-2 text-sm font-bold text-slate-700">URL pública de tu app</p>
-          <p className="mb-3 text-xs text-slate-500">
+          <p className="mb-2 text-sm font-bold text-ink dark:text-ink-invert">URL pública de tu app</p>
+          <p className="mb-3 text-xs text-muted">
             Ingresa la URL que Bolt te dio al publicar (ej. https://conecta-mx.netlify.app).
             Los QR y enlaces usarán esta dirección.
           </p>
@@ -143,7 +143,7 @@ export function QRPage({ onTrack }: QRPageProps) {
 
       {/* Current URL display */}
       {!editingUrl && !isPreview && (
-        <div className="mb-4 flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2.5">
+        <div className="mb-4 flex items-center justify-between rounded bg-emerald-50 px-4 py-2.5">
           <div className="flex items-center gap-2 text-sm text-emerald-700">
             <Check className="h-4 w-4" /> URL pública: <span className="break-all font-medium">{publicUrl}</span>
           </div>
@@ -155,14 +155,14 @@ export function QRPage({ onTrack }: QRPageProps) {
 
       {/* Direct link share */}
       <div className="card p-5">
-        <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-700">
-          <Share2 className="h-4 w-4 text-[#1565C0]" /> Enlace directo
+        <div className="mb-3 flex items-center gap-2 text-sm font-bold text-ink dark:text-ink-invert">
+          <Share2 className="h-4 w-4 text-gold" /> Enlace directo
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2">
+        <div className="flex items-center gap-2 rounded border border-line bg-surface-soft p-2">
           <input
             readOnly
             value={publicUrl}
-            className="flex-1 bg-transparent text-sm text-slate-600 outline-none"
+            className="flex-1 bg-transparent text-sm text-muted outline-none"
             onFocus={(e) => e.target.select()}
           />
           <button
@@ -191,8 +191,8 @@ export function QRPage({ onTrack }: QRPageProps) {
 
       {/* QR code */}
       <div className="card mt-4 flex flex-col items-center gap-4 p-6">
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-          <Globe className="h-4 w-4 text-[#1565C0]" /> Código QR general
+        <div className="flex items-center gap-2 text-sm font-bold text-ink dark:text-ink-invert">
+          <Globe className="h-4 w-4 text-gold" /> Código QR general
         </div>
         <QRBox
           value={publicUrl}
@@ -200,7 +200,7 @@ export function QRPage({ onTrack }: QRPageProps) {
           label={publicUrl}
           onDownload={() => onTrack('qrDownloads')}
         />
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-muted">
           Imprime este QR y colócalo en tu mostrador, tarjetas de presentación o publicidad. Quien lo escanee llegará directamente a la app.
         </p>
       </div>
@@ -208,10 +208,10 @@ export function QRPage({ onTrack }: QRPageProps) {
       {/* Audience cards */}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="card p-4">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+          <div className="flex items-center gap-2 text-sm font-bold text-ink dark:text-ink-invert">
             <Store className="h-4 w-4 text-emerald-600" /> Para negocios
           </div>
-          <p className="mt-1.5 text-xs text-slate-500">
+          <p className="mt-1.5 text-xs text-muted">
             Comparte este enlace con negocios para que se registren gratis y empiecen a conseguir más clientes.
           </p>
           <a
@@ -224,10 +224,10 @@ export function QRPage({ onTrack }: QRPageProps) {
           </a>
         </div>
         <div className="card p-4">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-            <Briefcase className="h-4 w-4 text-amber-600" /> Para solicitantes
+          <div className="flex items-center gap-2 text-sm font-bold text-ink dark:text-ink-invert">
+            <Briefcase className="h-4 w-4 text-gold" /> Para solicitantes
           </div>
-          <p className="mt-1.5 text-xs text-slate-500">
+          <p className="mt-1.5 text-xs text-muted">
             Comparte este enlace con personas buscando empleo. Podrán ver vacantes y llenar su currículum dentro de la app.
           </p>
           <a
@@ -241,7 +241,7 @@ export function QRPage({ onTrack }: QRPageProps) {
         </div>
       </div>
 
-      <div className="mt-6 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-700">
+      <div className="mt-6 flex items-start gap-3 rounded bg-gold-soft p-4 text-sm text-gold">
         <Info className="mt-0.5 h-5 w-5 shrink-0" />
         <div>
           <p className="font-semibold">Códigos QR personalizados por negocio</p>
