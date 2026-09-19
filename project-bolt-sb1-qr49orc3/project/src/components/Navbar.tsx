@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, X, Home, Store, Briefcase, QrCode, Shield, DollarSign, Calendar, BarChart3, LogOut, User } from 'lucide-react';
+import { Menu, X, Home, Store, Briefcase, QrCode, Shield, DollarSign, Calendar, BarChart3, LogOut, User, Ghost } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { Business } from '../lib/types';
 import { Logo } from './Logo';
@@ -36,12 +36,18 @@ export function Navbar({ current, onNavigate, user, business, isAdmin, onSignOut
     { route: 'events', label: 'Eventos', icon: Calendar },
     { route: 'qr', label: 'QR', icon: QrCode },
     { route: 'plans', label: 'Planes', icon: DollarSign },
+    { route: 'juego', label: 'Juego', icon: Ghost },
   ];
 
   const links = isAdmin
     ? [...baseLinks, { route: 'admin', label: 'Admin', icon: Shield }]
     : user && business
-    ? [...baseLinks.slice(0, 5), { route: 'dashboard', label: 'Mi Panel', icon: BarChart3 }, { route: 'plans', label: 'Planes', icon: DollarSign }]
+    ? [
+        ...baseLinks.slice(0, 5),
+        { route: 'dashboard', label: 'Mi Panel', icon: BarChart3 },
+        { route: 'plans', label: 'Planes', icon: DollarSign },
+        { route: 'juego', label: 'Juego', icon: Ghost },
+      ]
     : baseLinks;
 
   return (
