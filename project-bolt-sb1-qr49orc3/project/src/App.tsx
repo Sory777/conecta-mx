@@ -17,7 +17,6 @@ import { PlansPage } from './pages/PlansPage';
 import { EventsPage } from './pages/EventsPage';
 import { AuthPage } from './pages/AuthPage';
 import { DashboardPage } from './pages/DashboardPage';
-import { HorrorGamePage } from './pages/HorrorGamePage';
 import { InstallBanner } from './components/InstallBanner';
 
 type Route =
@@ -31,8 +30,7 @@ type Route =
   | { name: 'events' }
   | { name: 'qr' }
   | { name: 'admin' }
-  | { name: 'plans' }
-  | { name: 'juego' };
+  | { name: 'plans' };
 
 function parseHash(): Route {
   const hash = window.location.hash.replace(/^#\/?/, '');
@@ -61,8 +59,6 @@ function parseHash(): Route {
       return { name: 'admin' };
     case 'plans':
       return { name: 'plans' };
-    case 'juego':
-      return { name: 'juego' };
     default:
       return { name: 'home' };
   }
@@ -80,7 +76,7 @@ function setHash(route: Route, params?: Record<string, string>) {
   }
   const map: Record<string, string> = {
     home: '', directory: '/directory', register: '/register', login: '/login', dashboard: '/dashboard',
-    jobs: '/jobs', events: '/events', qr: '/qr', admin: '/admin', plans: '/plans', juego: '/juego',
+    jobs: '/jobs', events: '/events', qr: '/qr', admin: '/admin', plans: '/plans',
   };
   if (route.name === 'business') {
     window.location.hash = `#/business/${route.id}`;
@@ -244,7 +240,6 @@ function AppInner() {
         {route.name === 'qr' && <QRPage onTrack={track} />}
         {route.name === 'admin' && <AdminPage businesses={businesses} onChange={refreshBusinesses} />}
         {route.name === 'plans' && <PlansPage totalBusinesses={businesses.length} />}
-        {route.name === 'juego' && <HorrorGamePage />}
       </main>
       <Footer onNavigate={navigate} />
       <InstallBanner />
