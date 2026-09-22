@@ -149,3 +149,13 @@ export interface Report {
   status: 'pending' | 'resolved' | 'dismissed';
   created_at: string;
 }
+
+export interface BusinessClaim {
+  id: string;
+  business_id: string;
+  user_email: string;
+  user_name?: string;
+  user_phone?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}

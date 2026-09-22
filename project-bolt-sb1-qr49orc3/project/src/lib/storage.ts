@@ -1,4 +1,4 @@
-import type { Business, Job, Product, Review, Stats, CV, Event, AnalyticsEventType, Favorite, Report, ReportReason } from './types';
+import type { Business, Job, Product, Review, Stats, CV, Event, AnalyticsEventType, Favorite, Report, ReportReason, BusinessClaim } from './types';
 import { supabase } from './supabase';
 
 export function uid(prefix = 'id'): string {
@@ -262,6 +262,29 @@ export const storage = {
     const { data, error } = await supabase.rpc('is_admin');
     if (error) return false;
     return data === true;
+  },
+
+  // --- Business claims ---
+  async submitBusinessClaim(businessId: string, userName: string, userEmail: string, userPhone?: string): Promise<void> {
+    const { error } = await supabase.from('business_claims').insert({
+      business_id: businessId, user_name: userName, user_email: userEmail, user_phone: userPhone,
+    });
+    if (error) throw error;
+  },
+
+  async getBusinessClaims(): Promise<BusinessClaim[]> {
+    const { data, error } = await supabase.from('business_claims').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data || []) as BusinessClaim[];
+  },
+
+  async resolveBusinessClaim(claim: BusinessClaim, approve: boolean): Promise<void> {
+    const { error } = await supabase.from('business_claims').update({ status: approve ? 'approved' : 'rejected' }).eq('id', claim.id);
+    if (error) throw error;
+    if (approve) {
+      const { error: bErr } = await supabase.from('businesses').update({ verified: true }).eq('id', claim.business_id);
+      if (bErr) throw bErr;
+    }
   },
 };
 

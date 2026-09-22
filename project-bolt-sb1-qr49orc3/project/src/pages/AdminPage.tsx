@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, type FormEvent } from 'react';
-import { Shield, Trash2, BadgeCheck, Search, BarChart3, QrCode, FileText, Mail, Phone, MapPin, Lock, AlertCircle, Flag, Package, Clock, HardDrive, Map, KeyRound, Loader2 } from 'lucide-react';
-import type { Business, Plan, CV, Report } from '../lib/types';
+import { Shield, Trash2, BadgeCheck, Search, BarChart3, QrCode, FileText, Mail, Phone, MapPin, Lock, AlertCircle, Flag, Package, Clock, HardDrive, Map, KeyRound, Loader2, Check, X as XIcon } from 'lucide-react';
+import type { Business, Plan, CV, Report, BusinessClaim } from '../lib/types';
 import { storage } from '../lib/storage';
 import { supabase } from '../lib/supabase';
 import { MUNICIPALITIES, CATEGORIES, PLAN_LABELS, categoryIcon } from '../lib/constants';
@@ -23,10 +23,11 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
   const [category, setCategory] = useState('');
   const [plan, setPlan] = useState('');
   const [qrBusiness, setQrBusiness] = useState<Business | null>(null);
-  const [tab, setTab] = useState<'businesses' | 'cvs' | 'reports' | 'health' | 'account'>('businesses');
+  const [tab, setTab] = useState<'businesses' | 'cvs' | 'reports' | 'claims' | 'health' | 'account'>('businesses');
   const [cvs, setCvs] = useState<CV[]>([]);
   const [cvFilter, setCvFilter] = useState('');
   const [reports, setReports] = useState<Report[]>([]);
+  const [claims, setClaims] = useState<BusinessClaim[]>([]);
   const [productCount, setProductCount] = useState(0);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -37,6 +38,8 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       storage.getCVs().then(setCvs).catch(() => {});
     } else if (tab === 'reports') {
       storage.getReports().then(setReports).catch(() => {});
+    } else if (tab === 'claims') {
+      storage.getBusinessClaims().then(setClaims).catch(() => {});
     }
   }, [tab]);
 
@@ -140,6 +143,19 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
     toast(status === 'resolved' ? 'Reporte resuelto' : 'Reporte descartado', 'success');
   };
 
+  const resolveClaim = async (claim: BusinessClaim, approve: boolean) => {
+    try {
+      await storage.resolveBusinessClaim(claim, approve);
+      setClaims((s) => s.map((c) => c.id === claim.id ? { ...c, status: approve ? 'approved' : 'rejected' } : c));
+      if (approve) onChange();
+      toast(approve ? 'Reclamo aprobado y negocio verificado' : 'Reclamo rechazado', 'success');
+    } catch {
+      toast('No se pudo procesar el reclamo', 'error');
+    }
+  };
+
+  const pendingClaims = claims.filter((c) => c.status === 'pending').length;
+
   const changePassword = async (e: FormEvent) => {
     e.preventDefault();
     if (newPassword.length < 6) {
@@ -206,6 +222,9 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         </button>
         <button onClick={() => setTab('reports')} className={`btn shrink-0 text-sm ${tab === 'reports' ? 'btn-primary' : 'btn-outline'}`}>
           <Flag className="h-4 w-4" /> Reportes {pendingReports > 0 && `(${pendingReports})`}
+        </button>
+        <button onClick={() => setTab('claims')} className={`btn shrink-0 text-sm ${tab === 'claims' ? 'btn-primary' : 'btn-outline'}`}>
+          <BadgeCheck className="h-4 w-4" /> Reclamos {pendingClaims > 0 && `(${pendingClaims})`}
         </button>
         <button onClick={() => setTab('health')} className={`btn shrink-0 text-sm ${tab === 'health' ? 'btn-primary' : 'btn-outline'}`}>
           <HardDrive className="h-4 w-4" /> Salud del sistema
@@ -457,6 +476,48 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {tab === 'claims' && (
+        <>
+          {claims.length === 0 ? (
+            <p className="py-10 text-center text-sm text-slate-400">No hay solicitudes de reclamo.</p>
+          ) : (
+            <div className="space-y-3">
+              {claims.map((c) => {
+                const biz = businesses.find((b) => b.id === c.business_id);
+                return (
+                  <div key={c.id} className="card p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`badge ${c.status === 'pending' ? 'bg-amber-100 text-amber-700' : c.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                            {c.status === 'pending' ? 'Pendiente' : c.status === 'approved' ? 'Aprobado' : 'Rechazado'}
+                          </span>
+                          <span className="text-xs text-slate-500">{biz?.name || c.business_id}</span>
+                        </div>
+                        <p className="mt-1 text-sm font-semibold text-slate-700">{c.user_name || 'Sin nombre'}</p>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500"><Mail className="h-3.5 w-3.5" /> {c.user_email}</p>
+                        {c.user_phone && <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500"><Phone className="h-3.5 w-3.5" /> {c.user_phone}</p>}
+                        <p className="mt-1 text-xs text-slate-400">{new Date(c.created_at).toLocaleString('es-MX')}</p>
+                      </div>
+                      {c.status === 'pending' && (
+                        <div className="flex gap-1.5">
+                          <button onClick={() => resolveClaim(c, true)} className="btn-outline px-3 py-1.5 text-xs text-emerald-600">
+                            <Check className="h-3.5 w-3.5" /> Aprobar
+                          </button>
+                          <button onClick={() => resolveClaim(c, false)} className="btn-outline px-3 py-1.5 text-xs text-slate-500">
+                            <XIcon className="h-3.5 w-3.5" /> Rechazar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </>

@@ -14,6 +14,7 @@ import { ProductCarousel } from '../components/ProductCarousel';
 import { ImageUpload } from '../components/ImageUpload';
 import { useToast } from '../components/Toast';
 import { ReportButton } from '../components/ReportButton';
+import { ClaimBusinessButton } from '../components/ClaimBusinessButton';
 
 interface BusinessDetailPageProps {
   business: Business;
@@ -142,16 +143,21 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
           </span>
           <StarRating value={business.rating} showNumber reviewCount={business.reviewCount} />
         </div>
-        <div className="flex gap-2">
-          <a
-            href={businessWaLink(business)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => { onTrack('whatsappClicks'); storage.trackEvent(business.id, null, 'whatsapp_click').catch(() => {}); }}
-            className="btn-wa px-4 py-2 text-sm"
-          >
-            <MessageCircle className="h-4 w-4" /> WhatsApp
-          </a>
+        <div className="flex flex-wrap gap-2">
+          {business.whatsapp && (
+            <a
+              href={businessWaLink(business)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => { onTrack('whatsappClicks'); storage.trackEvent(business.id, null, 'whatsapp_click').catch(() => {}); }}
+              className="btn-wa px-4 py-2 text-sm"
+            >
+              <MessageCircle className="h-4 w-4" /> WhatsApp
+            </a>
+          )}
+          {!business.user_id && (
+            <ClaimBusinessButton businessId={business.id} businessName={business.name} />
+          )}
         </div>
       </div>
 
@@ -179,9 +185,14 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
               <Phone className="h-4 w-4 text-slate-400" /> {formatPhone(business.phone)}
             </p>
           )}
-          <p className="flex items-center gap-2 text-slate-700">
-            <MessageCircle className="h-4 w-4 text-emerald-500" /> WhatsApp: {formatPhone(business.whatsapp)}
-          </p>
+          {business.whatsapp && (
+            <p className="flex items-center gap-2 text-slate-700">
+              <MessageCircle className="h-4 w-4 text-emerald-500" /> WhatsApp: {formatPhone(business.whatsapp)}
+            </p>
+          )}
+          {!business.phone && !business.whatsapp && (
+            <p className="text-slate-400">Sin datos de contacto aún — este negocio no ha sido reclamado.</p>
+          )}
           {business.address && (
             <p className="flex items-start gap-2 text-slate-700">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" /> {business.address}
