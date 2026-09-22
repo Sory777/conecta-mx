@@ -1,7 +1,8 @@
-import { useMemo, useState, useEffect } from 'react';
-import { Shield, Trash2, BadgeCheck, Search, BarChart3, QrCode, FileText, Mail, Phone, MapPin, Lock, AlertCircle, Flag, Package, Clock, HardDrive, Map } from 'lucide-react';
+import { useMemo, useState, useEffect, type FormEvent } from 'react';
+import { Shield, Trash2, BadgeCheck, Search, BarChart3, QrCode, FileText, Mail, Phone, MapPin, Lock, AlertCircle, Flag, Package, Clock, HardDrive, Map, KeyRound, Loader2 } from 'lucide-react';
 import type { Business, Plan, CV, Report } from '../lib/types';
 import { storage } from '../lib/storage';
+import { supabase } from '../lib/supabase';
 import { MUNICIPALITIES, CATEGORIES, PLAN_LABELS, categoryIcon } from '../lib/constants';
 import { useToast } from '../components/Toast';
 import { StarRating } from '../components/StarRating';
@@ -22,11 +23,14 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
   const [category, setCategory] = useState('');
   const [plan, setPlan] = useState('');
   const [qrBusiness, setQrBusiness] = useState<Business | null>(null);
-  const [tab, setTab] = useState<'businesses' | 'cvs' | 'reports' | 'health'>('businesses');
+  const [tab, setTab] = useState<'businesses' | 'cvs' | 'reports' | 'health' | 'account'>('businesses');
   const [cvs, setCvs] = useState<CV[]>([]);
   const [cvFilter, setCvFilter] = useState('');
   const [reports, setReports] = useState<Report[]>([]);
   const [productCount, setProductCount] = useState(0);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (tab === 'cvs') {
@@ -136,6 +140,28 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
     toast(status === 'resolved' ? 'Reporte resuelto' : 'Reporte descartado', 'success');
   };
 
+  const changePassword = async (e: FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      toast('La contraseña debe tener al menos 6 caracteres', 'error');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast('Las contraseñas no coinciden', 'error');
+      return;
+    }
+    setPasswordLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordLoading(false);
+    if (error) {
+      toast(error.message, 'error');
+      return;
+    }
+    setNewPassword('');
+    setConfirmPassword('');
+    toast('Contraseña actualizada', 'success');
+  };
+
   const filteredCVs = useMemo(() => {
     if (!cvFilter.trim()) return cvs;
     const q = cvFilter.toLowerCase();
@@ -183,6 +209,9 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         </button>
         <button onClick={() => setTab('health')} className={`btn shrink-0 text-sm ${tab === 'health' ? 'btn-primary' : 'btn-outline'}`}>
           <HardDrive className="h-4 w-4" /> Salud del sistema
+        </button>
+        <button onClick={() => setTab('account')} className={`btn shrink-0 text-sm ${tab === 'account' ? 'btn-primary' : 'btn-outline'}`}>
+          <KeyRound className="h-4 w-4" /> Cuenta
         </button>
       </div>
 
@@ -483,6 +512,58 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
             <p className="text-xs text-slate-500">negocios registrados en las últimas 24 horas</p>
           </div>
         </>
+      )}
+
+      {tab === 'account' && (
+        <div className="mx-auto max-w-md">
+          <div className="card p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                <Mail className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500">Sesión iniciada como</p>
+                <p className="text-sm font-bold text-slate-800">{user?.email}</p>
+              </div>
+            </div>
+
+            <form onSubmit={changePassword} className="space-y-4 border-t border-slate-100 pt-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                <KeyRound className="h-4 w-4 text-[#1565C0]" /> Cambiar contraseña
+              </div>
+              <div>
+                <label className="label">Nueva contraseña</label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="password"
+                    className="input pl-9"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="label">Confirmar contraseña</label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="password"
+                    className="input pl-9"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repite la contraseña"
+                  />
+                </div>
+              </div>
+              <button type="submit" disabled={passwordLoading} className="btn-primary w-full py-3">
+                {passwordLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <KeyRound className="h-5 w-5" />}
+                {passwordLoading ? 'Guardando...' : 'Actualizar contraseña'}
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
