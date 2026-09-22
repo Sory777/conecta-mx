@@ -1,0 +1,5 @@
+espacio/*
+!espacio/.gitkeep
+.env
+__pycache__/
+.venv/
