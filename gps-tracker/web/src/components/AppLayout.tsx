@@ -1,6 +1,7 @@
 import { NavLink, Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { useSubscription } from '../lib/useSubscription';
+import { useProfile } from '../lib/useProfile';
 
 const tabs = [
   { to: '/dashboard', label: 'Mapa' },
@@ -11,11 +12,13 @@ const tabs = [
 export function AppLayout() {
   const { user, loading, signOut } = useAuth();
   const { subscription } = useSubscription();
+  const { isAdmin } = useProfile();
 
   if (loading) return <div className="p-8 text-center text-gray-500">Cargando...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
   const blocked = subscription && ['past_due', 'expired', 'canceled'].includes(subscription.status);
+  const visibleTabs = isAdmin ? [...tabs, { to: '/admin', label: 'Admin' }] : tabs;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -23,7 +26,7 @@ export function AppLayout() {
         <div className="flex items-center gap-6">
           <span className="font-bold">GPS Flotilla</span>
           <nav className="flex gap-4 text-sm">
-            {tabs.map((t) => (
+            {visibleTabs.map((t) => (
               <NavLink
                 key={t.to}
                 to={t.to}

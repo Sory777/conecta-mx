@@ -1,5 +1,13 @@
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'expired';
 
+export interface Profile {
+  id: string;
+  full_name: string;
+  phone: string | null;
+  role: 'admin' | 'client';
+  created_at: string;
+}
+
 export interface Plan {
   id: string;
   code: string;

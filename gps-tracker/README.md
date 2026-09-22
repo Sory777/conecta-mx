@@ -143,6 +143,45 @@ Hoy, "pagar" es simular: el botón en `/billing` llama la función SQL
   el periodo, reactivar) no cambia nada.
 - El botón de "simular pago" se retira o se deja solo en desarrollo.
 
+## 4bis. Tú como administrador del negocio (instalador de GPS)
+
+Si tú instalas el GPS en los autos de tus clientes, cada cliente crea su
+propia cuenta y ve solo su vehículo — pero tú necesitas ver **todos** los
+vehículos de **todos** tus clientes desde una sola pantalla, para dar
+soporte y cobrar. Para eso existe el rol `admin` (`profiles.role`).
+
+**Cómo volverte admin** (una sola vez, después de crear tu cuenta normal
+desde `/login` → "Regístrate"): en el SQL Editor del dashboard de Supabase:
+
+```sql
+update profiles set role = 'admin' where id = (
+  select id from auth.users where email = 'tu-correo@ejemplo.com'
+);
+```
+
+Con eso, al volver a entrar verás una pestaña **Admin** con:
+- **Mapa global**: todos los vehículos de todos los clientes en un solo mapa.
+- **Lista y cobros**: tabla con cliente, vehículo, si está reportando GPS o
+  no, estado de la suscripción y fecha de vencimiento, con un botón
+  "Marcar pagado" para registrar el cobro de cualquier cliente (útil si
+  cobras en efectivo, transferencia o depósito, no solo tarjeta).
+
+Esto no reemplaza el que cada cliente pueda entrar a ver su propio auto en
+`/dashboard` — son dos vistas de los mismos datos, controladas por RLS
+(`supabase/migrations/0005_admin_role.sql`): el cliente solo ve lo suyo, tú
+lo ves todo.
+
+**Flujo de negocio recomendado, de principio a fin:**
+1. Vendes el servicio al cliente (instalación + mensualidad).
+2. Instalas el GPS en su auto (sección 2 más abajo — hardware o celular).
+3. Desde `/vehicles`, das de alta el vehículo del cliente y generas el
+   `device_token` para ese dispositivo.
+4. Le compartes al cliente sus credenciales (o las crea él mismo) y el
+   link de `/dashboard` para que vea su propio auto en tiempo real.
+5. Cada mes, cobras (en persona, transferencia, etc.) y entras a `/admin`
+   a marcar el pago de ese cliente. Si no paga, simplemente no lo marcas:
+   a los pocos días el cron `billing-cycle` corta el rastreo solo.
+
 ## 5. Estructura del proyecto
 
 ```

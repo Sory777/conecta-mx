@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { VehiclesPage } from './pages/VehiclesPage';
 import { BillingPage } from './pages/BillingPage';
 import { DriverPage } from './pages/DriverPage';
+import { AdminPage } from './pages/AdminPage';
 
 export default function App() {
   return (
@@ -20,6 +21,10 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/vehicles" element={<VehiclesPage />} />
             <Route path="/billing" element={<BillingPage />} />
+            {/* /admin no tiene guard de rol propio: si role != 'admin', las
+                queries simplemente regresan vacío por RLS. El tab ya se
+                oculta en AppLayout, esto es solo defensa en profundidad. */}
+            <Route path="/admin" element={<AdminPage />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
