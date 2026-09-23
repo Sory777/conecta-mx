@@ -562,3 +562,71 @@ Ya quedaron resueltas por tu respuesta: el proveedor de video (Shotstack), la vo
 4. **Plan de Supabase:** ¿el proyecto de ConectaMX está en el plan Free o en Pro? (Define si guardamos los archivos en R2 o en Supabase Storage.)
 
 Fuentes adicionales (v2): [Google Cloud TTS – precios y capa gratuita](https://texttolab.com/blog/google-cloud-tts-pricing) · [Costbench – capa gratuita de Google Cloud TTS](https://costbench.com/software/ai-voice-tools/google-cloud-text-to-speech/free-plan/) · [Gemini 2.5 Flash-Lite – precios](https://pricepertoken.com/pricing-page/model/google-gemini-2.5-flash-lite) · [Gemini API pricing (sep 2026)](https://costgoat.com/pricing/gemini-api) · [Shotstack – Pricing](https://shotstack.io/pricing/) · [Zernio/Late – Pricing](https://getlate.dev/pricing)
+
+---
+
+## 14. MODO PRUEBA 100 % GRATIS (validar antes de pagar)
+
+Objetivo: probar el flujo completo con **$0**, sin comprometerse con ningún plan de pago. Todo lo que se construya aquí **se reutiliza** en producción: se cambian las llaves y los planes, no la lógica.
+
+### 14.1 Servicios gratuitos seleccionados
+
+| Capa | Servicio gratis | Qué incluye gratis | Límite que importa | ¿Tarjeta? |
+|---|---|---|---|---|
+| Orquestación | **Make Free** | 1,000 créditos/mes | **Solo 2 escenarios activos**; programación cada 15 min como mínimo (los webhooks no se ven afectados) | No |
+| Visión y textos | **Gemini API, capa gratuita** (llave de Google AI Studio, módulo nativo `gemini-ai`) | Cientos a ~1,000 solicitudes diarias en los modelos Flash/Flash-Lite (Google cambia las cifras sin aviso) | **En la capa gratuita Google puede usar los datos para mejorar sus productos** → usar solo fotos de prueba o de un piloto que dé su consentimiento | No |
+| Voz | **Gemini TTS** (capa gratuita, módulo `gemini-ai` "Generate speech from text") **o ElevenLabs Free** (≈10k caracteres/mes, uso no comercial y con atribución) **o sin voz** | ~20 videos con voz al mes (ElevenLabs) | Confirmo las voces en español en la Etapa 5. Google Cloud TTS también tiene capa gratuita, pero exige activar facturación con tarjeta | No |
+| Video | **Shotstack Sandbox** (entorno `stage`) | Renders **gratis con marca de agua** (máx. 10 min por video); además **10 créditos de producción gratis por 30 días** (≈ 30–40 videos sin marca de agua) | La cuenta debe tener al menos 1 crédito disponible para usar el sandbox | No |
+| Video (alternativa) | JSON2Video Free | 600 créditos al registrarse (≈ 10 min de video), con marca de agua, máx. 60 s por video | No se renuevan | No |
+| Base de datos y archivos | **Supabase Free, proyecto nuevo separado** ("conecta-social-test"), para no tocar la base de producción de ConectaMX | 500 MB de base de datos, 1 GB de archivos, bucket público para las URLs que exige Instagram | Se pausa tras 7 días sin uso (se reactiva con un clic) | No |
+| Entrada de fotos | **Tally Free** (módulo nativo `tally`) | Formularios ilimitados con subida de archivos | Tamaño máximo por archivo en el plan gratuito (≈ 10 MB, suficiente para fotos) | No |
+| Aprobación | **Link mágico** → webhook de Make (el mismo webhook de "eventos", ver §14.2) | — | — | No |
+| Notificación | **Telegram bot** (módulo nativo, envía el video al celular) o **Gmail** | Ilimitado | — | No |
+| Música | **Pixabay Music** (licencia gratuita, permite uso comercial) | — | Puede haber reclamos automáticos de Content ID en YouTube; en las pruebas no importa | No |
+| Publicación | Módulos nativos de Make para **Instagram, Facebook Page y YouTube** | Gratis | Para las pruebas se crea una **Página de Facebook de prueba + Instagram Creator vinculado**, y en YouTube se sube como **privado/no listado** | No |
+| TikTok | Tarea manual (MP4 + copy en Telegram) | — | — | No |
+
+**Costo de probar: $0.** Capacidad: **≈ 20–25 videos/mes** (lo limitan los 1,000 créditos de Make a ≈ 40 créditos por video).
+
+### 14.2 Rediseño para 2 escenarios activos (plan Free de Make)
+
+La lógica de S1–S8 se agrupa en **dos escenarios**, cada uno con un **router por tipo de evento**:
+
+```mermaid
+flowchart LR
+    subgraph A["Escenario A · PIPELINE (trigger: Tally Watch New Responses)"]
+      A1[Validar fotos] --> A2[Subir a Supabase Storage] --> A3[Crear project + media]
+      A3 --> A4[Gemini: análisis de fotos → JSON] --> A5[Gemini: concepto + guion + copies]
+      A5 --> A6[Voz opcional] --> A7[Armar VideoSpec] --> A8[Shotstack Render<br/>callback = webhook B]
+    end
+    subgraph B["Escenario B · EVENTOS (trigger: Custom webhook)"]
+      R{Router por event_type}
+      R -->|render_done| B1[QC → guardar video → modo]
+      B1 -->|aprobación| B2[Telegram/correo: preview + links Aprobar/Rechazar]
+      B1 -->|automático| P
+      R -->|approve| P[Publicar IG / FB / YT<br/>rutas con manejador de error] --> N[Registrar logs + notificar]
+      R -->|reject| X[Guardar feedback → llamar de nuevo a A vía HTTP]
+    end
+    A8 -. callback .-> R
+```
+
+- Los links de aprobación apuntan al **mismo webhook de B** con `event_type=approve|reject`, el `video_id` y un token firmado.
+- Los reintentos se hacen **dentro del mismo escenario**, con el manejador *Break* y su reintento automático (no hace falta el monitor S8 para probar).
+- Al pasar a un plan de pago se pueden separar de nuevo en S1–S8 (§2.2) o dejarlos en 2–3 escenarios si funcionan bien. La base de datos y los prompts no cambian.
+
+### 14.3 Qué NO se puede probar gratis (y no bloquea)
+
+| Cosa | Motivo | Cómo se valida |
+|---|---|---|
+| Videos sin marca de agua después de los créditos de regalo | Shotstack cobra en producción | Con los 10 créditos gratis de los primeros 30 días |
+| Volumen real (100+ videos) | 1,000 créditos de Make | Se mide el consumo por video en las pruebas y se proyecta |
+| Privacidad de los datos de clientes reales | La capa gratuita de Gemini puede usar los datos | Probar con fotos propias o de un piloto que acepte; en producción, capa de pago |
+| TikTok automático | Requiere agregador o auditoría | Manual durante la prueba |
+
+### 14.4 Ruta de prueba → producción
+
+1. **Prueba ($0):** stack de §14 con 2 escenarios, 1–2 negocios piloto (una inmobiliaria y una tienda de ropa).
+2. **Primer cliente de pago (≈ $25/mes):** Make Core, capa de pago de Gemini, Shotstack en prepago y sin marca de agua (§13).
+3. **Escala:** entrada desde el dashboard de ConectaMX, separación en S1–S8, agregador o apps propias para el multi-cliente (§7) y FFmpeg propio si conviene (§13.1).
+
+Fuentes (modo prueba): [Make – plan gratuito, límites](https://use-apify.com/blog/make-com-free-plan-limits) · [Shotstack – Render your first video (sandbox)](https://shotstack.io/learn/render-your-first-video-shotstack-api/) · [Shotstack API reference](https://shotstack.io/docs/api/) · [JSON2Video – planes](https://json2video.com/docs/v2/reference/credits/plans) · [Gemini API – rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) · [Gemini API – billing](https://ai.google.dev/gemini-api/docs/billing) · [Gemini free vs paid: uso de datos](https://ampm-aiops.com/en/guides/gemini-free-tier-data-tradeoff-2026/)
