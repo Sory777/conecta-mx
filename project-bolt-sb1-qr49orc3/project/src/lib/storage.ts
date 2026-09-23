@@ -1,4 +1,4 @@
-import type { Business, Job, Product, Review, Stats, CV, Event, AnalyticsEventType, Favorite, Report, ReportReason, BusinessClaim } from './types';
+import type { Business, Job, Product, Review, Stats, CV, Event, AnalyticsEventType, Favorite, Report, ReportReason, BusinessClaim, Ad, VendorLocation } from './types';
 import { supabase } from './supabase';
 
 export function uid(prefix = 'id'): string {
@@ -295,6 +295,58 @@ export const storage = {
       const { error: bErr } = await supabase.from('businesses').update({ verified: true }).eq('id', claim.business_id);
       if (bErr) throw bErr;
     }
+  },
+
+  // --- Ads ---
+  async getActiveAds(): Promise<Ad[]> {
+    const { data, error } = await supabase.from('ads').select('*').eq('active', true).order('sort_order', { ascending: true });
+    if (error) throw error;
+    return (data || []) as Ad[];
+  },
+
+  async getAllAds(): Promise<Ad[]> {
+    const { data, error } = await supabase.from('ads').select('*').order('sort_order', { ascending: true });
+    if (error) throw error;
+    return (data || []) as Ad[];
+  },
+
+  async addAd(ad: Omit<Ad, 'id' | 'views' | 'skips' | 'created_at'>): Promise<void> {
+    const { error } = await supabase.from('ads').insert(ad);
+    if (error) throw error;
+  },
+
+  async updateAd(id: string, updates: Partial<Ad>): Promise<void> {
+    const { error } = await supabase.from('ads').update(updates).eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteAd(id: string): Promise<void> {
+    const { error } = await supabase.from('ads').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async trackAdStat(adId: string, stat: 'view' | 'skip'): Promise<void> {
+    const { error } = await supabase.rpc('increment_ad_stat', { p_ad_id: adId, p_stat: stat });
+    if (error) throw error;
+  },
+
+  // --- Vendor live location (ambulantes) ---
+  async getVendorLocation(businessId: string): Promise<VendorLocation | null> {
+    const { data, error } = await supabase.from('vendor_locations').select('*').eq('business_id', businessId).maybeSingle();
+    if (error) throw error;
+    return data as VendorLocation | null;
+  },
+
+  async setVendorLocation(businessId: string, lat: number, lng: number): Promise<void> {
+    const { error } = await supabase.from('vendor_locations').upsert({
+      business_id: businessId, lat, lng, active: true, updated_at: new Date().toISOString(),
+    });
+    if (error) throw error;
+  },
+
+  async stopVendorLocation(businessId: string): Promise<void> {
+    const { error } = await supabase.from('vendor_locations').update({ active: false, updated_at: new Date().toISOString() }).eq('business_id', businessId);
+    if (error) throw error;
   },
 };
 

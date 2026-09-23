@@ -1,8 +1,9 @@
-import { useMemo, useState, useEffect, type FormEvent } from 'react';
-import { Shield, Trash2, BadgeCheck, Search, BarChart3, QrCode, FileText, Mail, Phone, MapPin, Lock, AlertCircle, Flag, Package, Clock, HardDrive, Map, KeyRound, Loader2, Check, X as XIcon } from 'lucide-react';
-import type { Business, Plan, CV, Report, BusinessClaim } from '../lib/types';
+import { useMemo, useState, useEffect, useRef, type FormEvent } from 'react';
+import { Shield, Trash2, BadgeCheck, Search, BarChart3, QrCode, FileText, Mail, Phone, MapPin, Lock, AlertCircle, Flag, Package, Clock, HardDrive, Map, KeyRound, Loader2, Check, X as XIcon, Megaphone, Plus, Eye, SkipForward, Upload, Play } from 'lucide-react';
+import type { Business, Plan, CV, Report, BusinessClaim, Ad } from '../lib/types';
 import { storage } from '../lib/storage';
 import { supabase } from '../lib/supabase';
+import { uploadVideo } from '../lib/upload';
 import { MUNICIPALITIES, CATEGORIES, PLAN_LABELS, categoryIcon } from '../lib/constants';
 import { useToast } from '../components/Toast';
 import { StarRating } from '../components/StarRating';
@@ -23,11 +24,12 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
   const [category, setCategory] = useState('');
   const [plan, setPlan] = useState('');
   const [qrBusiness, setQrBusiness] = useState<Business | null>(null);
-  const [tab, setTab] = useState<'businesses' | 'cvs' | 'reports' | 'claims' | 'health' | 'account'>('businesses');
+  const [tab, setTab] = useState<'businesses' | 'cvs' | 'reports' | 'claims' | 'ads' | 'health' | 'account'>('businesses');
   const [cvs, setCvs] = useState<CV[]>([]);
   const [cvFilter, setCvFilter] = useState('');
   const [reports, setReports] = useState<Report[]>([]);
   const [claims, setClaims] = useState<BusinessClaim[]>([]);
+  const [ads, setAds] = useState<Ad[]>([]);
   const [productCount, setProductCount] = useState(0);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -40,6 +42,8 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       storage.getReports().then(setReports).catch(() => {});
     } else if (tab === 'claims') {
       storage.getBusinessClaims().then(setClaims).catch(() => {});
+    } else if (tab === 'ads') {
+      storage.getAllAds().then(setAds).catch(() => {});
     }
   }, [tab]);
 
@@ -225,6 +229,9 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         </button>
         <button onClick={() => setTab('claims')} className={`btn shrink-0 text-sm ${tab === 'claims' ? 'btn-primary' : 'btn-outline'}`}>
           <BadgeCheck className="h-4 w-4" /> Reclamos {pendingClaims > 0 && `(${pendingClaims})`}
+        </button>
+        <button onClick={() => setTab('ads')} className={`btn shrink-0 text-sm ${tab === 'ads' ? 'btn-primary' : 'btn-outline'}`}>
+          <Megaphone className="h-4 w-4" /> Anuncios {ads.length > 0 && `(${ads.length})`}
         </button>
         <button onClick={() => setTab('health')} className={`btn shrink-0 text-sm ${tab === 'health' ? 'btn-primary' : 'btn-outline'}`}>
           <HardDrive className="h-4 w-4" /> Salud del sistema
@@ -523,6 +530,10 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         </>
       )}
 
+      {tab === 'ads' && (
+        <AdsTab ads={ads} onChange={() => storage.getAllAds().then(setAds).catch(() => {})} />
+      )}
+
       {tab === 'health' && (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -627,5 +638,213 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         </div>
       )}
     </div>
+  );
+}
+
+function AdsTab({ ads, onChange }: { ads: Ad[]; onChange: () => void }) {
+  const { toast } = useToast();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Ad | null>(null);
+  const [title, setTitle] = useState('');
+  const [advertiserName, setAdvertiserName] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [duration, setDuration] = useState(20);
+  const [skipAfter, setSkipAfter] = useState(5);
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const resetForm = () => {
+    setEditing(null);
+    setTitle('');
+    setAdvertiserName('');
+    setVideoUrl('');
+    setDuration(20);
+    setSkipAfter(5);
+    setShowForm(false);
+  };
+
+  const startEdit = (ad: Ad) => {
+    setEditing(ad);
+    setTitle(ad.title);
+    setAdvertiserName(ad.advertiser_name || '');
+    setVideoUrl(ad.video_url);
+    setDuration(ad.duration_seconds);
+    setSkipAfter(ad.skip_after_seconds);
+    setShowForm(true);
+  };
+
+  const pickFile = () => fileRef.current?.click();
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadVideo(file);
+      setVideoUrl(url);
+      toast('Video subido', 'success');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'No se pudo subir el video', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !videoUrl.trim()) {
+      toast('Título y video son requeridos', 'error');
+      return;
+    }
+    if (skipAfter > duration) {
+      toast('El "saltar después de" no puede ser mayor que la duración', 'error');
+      return;
+    }
+    setSaving(true);
+    try {
+      if (editing) {
+        await storage.updateAd(editing.id, {
+          title: title.trim(),
+          advertiser_name: advertiserName.trim() || undefined,
+          video_url: videoUrl.trim(),
+          duration_seconds: duration,
+          skip_after_seconds: skipAfter,
+        });
+        toast('Anuncio actualizado', 'success');
+      } else {
+        await storage.addAd({
+          title: title.trim(),
+          advertiser_name: advertiserName.trim() || undefined,
+          video_url: videoUrl.trim(),
+          duration_seconds: duration,
+          skip_after_seconds: skipAfter,
+          active: true,
+          sort_order: ads.length,
+        });
+        toast('Anuncio creado', 'success');
+      }
+      resetForm();
+      onChange();
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'No se pudo guardar el anuncio', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleActive = async (ad: Ad) => {
+    await storage.updateAd(ad.id, { active: !ad.active });
+    onChange();
+    toast(ad.active ? 'Anuncio pausado' : 'Anuncio activado', 'success');
+  };
+
+  const remove = async (ad: Ad) => {
+    if (!confirm(`¿Eliminar el anuncio "${ad.title}"?`)) return;
+    await storage.deleteAd(ad.id);
+    onChange();
+    toast('Anuncio eliminado', 'info');
+  };
+
+  return (
+    <>
+      <div className="mb-4 flex items-start justify-between gap-2">
+        <p className="text-sm text-slate-500">
+          El anuncio se muestra una vez por sesión antes de entrar a la app. Sube videos de eventos de presidencia o véndelo como espacio publicitario a negocios.
+        </p>
+        <button onClick={() => { resetForm(); setShowForm(true); }} className="btn-primary shrink-0 px-3 py-2 text-xs">
+          <Plus className="h-4 w-4" /> Nuevo
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={submit} className="card mb-4 space-y-3 p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label">Título *</label>
+              <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej. Feria del Empleo 2026" />
+            </div>
+            <div>
+              <label className="label">Anunciante (opcional)</label>
+              <input className="input" value={advertiserName} onChange={(e) => setAdvertiserName(e.target.value)} placeholder="Ej. Presidencia Municipal / Negocio" />
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Video *</label>
+            <input ref={fileRef} type="file" accept="video/mp4,video/webm,video/quicktime" onChange={onFile} className="hidden" />
+            <div className="flex gap-2">
+              <input className="input flex-1" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://... o sube un archivo" />
+              <button type="button" onClick={pickFile} disabled={uploading} className="btn-outline shrink-0 px-3 py-2 text-xs">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploading ? 'Subiendo...' : 'Subir'}
+              </button>
+            </div>
+            {videoUrl && (
+              <video src={videoUrl} controls className="mt-2 max-h-48 w-full rounded-lg bg-black" />
+            )}
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label">Duración total (segundos)</label>
+              <input type="number" min={5} max={180} className="input" value={duration} onChange={(e) => setDuration(Math.max(5, Math.min(180, Number(e.target.value) || 0)))} />
+              <p className="mt-1 text-xs text-slate-400">Recomendado 15-30s. El admin puede extenderlo hasta 180s.</p>
+            </div>
+            <div>
+              <label className="label">Saltar disponible después de (segundos)</label>
+              <input type="number" min={0} max={duration} className="input" value={skipAfter} onChange={(e) => setSkipAfter(Math.max(0, Math.min(duration, Number(e.target.value) || 0)))} />
+              <p className="mt-1 text-xs text-slate-400">5-10s es el estándar para que cuente como vista.</p>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <button type="submit" disabled={saving} className="btn-primary px-4 py-2 text-sm">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {editing ? 'Guardar cambios' : 'Crear anuncio'}
+            </button>
+            <button type="button" onClick={resetForm} className="btn-outline px-4 py-2 text-sm">Cancelar</button>
+          </div>
+        </form>
+      )}
+
+      {ads.length === 0 ? (
+        <p className="py-10 text-center text-sm text-slate-400">No hay anuncios todavía. Crea el primero para que se muestre a los visitantes.</p>
+      ) : (
+        <div className="space-y-3">
+          {ads.map((ad) => (
+            <div key={ad.id} className="card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-bold text-slate-800">{ad.title}</h3>
+                    <span className={`badge ${ad.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                      {ad.active ? 'Activo' : 'Pausado'}
+                    </span>
+                  </div>
+                  {ad.advertiser_name && <p className="mt-0.5 text-xs text-slate-500">{ad.advertiser_name}</p>}
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><Play className="h-3.5 w-3.5" /> {ad.duration_seconds}s</span>
+                    <span className="flex items-center gap-1"><SkipForward className="h-3.5 w-3.5" /> saltar a los {ad.skip_after_seconds}s</span>
+                    <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {ad.views} vistas</span>
+                    <span className="flex items-center gap-1"><SkipForward className="h-3.5 w-3.5" /> {ad.skips} saltos</span>
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-1.5">
+                  <button onClick={() => startEdit(ad)} className="btn-outline px-3 py-1.5 text-xs">Editar</button>
+                  <button onClick={() => toggleActive(ad)} className="btn-outline px-3 py-1.5 text-xs">
+                    {ad.active ? 'Pausar' : 'Activar'}
+                  </button>
+                  <button onClick={() => remove(ad)} className="rounded-lg p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Eliminar">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }

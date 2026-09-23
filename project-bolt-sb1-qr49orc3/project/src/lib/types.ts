@@ -30,6 +30,29 @@ export interface Business {
   createdAt: number;
   coords?: { lat: number; lng: number };
   user_id?: string;
+  is_ambulante?: boolean;
+}
+
+export interface Ad {
+  id: string;
+  title: string;
+  video_url: string;
+  duration_seconds: number;
+  skip_after_seconds: number;
+  active: boolean;
+  sort_order: number;
+  advertiser_name?: string;
+  views: number;
+  skips: number;
+  created_at: string;
+}
+
+export interface VendorLocation {
+  business_id: string;
+  lat: number;
+  lng: number;
+  active: boolean;
+  updated_at: string;
 }
 
 export interface Product {

@@ -2,13 +2,14 @@ import { useEffect, useState, useMemo } from 'react';
 import {
   Eye, MessageCircle, Share2, MapPin, Phone, Mail, Globe, Heart, Star,
   TrendingUp, BarChart3, AlertCircle, Lightbulb, Clock, Award, RefreshCw,
-  Package, Calendar, Users, Camera
+  Package, Calendar, Users, Camera, Truck
 } from 'lucide-react';
 import type { Business, Product, AnalyticsEventType } from '../lib/types';
 import { storage } from '../lib/storage';
 import { useToast } from '../components/Toast';
 import { PLAN_LABELS, PLAN_PHOTO_LIMITS, BACKGROUND_PRESETS } from '../lib/constants';
 import { PhotoGallery } from '../components/PhotoGallery';
+import { LiveLocationToggle } from '../components/LiveLocationToggle';
 
 interface DashboardPageProps {
   business: Business;
@@ -113,6 +114,18 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       toast('Fondo actualizado', 'success');
     } finally {
       setSavingBg(false);
+    }
+  };
+
+  const [savingAmbulante, setSavingAmbulante] = useState(false);
+  const toggleAmbulante = async () => {
+    setSavingAmbulante(true);
+    try {
+      await storage.updateBusiness(business.id, { is_ambulante: !business.is_ambulante });
+      await onRefresh();
+      toast(business.is_ambulante ? 'Ya no eres ambulante' : 'Marcado como negocio ambulante', 'success');
+    } finally {
+      setSavingAmbulante(false);
     }
   };
 
@@ -275,6 +288,31 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
             );
           })}
         </div>
+      </div>
+
+      {/* Ambulant vendor */}
+      <div className="mb-5 card p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <Truck className="h-4 w-4 text-[#1565C0]" />
+          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Vendedor ambulante</h2>
+        </div>
+        <label className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3">
+          <input
+            type="checkbox"
+            checked={!!business.is_ambulante}
+            disabled={savingAmbulante}
+            onChange={toggleAmbulante}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+          />
+          <span className="text-xs text-slate-600">
+            Marca esto si vendes en movimiento (carrito, puesto ambulante, etc.). Al activarlo, podrás compartir tu ubicación en vivo para que los clientes vean por dónde vas.
+          </span>
+        </label>
+        {business.is_ambulante && (
+          <div className="mt-3">
+            <LiveLocationToggle businessId={business.id} />
+          </div>
+        )}
       </div>
 
       {/* Recommendations */}

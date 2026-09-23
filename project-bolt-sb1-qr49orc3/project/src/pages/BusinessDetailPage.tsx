@@ -15,6 +15,7 @@ import { ImageUpload } from '../components/ImageUpload';
 import { useToast } from '../components/Toast';
 import { ReportButton } from '../components/ReportButton';
 import { ClaimBusinessButton } from '../components/ClaimBusinessButton';
+import { LiveVendorMap } from '../components/LiveVendorMap';
 
 interface BusinessDetailPageProps {
   business: Business;
@@ -135,6 +136,8 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
           </div>
         </div>
       </div>
+
+      <LiveVendorMap business={business} />
 
       {/* Status + rating row */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">

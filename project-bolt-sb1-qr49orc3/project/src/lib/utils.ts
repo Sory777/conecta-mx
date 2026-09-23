@@ -135,6 +135,24 @@ export function mapsEmbedSrc(b: Business): string {
   return `https://maps.google.com/maps?q=${q}&output=embed`;
 }
 
+export function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const s1 = Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(s1), Math.sqrt(1 - s1));
+}
+
+// Rough ETA estimate assuming a walking/street-vendor pace; always labeled as approximate in the UI.
+export function estimateEtaMinutes(distanceKm: number, avgSpeedKmh = 12): number {
+  return Math.max(1, Math.round((distanceKm / avgSpeedKmh) * 60));
+}
+
+export function liveLocationEmbedSrc(lat: number, lng: number): string {
+  return `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+}
+
 export function downloadDataUrl(dataUrl: string, filename: string): void {
   const a = document.createElement('a');
   a.href = dataUrl;

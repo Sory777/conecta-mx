@@ -1,4 +1,4 @@
-import { MapPin, Phone, BadgeCheck, Clock, Sparkles, Navigation } from 'lucide-react';
+import { MapPin, Phone, BadgeCheck, Clock, Sparkles, Navigation, Truck } from 'lucide-react';
 import type { Business } from '../lib/types';
 import { categoryIcon, PLAN_LABELS } from '../lib/constants';
 import { businessWaLink, isOpenNow, formatPhone, mapsDirectionsLink } from '../lib/utils';
@@ -48,6 +48,11 @@ export function BusinessCard({ business, onOpen }: BusinessCardProps) {
           )}
           {business.plan !== 'free' && (
             <span className="badge bg-emerald-500 text-white shadow">{PLAN_LABELS[business.plan]}</span>
+          )}
+          {business.is_ambulante && (
+            <span className="badge bg-orange-500 text-white shadow">
+              <Truck className="h-3.5 w-3.5" /> Ambulante
+            </span>
           )}
         </div>
         <div className="absolute right-2 top-2 z-10">

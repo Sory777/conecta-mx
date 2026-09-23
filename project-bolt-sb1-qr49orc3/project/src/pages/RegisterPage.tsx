@@ -1,5 +1,5 @@
 import { useState, type ReactNode, type FormEvent } from 'react';
-import { Store, CheckCircle2, Info, MapPin, LocateFixed, Loader2, Mail, Lock } from 'lucide-react';
+import { Store, CheckCircle2, Info, MapPin, LocateFixed, Loader2, Mail, Lock, Truck } from 'lucide-react';
 import type { Business, Plan } from '../lib/types';
 import { MUNICIPALITIES, CATEGORIES } from '../lib/constants';
 import { storage, uid } from '../lib/storage';
@@ -29,12 +29,13 @@ interface FormState {
   promotion: string;
   imageUrl: string;
   acceptTerms: boolean;
+  isAmbulante: boolean;
 }
 
 const empty: FormState = {
   email: '', password: '', name: '', municipality: '', city: '', category: '', description: '',
   whatsapp: '', phone: '', address: '', coords: null, hours: '',
-  facebook: '', instagram: '', promotion: '', imageUrl: '', acceptTerms: false,
+  facebook: '', instagram: '', promotion: '', imageUrl: '', acceptTerms: false, isAmbulante: false,
 };
 
 const sampleImages = [
@@ -123,6 +124,7 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
         reviewCount: 0,
         createdAt: Date.now(),
         user_id: authData.user.id,
+        is_ambulante: form.isAmbulante,
       };
       await storage.addBusiness(business);
       if (isFounding) {
@@ -221,6 +223,19 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
           <p className="mb-2 text-xs text-slate-500">Comparte tu ubicación actual para que los clientes te encuentren en el mapa y verifiquemos tu negocio.</p>
           <GeoButton coords={form.coords} onSet={(c) => set('coords', c)} />
         </div>
+
+        <label className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3">
+          <input
+            type="checkbox"
+            checked={form.isAmbulante}
+            onChange={(e) => set('isAmbulante', e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+          />
+          <span className="text-xs text-slate-600">
+            <Truck className="mr-1 inline h-3.5 w-3.5 text-[#1565C0]" />
+            Soy un negocio ambulante (vendo en movimiento, ej. carrito de comida). Podrás compartir tu ubicación en vivo desde tu panel.
+          </span>
+        </label>
 
         <Field label="Horario (opcional)" hint="Formato: Lun-Vie 9:00-18:00, Sab 9:00-14:00" error={errors.hours}>
           <input className="input" value={form.hours} onChange={(e) => set('hours', e.target.value)} placeholder="Lun-Dom 9:00-21:00" />

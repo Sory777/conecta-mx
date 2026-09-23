@@ -18,6 +18,7 @@ import { EventsPage } from './pages/EventsPage';
 import { AuthPage } from './pages/AuthPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { InstallBanner } from './components/InstallBanner';
+import { AdGate } from './components/AdGate';
 
 type Route =
   | { name: 'home' }
@@ -96,6 +97,7 @@ function AppInner() {
     try { return JSON.parse(localStorage.getItem('cmx_saved_jobs') || '[]'); } catch { return []; }
   });
   const [loading, setLoading] = useState(true);
+  const [adPassed, setAdPassed] = useState(() => !!sessionStorage.getItem('cmx_ad_shown_session'));
 
   useEffect(() => {
     let active = true;
@@ -182,6 +184,10 @@ function AppInner() {
     if (route.name !== 'business') return null;
     return businesses.find((b) => b.id === route.id) || null;
   }, [route, businesses]);
+
+  if (!adPassed) {
+    return <AdGate onDone={() => setAdPassed(true)} />;
+  }
 
   if (loading) {
     return (
