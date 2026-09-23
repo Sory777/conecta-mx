@@ -56,7 +56,8 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
       list = list.filter((b) => {
         const textMatch = b.name.toLowerCase().includes(q) ||
           b.category.toLowerCase().includes(q) ||
-          b.description.toLowerCase().includes(q);
+          b.description.toLowerCase().includes(q) ||
+          (b.address || '').toLowerCase().includes(q);
         const catMatch = cats.includes(b.category);
         return textMatch || catMatch;
       });
