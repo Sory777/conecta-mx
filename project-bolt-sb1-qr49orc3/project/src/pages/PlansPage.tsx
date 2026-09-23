@@ -1,5 +1,5 @@
 import { Check, Crown, Star, Gift } from 'lucide-react';
-import { PLAN_PRICES, FOUNDING_THRESHOLD } from '../lib/constants';
+import { PLAN_PRICES, PLAN_PHOTO_LIMITS, FOUNDING_THRESHOLD } from '../lib/constants';
 
 interface PlansPageProps {
   totalBusinesses: number;
@@ -16,6 +16,7 @@ export function PlansPage({ totalBusinesses }: PlansPageProps) {
       color: 'text-slate-600',
       features: [
         'Listado básico en el directorio',
+        `Hasta ${PLAN_PHOTO_LIMITS.free} fotos en tu espacio`,
         'Hasta 10 productos',
         'Botón de WhatsApp',
         'Link de Google Maps',
@@ -32,6 +33,7 @@ export function PlansPage({ totalBusinesses }: PlansPageProps) {
       features: [
         'Insignia de verificado',
         'Apareces en la sección destacados',
+        `Hasta ${PLAN_PHOTO_LIMITS.featured} fotos en tu espacio`,
         'Hasta 50 productos',
         'Estadísticas básicas',
         'Prioridad en búsqueda',
@@ -45,6 +47,7 @@ export function PlansPage({ totalBusinesses }: PlansPageProps) {
       color: 'text-emerald-600',
       features: [
         'Prioridad máxima en búsqueda',
+        `Hasta ${PLAN_PHOTO_LIMITS.premium} fotos en tu espacio`,
         'Productos ilimitados',
         'Links a redes sociales',
         'Promociones destacadas',
@@ -85,7 +88,7 @@ export function PlansPage({ totalBusinesses }: PlansPageProps) {
             </div>
             <p className="mb-4">
               <span className="text-3xl font-extrabold text-slate-800">${p.price}</span>
-              <span className="text-sm text-slate-500">/mes</span>
+              <span className="text-sm text-slate-500">/mes{p.price > 0 ? ' + IVA' : ''}</span>
             </p>
             <ul className="mb-5 flex-1 space-y-2">
               {p.features.map((f) => (
@@ -95,7 +98,7 @@ export function PlansPage({ totalBusinesses }: PlansPageProps) {
               ))}
             </ul>
             <button
-              onClick={() => { window.location.hash = `#/register?plan=${p.id}`; }}
+              onClick={() => { window.location.hash = `#/register?plan=${p.key}`; }}
               className={`btn w-full ${p.featured ? 'btn-primary' : 'btn-outline'}`}
             >
               Elegir {p.name}

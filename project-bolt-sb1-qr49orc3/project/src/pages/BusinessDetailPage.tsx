@@ -6,7 +6,7 @@ import {
 import type { Business, Product, Review, Job } from '../lib/types';
 import { storage, uid, recomputeBusinessRatings } from '../lib/storage';
 import type { AnalyticsEventType } from '../lib/types';
-import { categoryIcon, PLAN_LABELS, PLAN_LIMITS, CONTRACT_TYPES, CATEGORIES } from '../lib/constants';
+import { categoryIcon, PLAN_LABELS, PLAN_LIMITS, CONTRACT_TYPES, CATEGORIES, backgroundClass } from '../lib/constants';
 import { businessWaLink, isOpenNow, formatPhone, timeAgo, jobApplyLink, mapsDirectionsLink, mapsEmbedSrc } from '../lib/utils';
 import { StarRating } from '../components/StarRating';
 import { Modal } from '../components/Modal';
@@ -108,7 +108,8 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-5">
+    <div className={backgroundClass(business.background)}>
+      <div className="mx-auto max-w-4xl px-4 py-5">
       <button onClick={onBack} className="btn-ghost mb-4 -ml-2 text-sm">
         <ArrowLeft className="h-4 w-4" /> Volver
       </button>
@@ -175,6 +176,20 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
           </div>
         )}
       </div>
+
+      {/* Photo gallery */}
+      {business.photos && business.photos.length > 0 && (
+        <div className="card mt-4 p-4">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Galería</h2>
+          <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {business.photos.map((url) => (
+              <div key={url} className="aspect-square overflow-hidden rounded-xl">
+                <img src={url} alt={business.name} className="h-full w-full object-cover" loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Contact */}
       <div className="card mt-4 p-4">
@@ -365,6 +380,7 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
       <Modal open={showAddJob} onClose={() => setShowAddJob(false)} title="Publicar vacante" maxWidth="max-w-xl">
         <AddJobForm business={business} onAdd={addJob} />
       </Modal>
+      </div>
     </div>
   );
 }

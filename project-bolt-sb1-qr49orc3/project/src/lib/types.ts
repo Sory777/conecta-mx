@@ -20,6 +20,8 @@ export interface Business {
   instagram?: string;
   promotion?: string;
   imageUrl?: string;
+  photos?: string[];
+  background?: string;
   plan: Plan;
   verified: boolean;
   founding: boolean;

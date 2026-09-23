@@ -131,6 +131,33 @@ export const PLAN_PRICES: Record<string, number> = {
   premium: 99,
 };
 
+export const PLAN_PHOTO_LIMITS: Record<string, number> = {
+  free: 5,
+  featured: 20,
+  premium: 50,
+};
+
+export interface BackgroundPreset {
+  key: string;
+  label: string;
+  className: string;
+}
+
+export const BACKGROUND_PRESETS: BackgroundPreset[] = [
+  { key: 'default', label: 'Clásico', className: 'bg-slate-50' },
+  { key: 'ocean', label: 'Océano', className: 'bg-gradient-to-b from-sky-50 via-blue-50 to-white' },
+  { key: 'sunset', label: 'Atardecer', className: 'bg-gradient-to-b from-orange-50 via-amber-50 to-white' },
+  { key: 'forest', label: 'Bosque', className: 'bg-gradient-to-b from-emerald-50 via-green-50 to-white' },
+  { key: 'berry', label: 'Fresa', className: 'bg-gradient-to-b from-rose-50 via-pink-50 to-white' },
+  { key: 'grape', label: 'Uva', className: 'bg-gradient-to-b from-violet-50 via-purple-50 to-white' },
+  { key: 'gold', label: 'Dorado', className: 'bg-gradient-to-b from-yellow-50 via-amber-50 to-white' },
+  { key: 'midnight', label: 'Noche', className: 'bg-gradient-to-b from-slate-800 via-slate-700 to-slate-100' },
+];
+
+export function backgroundClass(key?: string): string {
+  return BACKGROUND_PRESETS.find((b) => b.key === key)?.className ?? BACKGROUND_PRESETS[0].className;
+}
+
 export const FOUNDING_THRESHOLD = 30;
 
 export const EVENT_CATEGORIES = [

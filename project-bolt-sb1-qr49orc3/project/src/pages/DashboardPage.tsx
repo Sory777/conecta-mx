@@ -7,7 +7,8 @@ import {
 import type { Business, Product, AnalyticsEventType } from '../lib/types';
 import { storage } from '../lib/storage';
 import { useToast } from '../components/Toast';
-import { PLAN_LABELS } from '../lib/constants';
+import { PLAN_LABELS, PLAN_PHOTO_LIMITS, BACKGROUND_PRESETS } from '../lib/constants';
+import { PhotoGallery } from '../components/PhotoGallery';
 
 interface DashboardPageProps {
   business: Business;
@@ -95,6 +96,25 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
   const topProducts = useMemo(() => {
     return [...products].sort((a, b) => b.views - a.views).slice(0, 5);
   }, [products]);
+
+  const photoLimit = PLAN_PHOTO_LIMITS[business.plan] ?? PLAN_PHOTO_LIMITS.free;
+
+  const savePhotos = async (photos: string[]) => {
+    await storage.updateBusiness(business.id, { photos });
+    await onRefresh();
+  };
+
+  const [savingBg, setSavingBg] = useState(false);
+  const saveBackground = async (key: string) => {
+    setSavingBg(true);
+    try {
+      await storage.updateBusiness(business.id, { background: key });
+      await onRefresh();
+      toast('Fondo actualizado', 'success');
+    } finally {
+      setSavingBg(false);
+    }
+  };
 
   const expiredCount = useMemo(() => {
     const now = Date.now();
@@ -225,6 +245,37 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
           </div>
         </div>
       )}
+
+      {/* Photo gallery */}
+      <div className="mb-5 card p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <Camera className="h-4 w-4 text-[#1565C0]" />
+          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Fotos de tu espacio</h2>
+        </div>
+        <PhotoGallery photos={business.photos || []} limit={photoLimit} onChange={savePhotos} />
+      </div>
+
+      {/* Mini-website background */}
+      <div className="mb-5 card p-4">
+        <h2 className="mb-1 text-sm font-bold uppercase tracking-wide text-slate-500">Personaliza tu espacio</h2>
+        <p className="mb-3 text-xs text-slate-400">Elige un fondo para tu página, como si fuera tu mini sitio web.</p>
+        <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+          {BACKGROUND_PRESETS.map((bg) => {
+            const selected = (business.background || 'default') === bg.key;
+            return (
+              <button
+                key={bg.key}
+                type="button"
+                disabled={savingBg}
+                onClick={() => saveBackground(bg.key)}
+                className={`aspect-square rounded-xl border-2 ${bg.className} ${selected ? 'border-[#1565C0]' : 'border-transparent'} transition hover:scale-105`}
+                title={bg.label}
+                aria-label={bg.label}
+              />
+            );
+          })}
+        </div>
+      </div>
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
