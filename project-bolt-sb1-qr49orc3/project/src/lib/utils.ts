@@ -118,7 +118,8 @@ export function mapsDirectionsLink(b: Business): string | null {
     return `https://www.google.com/maps/dir/?api=1&destination=${b.coords.lat},${b.coords.lng}`;
   }
   if (b.mapsLink) return b.mapsLink;
-  if (b.address) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.address + ', ' + b.municipality + ', México')}`;
+  const place = [b.address, b.city, b.municipality].filter(Boolean).join(', ');
+  if (b.address) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place + ', México')}`;
   return null;
 }
 
@@ -129,7 +130,8 @@ export function mapsEmbedSrc(b: Business): string {
       && b.coords.lng >= -180 && b.coords.lng <= 180) {
     return `https://maps.google.com/maps?q=${b.coords.lat},${b.coords.lng}&output=embed`;
   }
-  const q = encodeURIComponent((b.address || b.municipality) + ', México');
+  const place = [b.address, b.city, b.municipality].filter(Boolean).join(', ');
+  const q = encodeURIComponent(place + ', México');
   return `https://maps.google.com/maps?q=${q}&output=embed`;
 }
 
