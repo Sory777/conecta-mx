@@ -270,7 +270,8 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
             className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#1565C0]"
           />
           <span className="text-xs text-slate-600">
-            Acepto los términos y condiciones de Conecta MX y autorizo la publicación de mi información de contacto.
+            Acepto los <a href="#/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-[#1565C0] hover:underline">términos y condiciones</a> y el{' '}
+            <a href="#/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-[#1565C0] hover:underline">aviso de privacidad</a> de Conecta MX, y autorizo la publicación de mi información de contacto.
           </span>
         </label>
         {errors.acceptTerms && <p className="-mt-2 text-xs text-rose-500">{errors.acceptTerms}</p>}

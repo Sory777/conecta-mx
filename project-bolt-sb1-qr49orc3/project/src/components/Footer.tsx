@@ -37,6 +37,10 @@ export function Footer({ onNavigate }: FooterProps) {
         </div>
         <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-slate-100 pt-4 text-xs text-slate-400 sm:flex-row">
           <p>© {new Date().getFullYear()} Conecta MX. Todos los derechos reservados.</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => onNavigate('terms')} className="hover:text-[#1565C0] hover:underline">Términos y condiciones</button>
+            <button onClick={() => onNavigate('privacy')} className="hover:text-[#1565C0] hover:underline">Aviso de privacidad</button>
+          </div>
           <p className="inline-flex items-center gap-1">Hecho con <Heart className="h-3 w-3 fill-rose-500 text-rose-500" /> en México</p>
         </div>
       </div>
