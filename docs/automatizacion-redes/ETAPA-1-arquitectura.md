@@ -13,7 +13,9 @@
 | ¿Dónde vive la lógica? | **Make** orquesta. **Supabase** guarda datos, archivos y estado (multi-cliente con RLS). Los proveedores de IA, voz y video se llaman por módulo nativo o HTTP y son **intercambiables**. |
 | ¿Cuánto cuesta por video? | Costo variable ≈ **US$0.15–0.55** por video de 30 s. Con los costos fijos incluidos: ≈ **US$0.90** (100/mes), ≈ **US$0.50–0.70** (500/mes), ≈ **US$0.40–0.55** (1,000/mes). |
 | ¿Qué requiere humanos? | Conectar cuentas sociales (OAuth, una vez por cliente), aprobar videos (modo aprobación), TikTok mientras no haya auditoría, perfiles personales de Facebook, y las revisiones de apps (Meta/TikTok/Google/LinkedIn) si en fase SaaS usamos apps propias. |
-| Recomendación de arranque | Supabase + Make + Claude (visión y textos) + ElevenLabs (voz) + Shotstack (video) + módulos nativos de Make para IG/FB/YT/LinkedIn + Zernio (antes Late) para TikTok. |
+| Recomendación de arranque | ~~Supabase + Make + Claude + ElevenLabs + Shotstack + Zernio~~ → **Actualizado (v2): stack de costo mínimo para inmobiliarias y tiendas de ropa. Ver §13.** |
+
+> **v2 (decisión del cliente):** prioridad = **costo mínimo**; verticales iniciales = **inmobiliarias** y **tiendas de ropa**. La §13 sustituye a las recomendaciones de §9, §11 y §12 donde se contradigan.
 
 ---
 
@@ -461,3 +463,102 @@ Cuando respondas estas preguntas y me digas **"CONTINÚA"**, paso a la **Etapa 2
 - OpenAI TTS: [CostGoat – OpenAI TTS pricing](https://costgoat.com/pricing/openai-tts) · [OpenAI community – gpt-4o-mini-tts pricing](https://community.openai.com/t/understanding-gpt-4o-mini-tts-pricing-input-characters-cost/1151816)
 - Zernio/Late: [Late pricing](https://getlate.dev/pricing) · [social-api.ai – Social media API pricing 2026](https://social-api.ai/blog/social-media-api-pricing-2026)
 - Claude: tabla de precios de modelos de Anthropic (Sonnet 5 $2/$10, Haiku 4.5 $1/$5 por millón de tokens).
+
+---
+
+## 13. ACTUALIZACIÓN v2 — Stack de costo mínimo para inmobiliarias y tiendas de ropa
+
+Decisión del cliente: **lo más barato posible**, enfocado en **inmobiliarias** y **tiendas de ropa**. La arquitectura (escenarios S1–S8, Supabase, adaptadores intercambiables, idempotencia) **no cambia**; cambian los proveedores y algunos valores por defecto.
+
+### 13.1 Stack de costo mínimo
+
+| Capa | Antes (v1) | **Ahora (v2, costo mínimo)** | Por qué |
+|---|---|---|---|
+| Visión y textos | Claude Sonnet 5 (≈ $0.08/video) | **Gemini 2.5 Flash-Lite** vía módulo nativo `gemini-ai` ($0.10 / $0.40 por millón de tokens de entrada/salida) → **≈ $0.002–0.004/video**. Si la calidad no alcanza en las pruebas, se sube a Gemini Flash o Claude Haiku 4.5 (≈ $0.04) cambiando solo `provider_configs` | ~20–40 veces más barato. **Se usa la capa de pago, no la gratuita**: en la capa gratuita Google puede usar los datos (las fotos de tus clientes) para mejorar sus productos |
+| Voz | ElevenLabs (≈ $0.02–0.045) | **Google Cloud TTS WaveNet/Standard** (`google-cloud-tts` nativo). **1M caracteres WaveNet gratis al mes** (≈ 2,200 videos de 30 s) y después $4 por millón de caracteres. **Voz opcional**: la ropa va sin voz por defecto | **$0** en los volúmenes previstos. Acento latino neutro con voces `es-US`; en la Etapa 5 confirmo qué voces hay y las escuchamos |
+| Video | Shotstack | **Shotstack** (se mantiene) con **videos más cortos**: ropa 12–20 s, inmobiliaria 25–35 s. Se cobra por segundo, así que un video de 15 s cuesta la mitad que uno de 30 s. Se desarrolla gratis en su *sandbox* (con marca de agua) | Es el render en la nube más barato que encontré en Make ($0.20/min con suscripción, $0.40/min en prepago) |
+| Video (fase escala) | — | **Opcional más adelante:** un servidor propio con FFmpeg en un VPS de ≈ $5–6/mes detrás de un módulo HTTP, lo que baja el costo por video a casi $0. El adaptador de §3.6 permite cambiar sin rehacer nada | Conviene cuando se pasen ~300–500 videos/mes; antes, el mantenimiento no compensa |
+| Formato **gratis** extra | — | **Carrusel de fotos** (IG `Create a carousel post`, FB `Create a Post with Photos`) con copy generado por IA: **$0 de render**. Ideal para ropa (catálogo) y como complemento del reel en inmobiliarias | Contenido extra sin costo de video |
+| Publicación TikTok | Zernio (de pago por cuenta) | **Tarea manual**: el negocio recibe el MP4 + el copy listo para pegar (≈ 1 min de su tiempo). Zernio queda como **complemento de pago** para quien lo quiera (las 2 primeras cuentas son gratis, útil para el piloto) | $0 |
+| Publicación IG / FB / YouTube | Módulos nativos | Igual (sin costo). **LinkedIn se desactiva por defecto** (poco valor para estas dos verticales) | Menos créditos de Make |
+| Entrada | Dashboard o Tally | **Dashboard de ConectaMX** con subida directa a Supabase/R2 (las fotos no pasan por Make: ≈ 15 créditos menos por video). Tally solo si quieres probar antes de programar | Lo más barato en créditos y ya tienes la app |
+| Almacenamiento | Supabase Pro ($25) | **Proyecto Supabase existente** para datos + **Cloudflare R2** (10 GB gratis, **egreso gratis**) para fotos y videos, con **borrado automático a los 60 días** de las fotos originales y los renders ya publicados | Evita pagar $25/mes de Supabase Pro por almacenamiento |
+| Aprobación / notificación | Link mágico | **Link mágico por correo** (módulo de correo de Make o Resend en su capa gratuita) + **link `wa.me`** que el negocio abre desde su WhatsApp. **Sin** la API de WhatsApp Business (cuesta por mensaje) | $0 |
+| Make | Core | **Core anual ≈ $9/mes (10k créditos)**. Con entrada por dashboard y sin LinkedIn: **≈ 35–45 créditos por video** → ~220–280 videos/mes con el plan base | |
+
+### 13.2 Costo estimado con el stack v2
+
+Costo variable por video:
+
+| Concepto | Ropa (15 s, sin voz) | Inmobiliaria (30 s, con voz) |
+|---|---|---|
+| IA (visión + guion + copies + QC) | ≈ $0.003 | ≈ $0.004 |
+| Voz | $0 | $0 (dentro de la capa gratuita) |
+| Render (Shotstack con suscripción / prepago) | $0.05 / $0.10 | $0.10 / $0.20 |
+| Portada (primer cuadro = portada; sin render aparte) | $0 | $0 |
+| Almacenamiento R2 | ≈ $0 | ≈ $0 |
+| **Total variable** | **≈ $0.05–0.10** | **≈ $0.10–0.20** |
+
+Costo mensual con mezcla 50 % ropa y 50 % inmobiliaria (≈ 22.5 s promedio):
+
+| Concepto | 100 videos/mes | 500 videos/mes | 1,000 videos/mes |
+|---|---|---|---|
+| Make (≈ 40 créditos por video) | 4k → Core anual ≈ **$9** | 20k → ≈ **$18–20** | 40k → ≈ **$35–40** |
+| IA (Gemini Flash-Lite) | ≈ $0.35 | ≈ $1.75 | ≈ $3.50 |
+| Voz (Google TTS, capa gratuita) | $0 | $0 | $0 |
+| Render (Shotstack) | ≈ 38 min → prepago ≈ **$15** | ≈ 190 min → suscripción **$39** | ≈ 375 min → ≈ **$75–80** |
+| Almacenamiento (R2 + Supabase existente) | $0 | $0 | ≈ $1 |
+| TikTok (manual) | $0 | $0 | $0 |
+| **Total aprox.** | **≈ $25/mes → $0.25/video** | **≈ $60/mes → $0.12/video** | **≈ $120/mes → $0.12/video** |
+| v1 (referencia) | $88 | $330 | $520 |
+
+Con un servidor FFmpeg propio (fase escala), 1,000 videos quedarían en **≈ $50/mes** (Make + VPS). En la práctica, el costo fijo que más pesa es **Make**.
+
+### 13.3 Vertical: INMOBILIARIA
+
+| Aspecto | Configuración |
+|---|---|
+| Formato | Reel/Short 9:16 de **25–35 s** + carrusel opcional ($0) |
+| Voz | **Sí** (WaveNet es-US), tono cálido, ~150 palabras por minuto |
+| Modo por defecto | **APROBACIÓN**: un error en precio, recámaras o zona es grave (posible publicidad engañosa) |
+| Datos del usuario (nunca inferidos de las fotos) | Precio, operación (venta/renta), colonia/municipio, recámaras, baños, m² de terreno/construcción, estacionamientos, amenidades no visibles, WhatsApp |
+| Lo que la IA detecta en las fotos | Fachada, sala, comedor, cocina, recámara, baño, jardín/patio, cochera, alberca, terraza, vista, área común; calidad (luz, nitidez, inclinación); duplicados; portada (casi siempre la fachada o la mejor área social) |
+| Orden por defecto | Fachada → sala/comedor → cocina → recámaras → baños → exteriores/amenidades → cierre con datos |
+| Guion | Hook con **zona + beneficio real** ("3 recámaras a 5 min de Plaza Andares" solo si el usuario dio la referencia) → recorrido → datos → CTA "Agenda tu visita por WhatsApp" |
+| Texto en pantalla | Precio, "3 rec · 2 baños · 180 m²", colonia, logo y WhatsApp en la tarjeta final |
+| Plataformas | IG Reel, FB Reel (Página), YouTube Short, TikTok (manual) |
+| Limitación | **Facebook Marketplace y los portales inmobiliarios (Inmuebles24, Vivanuncios, etc.) no tienen API pública de publicación** para este uso → quedan fuera de la automatización o como tarea manual |
+
+### 13.4 Vertical: TIENDA DE ROPA
+
+| Aspecto | Configuración |
+|---|---|
+| Formatos | **(a) Prenda destacada**: 1 prenda, 12–15 s. **(b) Lookbook/colección**: 4–10 prendas, 15–20 s, cortes al ritmo de la música. **(c) Carrusel** de catálogo ($0) |
+| Voz | **No** por defecto (música + texto en pantalla, que es lo que más se usa en moda). Activable |
+| Modo por defecto | **AUTOMÁTICO** (menos riesgo), con aprobación opcional |
+| Datos del usuario | Precio, tallas disponibles, colores, promoción, envío/apartado, dirección o link de la tienda, WhatsApp |
+| Lo que la IA detecta | Tipo de prenda (vestido, jeans, blusa, conjunto, calzado, accesorio), color, estilo (casual, formal, deportivo), ocasión, si hay modelo o maniquí/colgador, fondo, calidad de la foto. **No inventa** tela, marca ni tallas |
+| Estructura | Hook ("Nuevo en tienda 🔥", "Outfit para [ocasión]") → prendas con precio → tallas/colores → CTA "Pide la tuya por WhatsApp / Apártala" |
+| Hashtags | Fijos del negocio + ciudad (#ModaGuadalajara) + tipo de prenda y ocasión; rotación para no repetir |
+| Plataformas | IG Reel + carrusel, FB Reel + post con fotos, TikTok (manual), YouTube Short opcional |
+| Consideraciones | Si aparecen **personas reales** (modelos o clientas), el negocio debe tener su autorización → casilla obligatoria al subir. Las fotos de catálogo de marcas de terceros pueden tener derechos de autor → casilla "las fotos son propias o tengo permiso" |
+
+### 13.5 Riesgos del stack barato y cómo se mitigan
+
+| Riesgo | Mitigación |
+|---|---|
+| Gemini Flash-Lite podría clasificar peor las habitaciones o prendas que un modelo mayor | En la Etapa 3 se prueba con 10–20 sets reales de fotos de cada vertical. Si falla, se sube de modelo solo para visión (el costo sigue siendo de centavos) |
+| Las voces WaveNet suenan menos naturales que ElevenLabs | ElevenLabs queda como **complemento premium** que el cliente paga aparte |
+| La publicación manual en TikTok depende del cliente | La notificación incluye el video + copy listos; Zernio queda como complemento de pago |
+| Borrar a los 60 días impide re-editar videos viejos | Se conservan el `video_spec` y el guion (texto, casi no ocupa espacio); se borran solo los binarios. Si el cliente quiere conservarlos, es un extra |
+
+### 13.6 Decisiones que siguen pendientes
+
+Ya quedaron resueltas por tu respuesta: el proveedor de video (Shotstack), la voz (Google TTS, opcional), TikTok (manual) y la aprobación (link por correo + wa.me). Faltan:
+
+1. **Entrada:** ¿confirmas que la construimos dentro del **dashboard de ConectaMX** (lo más barato en créditos de Make), o prefieres probar primero con **Tally** (sin programar, ≈ 15 créditos más por video)?
+2. **Cliente piloto:** ¿tienes una inmobiliaria y/o una tienda de ropa real para probar? Necesitan **Instagram Business/Creator vinculado a una Página de Facebook**.
+3. **Plan de Make:** ¿ya pagas Make (qué plan) o estás en el plan gratuito (1,000 créditos/mes, suficiente solo para desarrollar)?
+4. **Plan de Supabase:** ¿el proyecto de ConectaMX está en el plan Free o en Pro? (Define si guardamos los archivos en R2 o en Supabase Storage.)
+
+Fuentes adicionales (v2): [Google Cloud TTS – precios y capa gratuita](https://texttolab.com/blog/google-cloud-tts-pricing) · [Costbench – capa gratuita de Google Cloud TTS](https://costbench.com/software/ai-voice-tools/google-cloud-text-to-speech/free-plan/) · [Gemini 2.5 Flash-Lite – precios](https://pricepertoken.com/pricing-page/model/google-gemini-2.5-flash-lite) · [Gemini API pricing (sep 2026)](https://costgoat.com/pricing/gemini-api) · [Shotstack – Pricing](https://shotstack.io/pricing/) · [Zernio/Late – Pricing](https://getlate.dev/pricing)
