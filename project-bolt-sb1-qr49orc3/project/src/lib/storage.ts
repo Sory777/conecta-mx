@@ -17,9 +17,19 @@ export function getVisitorId(): string {
 
 export const storage = {
   async getBusinesses(): Promise<Business[]> {
-    const { data, error } = await supabase.from('businesses').select('*').order('createdAt', { ascending: false });
-    if (error) throw error;
-    return (data || []) as Business[];
+    const pageSize = 1000;
+    const all: Business[] = [];
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('*')
+        .order('createdAt', { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      all.push(...((data || []) as Business[]));
+      if (!data || data.length < pageSize) break;
+    }
+    return all;
   },
 
   async saveBusinesses(list: Business[]): Promise<void> {

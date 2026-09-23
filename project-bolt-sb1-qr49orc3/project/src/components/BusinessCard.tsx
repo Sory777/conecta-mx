@@ -67,7 +67,7 @@ export function BusinessCard({ business, onOpen }: BusinessCardProps) {
             {business.category}
           </span>
           <span className="inline-flex items-center gap-0.5 text-slate-500">
-            <MapPin className="h-3.5 w-3.5" /> {business.municipality}
+            <MapPin className="h-3.5 w-3.5" /> {business.city ? `${business.city}, ${business.municipality}` : business.municipality}
           </span>
         </div>
 
