@@ -5,5 +5,9 @@
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"
-  }
+  },
+  "routes": [
+    { "pattern": "conectamxapp.uk", "custom_domain": true },
+    { "pattern": "www.conectamxapp.uk", "custom_domain": true }
+  ]
 }
