@@ -1,5 +1,9 @@
 import type { Business } from './types';
 
+export function normalizeText(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
 export function waLink(phone10: string, message: string): string {
   const clean = phone10.replace(/\D/g, '').slice(-10);
   return `https://wa.me/52${clean}?text=${encodeURIComponent(message)}`;

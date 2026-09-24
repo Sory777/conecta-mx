@@ -1,12 +1,12 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, X, LayoutGrid, List, Heart, Share2, Copy, Flag } from 'lucide-react';
 import type { Business } from '../lib/types';
-import { MUNICIPALITIES, CATEGORIES, SMART_SEARCH_MAP, categoryIcon } from '../lib/constants';
+import { MUNICIPALITIES, CATEGORIES, SMART_SEARCH_MAP_NORMALIZED, categoryIcon } from '../lib/constants';
 import { BusinessCard } from '../components/BusinessCard';
 import { EmptyState } from '../components/EmptyState';
 import { storage } from '../lib/storage';
 import { useToast } from '../components/Toast';
-import { isOpenNow } from '../lib/utils';
+import { isOpenNow, normalizeText } from '../lib/utils';
 
 interface DirectoryPageProps {
   businesses: Business[];
@@ -38,11 +38,11 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
 
   const smartCategories = useMemo((): string[] => {
     if (!query.trim()) return [];
-    const q = query.toLowerCase().trim();
+    const q = normalizeText(query.trim());
     const matched = new Set<string>();
     const parts = q.split(/\s+/);
     for (const part of parts) {
-      const cats = SMART_SEARCH_MAP[part];
+      const cats = SMART_SEARCH_MAP_NORMALIZED[part];
       if (cats) cats.forEach((c) => matched.add(c));
     }
     return Array.from(matched);
@@ -54,12 +54,18 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
       const q = query.toLowerCase().trim();
       const cats = smartCategories;
       list = list.filter((b) => {
-        const textMatch = b.name.toLowerCase().includes(q) ||
+        const nameMatch = b.name.toLowerCase().includes(q);
+        if (cats.length > 0) {
+          // The query matched a known category (e.g. "restaurante" -> Restaurantes).
+          // Trust that mapping instead of also matching loosely on description/address,
+          // which often share boilerplate wording across unrelated categories
+          // (e.g. many DENUE descriptions start with "Restaurantes con servicio de...").
+          return cats.includes(b.category) || nameMatch;
+        }
+        return nameMatch ||
           b.category.toLowerCase().includes(q) ||
           b.description.toLowerCase().includes(q) ||
           (b.address || '').toLowerCase().includes(q);
-        const catMatch = cats.includes(b.category);
-        return textMatch || catMatch;
       });
     }
     if (muni) list = list.filter((b) => b.municipality === muni);

@@ -281,3 +281,21 @@ export const SMART_SEARCH_MAP: Record<string, string[]> = {
 export function categoryIcon(name: string): LucideIcon {
   return CATEGORIES.find((c) => c.name === name)?.icon ?? OtherIcon;
 }
+
+function stripAccents(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Accent-insensitive version of SMART_SEARCH_MAP, built once at module load.
+// Lets "papelería" match the same entry as "papeleria".
+export const SMART_SEARCH_MAP_NORMALIZED: Record<string, string[]> = (() => {
+  const out: Record<string, Set<string>> = {};
+  for (const [key, cats] of Object.entries(SMART_SEARCH_MAP)) {
+    const normKey = stripAccents(key);
+    if (!out[normKey]) out[normKey] = new Set();
+    cats.forEach((c) => out[normKey].add(c));
+  }
+  const result: Record<string, string[]> = {};
+  for (const [key, set] of Object.entries(out)) result[key] = Array.from(set);
+  return result;
+})();
