@@ -1,7 +1,5 @@
-const CACHE_NAME = 'conecta-mx-v1';
+const CACHE_NAME = 'conecta-mx-v2';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/icon.svg',
 ];
@@ -29,7 +27,19 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (request.destination === 'document' || request.destination === 'manifest' || request.destination === 'image') {
+  // The HTML document references build-hashed JS/CSS filenames that change
+  // on every deploy and get deleted from the server. Serving a cached copy
+  // of the page (even as a fallback-first strategy) can point the browser
+  // at asset files that no longer exist, leaving the app broken until the
+  // user manually clears storage. Always go to the network for it.
+  if (request.destination === 'document') {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  if (request.destination === 'manifest' || request.destination === 'image') {
     event.respondWith(
       caches.match(request).then((cached) => {
         const fetchPromise = fetch(request).then((response) => {
