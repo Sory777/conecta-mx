@@ -126,25 +126,36 @@ function AppInner() {
   }, []);
 
   useEffect(() => {
+    // Patch local state directly from the realtime payload instead of
+    // re-fetching the entire (6,000+ row) table on every single insert or
+    // delete anywhere — that pattern re-downloads everything for every
+    // connected client on every change, and gets slower for everyone as
+    // both the dataset and the number of simultaneous users grow.
     const channel = supabase
       .channel('public:businesses_jobs')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'businesses' }, () => {
-        storage.getBusinesses().then(setBusinesses).catch(() => {});
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'businesses' }, (payload) => {
+        const row = payload.new as Business;
+        setBusinesses((prev) => (prev.some((b) => b.id === row.id) ? prev : [row, ...prev]));
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jobs' }, () => {
-        storage.getJobs().then(setJobs).catch(() => {});
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'businesses' }, (payload) => {
+        const id = (payload.old as { id?: string }).id;
+        setBusinesses((prev) => prev.filter((b) => b.id !== id));
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'businesses' }, () => {
-        storage.getBusinesses().then(setBusinesses).catch(() => {});
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jobs' }, (payload) => {
+        const row = payload.new as Job;
+        setJobs((prev) => (prev.some((j) => j.id === row.id) ? prev : [row, ...prev]));
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'jobs' }, () => {
-        storage.getJobs().then(setJobs).catch(() => {});
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'jobs' }, (payload) => {
+        const id = (payload.old as { id?: string }).id;
+        setJobs((prev) => prev.filter((j) => j.id !== id));
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, () => {
-        storage.getEvents().then(setEvents).catch(() => {});
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, (payload) => {
+        const row = payload.new as Event;
+        setEvents((prev) => (prev.some((e) => e.id === row.id) ? prev : [row, ...prev]));
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'events' }, () => {
-        storage.getEvents().then(setEvents).catch(() => {});
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'events' }, (payload) => {
+        const id = (payload.old as { id?: string }).id;
+        setEvents((prev) => prev.filter((e) => e.id !== id));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };

@@ -1,4 +1,4 @@
-import { Store, Briefcase, QrCode, TrendingUp, Building2, Sparkles, ArrowRight, MapPin, Calendar } from 'lucide-react';
+import { Store, Briefcase, QrCode, TrendingUp, Building2, Sparkles, ArrowRight, ChevronRight, MapPin, Calendar } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { Business, Event } from '../lib/types';
 import { CATEGORIES, MUNICIPALITIES, APP_NAME, APP_TAGLINE } from '../lib/constants';
@@ -100,7 +100,7 @@ export function HomePage({ businesses, jobsCount, events, onOpenBusiness, onNavi
               <button
                 key={card.label}
                 onClick={() => handleCardClick(card.route)}
-                className="group relative"
+                className="group relative cursor-pointer active:scale-[0.97]"
                 style={{ perspective: '1000px' }}
               >
                 <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${card.gradient} p-5 text-left text-white transition-all duration-300 group-hover:-translate-y-2 ${card.glow} shadow-[0_8px_30px_rgba(0,0,0,0.3)] group-hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]`}>
@@ -196,8 +196,9 @@ export function HomePage({ businesses, jobsCount, events, onOpenBusiness, onNavi
               <button
                 key={cat.name}
                 onClick={() => onNavigate('directory', { category: cat.name })}
-                className="card flex flex-col items-center gap-1 p-3 transition-all hover:-translate-y-0.5 hover:border-[#1565C0] hover:shadow-md"
+                className="card relative flex cursor-pointer flex-col items-center gap-1 p-3 transition-all hover:-translate-y-0.5 hover:border-[#1565C0] hover:shadow-md active:scale-[0.97] active:bg-slate-50"
               >
+                <ChevronRight className="absolute right-1.5 top-1.5 h-3 w-3 text-slate-300" />
                 <Icon className="h-6 w-6 text-[#1565C0]" />
                 <span className="text-center text-[11px] font-medium leading-tight text-slate-600">{cat.name}</span>
               </button>

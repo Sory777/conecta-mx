@@ -18,16 +18,29 @@ export function getVisitorId(): string {
 export const storage = {
   async getBusinesses(): Promise<Business[]> {
     const pageSize = 1000;
-    const all: Business[] = [];
-    for (let from = 0; ; from += pageSize) {
-      const { data, error } = await supabase
-        .from('businesses')
-        .select('*')
-        .order('createdAt', { ascending: false })
-        .range(from, from + pageSize - 1);
-      if (error) throw error;
-      all.push(...((data || []) as Business[]));
-      if (!data || data.length < pageSize) break;
+    const first = await supabase
+      .from('businesses')
+      .select('*', { count: 'exact' })
+      .order('createdAt', { ascending: false })
+      .range(0, pageSize - 1);
+    if (first.error) throw first.error;
+    const all: Business[] = [...((first.data || []) as Business[])];
+    const total = first.count ?? all.length;
+    if (total > pageSize) {
+      const pageStarts: number[] = [];
+      for (let from = pageSize; from < total; from += pageSize) pageStarts.push(from);
+      // Fetch the remaining pages in parallel instead of one-at-a-time —
+      // with 6,000+ rows that was 7 sequential round trips before anything
+      // showed up on screen.
+      const rest = await Promise.all(
+        pageStarts.map((from) =>
+          supabase.from('businesses').select('*').order('createdAt', { ascending: false }).range(from, from + pageSize - 1)
+        ),
+      );
+      for (const r of rest) {
+        if (r.error) throw r.error;
+        all.push(...((r.data || []) as Business[]));
+      }
     }
     return all;
   },
