@@ -15,12 +15,21 @@ export function getVisitorId(): string {
   return id;
 }
 
+// Fields needed by the home page and directory list/cards. Deliberately
+// excludes `photos` (a per-business array of gallery image URLs — the
+// single heaviest field once businesses start uploading several each),
+// plus `facebook`/`instagram`/`background`, which are only rendered on a
+// business's own detail page. Fetching those for all 6,000+ businesses on
+// every load doesn't scale as more businesses add photos; the detail page
+// fetches the full row itself via getBusinessById.
+const BUSINESS_LIST_FIELDS = 'id,name,municipality,city,category,description,whatsapp,phone,address,mapsLink,hours,promotion,imageUrl,plan,verified,founding,rating,reviewCount,createdAt,coords,user_id,is_ambulante';
+
 export const storage = {
   async getBusinesses(): Promise<Business[]> {
     const pageSize = 1000;
     const first = await supabase
       .from('businesses')
-      .select('*', { count: 'exact' })
+      .select(BUSINESS_LIST_FIELDS, { count: 'exact' })
       .order('createdAt', { ascending: false })
       .range(0, pageSize - 1);
     if (first.error) throw first.error;
@@ -34,7 +43,7 @@ export const storage = {
       // showed up on screen.
       const rest = await Promise.all(
         pageStarts.map((from) =>
-          supabase.from('businesses').select('*').order('createdAt', { ascending: false }).range(from, from + pageSize - 1)
+          supabase.from('businesses').select(BUSINESS_LIST_FIELDS).order('createdAt', { ascending: false }).range(from, from + pageSize - 1)
         ),
       );
       for (const r of rest) {
@@ -43,6 +52,12 @@ export const storage = {
       }
     }
     return all;
+  },
+
+  async getBusinessById(id: string): Promise<Business | null> {
+    const { data, error } = await supabase.from('businesses').select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return data as Business | null;
   },
 
   async saveBusinesses(list: Business[]): Promise<void> {

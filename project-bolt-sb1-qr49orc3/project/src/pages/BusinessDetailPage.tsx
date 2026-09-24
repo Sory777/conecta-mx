@@ -24,14 +24,28 @@ interface BusinessDetailPageProps {
   onJobsChange?: () => void;
 }
 
-export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: BusinessDetailPageProps) {
+export function BusinessDetailPage({ business: initialBusiness, onBack, onTrack, onJobsChange }: BusinessDetailPageProps) {
   const { toast } = useToast();
+  const [business, setBusiness] = useState<Business>(initialBusiness);
   const [products, setProducts] = useState<Product[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [businessJobs, setBusinessJobs] = useState<Job[]>([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [showAddJob, setShowAddJob] = useState(false);
+
+  useEffect(() => {
+    setBusiness(initialBusiness);
+    // The directory list doesn't carry photos/facebook/instagram/background
+    // (see BUSINESS_LIST_FIELDS) — fetch the full row for the gallery and
+    // social links once the visitor actually opens this business.
+    let active = true;
+    storage.getBusinessById(initialBusiness.id).then((full) => {
+      if (active && full) setBusiness(full);
+    }).catch(() => {});
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialBusiness.id]);
 
   useEffect(() => {
     let active = true;
