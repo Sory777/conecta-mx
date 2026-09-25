@@ -1,0 +1,685 @@
+<title>Mapa de velas XAU/USD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --page: #f6f5f1;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #7a7872;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --ring: rgba(11,11,11,0.10);
+  --gold: #8a6100;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --mid: #f0efec;
+  --b1: #cde2fb; --b2: #9ec5f4; --b3: #5598e7; --b4: #1c5cab;
+  --r1: #fbdcd9; --r2: #f4b1ab; --r3: #e8716c; --r4: #b8312f;
+  --candle-fill: #0b0b0b;
+  --candle-hollow: #fcfcfb;
+  --tip-bg: #0b0b0b;
+  --tip-ink: #ffffff;
+  --code-bg: #f0efe9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #979589;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --gold: #e3b554;
+    --s1: #3987e5; --s2: #d95926; --mid: #2c2c2a;
+    --b1: #1d3350; --b2: #1f4f8c; --b3: #3987e5; --b4: #9ec5f4;
+    --r1: #43211f; --r2: #7a2c29; --r3: #d34f4c; --r4: #f4a39e;
+    --candle-fill: #ffffff; --candle-hollow: #1a1a19; --tip-bg: #ffffff; --tip-ink: #0b0b0b; --code-bg: #121211;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #979589;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --gold: #e3b554;
+  --s1: #3987e5; --s2: #d95926; --mid: #2c2c2a;
+  --b1: #1d3350; --b2: #1f4f8c; --b3: #3987e5; --b4: #9ec5f4;
+  --r1: #43211f; --r2: #7a2c29; --r3: #d34f4c; --r4: #f4a39e;
+  --candle-fill: #ffffff; --candle-hollow: #1a1a19; --tip-bg: #ffffff; --tip-ink: #0b0b0b; --code-bg: #121211;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--page); color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding-inline: 16px; padding-block: 28px 56px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 36px; }
+h1, h2 { font-family: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: 0.005em; }
+h1 { font-size: clamp(34px, 6vw, 52px); line-height: 1.02; }
+h2 { font-size: 28px; line-height: 1.1; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font: 500 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+.lede { color: var(--ink-2); font-size: 17px; }
+header { display: grid; gap: 12px; }
+.quote { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; color: var(--ink-2); }
+section { display: grid; gap: 14px; }
+.panel { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); padding: 18px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.seg { display: inline-flex; border-radius: 8px; box-shadow: 0 0 0 1px var(--ring); overflow: hidden; }
+.seg button {
+  font: 500 13px/1 system-ui, sans-serif; color: var(--ink-2); background: transparent; border: 0;
+  padding: 9px 12px; cursor: pointer; min-height: 36px;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.seg button:focus-visible, .copy:focus-visible, summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+.ctl-label { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* heatmap */
+.scroll { overflow-x: auto; }
+table.heat { border-collapse: separate; border-spacing: 2px; width: 100%; min-width: 640px; font-variant-numeric: tabular-nums; }
+.heat th { font: 500 12px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); padding: 6px 4px; text-align: center; }
+.heat th.pat-h { text-align: left; }
+.heat td.pat { padding: 4px 8px 4px 0; white-space: nowrap; }
+.patcell { display: flex; align-items: center; gap: 10px; }
+.patcell svg { flex: none; }
+.pname { font-weight: 600; font-size: 14px; }
+.pdir { font-size: 11px; color: var(--muted); display: block; line-height: 1.2; }
+.heat td.v {
+  text-align: center; border-radius: 4px; padding: 6px 2px; min-width: 64px; cursor: default;
+  font: 500 13px/1.15 "IBM Plex Mono", ui-monospace, monospace;
+}
+.heat td.v small { display: block; font-size: 10px; opacity: 0.75; }
+.heat td.v.thin { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--ring) 5px 6px); }
+.heat td.v.na { color: var(--muted); background: transparent; }
+.heat td.tally { text-align: center; font: 500 12px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--ink-2); padding-inline: 8px; white-space: nowrap; }
+.heat tr.base td { border-top: 1px solid var(--axis); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12px; color: var(--ink-2); }
+.ramp { display: inline-flex; gap: 2px; }
+.ramp i { width: 22px; height: 12px; border-radius: 2px; display: block; }
+.sw-thin { width: 22px; height: 12px; border-radius: 2px; display: inline-block; background: var(--mid) repeating-linear-gradient(135deg, transparent 0 5px, var(--ring) 5px 6px); vertical-align: middle; }
+
+/* rachas */
+.chart-wrap { position: relative; }
+svg.lines { width: 100%; height: auto; display: block; }
+.lines text { font: 11px "IBM Plex Mono", ui-monospace, monospace; fill: var(--muted); }
+.lines .dl { font: 600 12px system-ui, sans-serif; }
+.key { display: flex; gap: 16px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+.key i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+
+.tip {
+  position: fixed; pointer-events: none; z-index: 10; background: var(--tip-bg); color: var(--tip-ink);
+  font: 12px/1.45 system-ui, sans-serif; padding: 8px 10px; border-radius: 6px; max-width: 240px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18); font-variant-numeric: tabular-nums;
+}
+.tip b { font-weight: 600; }
+
+/* hallazgos y setups */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.fact { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); padding: 16px; display: grid; gap: 6px; align-content: start; }
+.fact .num { font: 600 30px/1 "Barlow Condensed", system-ui, sans-serif; }
+.fact p { color: var(--ink-2); font-size: 14px; }
+.setups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.setup { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); padding: 18px; display: grid; gap: 10px; align-content: start; }
+.setup h3 { margin: 0; font: 600 22px/1.1 "Barlow Condensed", system-ui, sans-serif; }
+.setup .when { font: 500 12px/1.3 "IBM Plex Mono", ui-monospace, monospace; color: var(--gold); }
+.setup dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+.setup dt { color: var(--muted); }
+.setup dd { margin: 0; }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 70ch; }
+details { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); }
+summary { cursor: pointer; padding: 14px 18px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.copy { font: 500 13px system-ui, sans-serif; background: var(--ink); color: var(--surface); border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; min-height: 36px; }
+pre.code { margin: 0; padding: 16px 18px; background: var(--code-bg); border-radius: 0 0 10px 10px; overflow-x: auto; font: 12px/1.5 "IBM Plex Mono", ui-monospace, monospace; max-height: 520px; }
+.note { font-size: 13px; color: var(--muted); max-width: 72ch; }
+@media (prefers-reduced-motion: no-preference) { .seg button { transition: background .15s, color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">XAU/USD · eToro · M1 a D1</span>
+    <h1>Mapa de velas del oro</h1>
+    <p class="lede">Cada patrón con su nombre, su dibujo y qué tan seguido el precio siguió en la dirección que el patrón "promete". Si una casilla marca 50 %, el patrón vale lo mismo que lanzar una moneda.</p>
+    <p class="quote" id="meta"></p>
+  </header>
+
+  <section class="facts" id="facts"></section>
+
+  <section>
+    <h2>Patrones con nombre</h2>
+    <p class="note">Azul = el precio siguió la dirección esperada más de la mitad de las veces. Rojo = hizo lo contrario. Rayado = menos de 10 casos, no confíes en ese número.</p>
+    <div class="panel" style="display:grid;gap:14px">
+      <div class="controls">
+        <span class="ctl-label">Medir después de</span>
+        <div class="seg" role="group" aria-label="Horizonte">
+          <button id="h1" type="button" aria-pressed="false" data-h="sigue_1_vela_pct">1 vela</button>
+          <button id="h3" type="button" aria-pressed="true" data-h="sigue_3_velas_pct">3 velas</button>
+        </div>
+        <div class="legend">
+          <span class="ramp" aria-hidden="true"><i style="background:var(--r4)"></i><i style="background:var(--r3)"></i><i style="background:var(--r2)"></i><i style="background:var(--r1)"></i><i style="background:var(--mid)"></i><i style="background:var(--b1)"></i><i style="background:var(--b2)"></i><i style="background:var(--b3)"></i><i style="background:var(--b4)"></i></span>
+          <span>≤20 % · 50 % · ≥80 %</span>
+          <span><span class="sw-thin"></span> n &lt; 10</span>
+        </div>
+      </div>
+      <div class="scroll"><table class="heat" id="heat" aria-label="Porcentaje de continuidad por patrón y temporalidad"></table></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rachas: ¿la siguiente vela repite el color?</h2>
+    <p class="note">Probabilidad de que, después de N velas seguidas del mismo color, la siguiente sea igual. Los puntos huecos tienen menos de 10 casos.</p>
+    <div class="panel" style="display:grid;gap:12px">
+      <div class="controls">
+        <span class="ctl-label">Temporalidad</span>
+        <div class="seg" role="group" aria-label="Temporalidad" id="tfseg"></div>
+      </div>
+      <div class="key">
+        <span><i style="background:var(--s1)"></i>Tras velas alcistas</span>
+        <span><i style="background:var(--s2)"></i>Tras velas bajistas</span>
+      </div>
+      <div class="chart-wrap"><svg class="lines" id="lines" viewBox="0 0 720 300" role="img" aria-label="Probabilidad de continuidad por longitud de racha"></svg></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Los dos setups del indicador</h2>
+    <div class="setups">
+      <article class="setup">
+        <span class="when">00:00–07:00 UTC · 18:00–01:00 CDMX</span>
+        <h3>1 · Impulso asiático</h3>
+        <dl>
+          <dt>Señal</dt><dd>Vela con cuerpo ≥ 60 % de su rango que cierra arriba del máximo (o abajo del mínimo) de las 12 velas previas</dd>
+          <dt>Entrada</dt><dd>Apertura de la siguiente vela</dd>
+          <dt>Stop</dt><dd>1 ATR</dd>
+          <dt>Objetivo</dt><dd>2 ATR</dd>
+          <dt>Backtest M5</dt><dd>22 ops · 59 % acierto · PF 2.2</dd>
+        </dl>
+      </article>
+      <article class="setup">
+        <span class="when">12:00–17:00 UTC · 06:00–11:00 CDMX</span>
+        <h3>2 · Regreso a la VWAP</h3>
+        <dl>
+          <dt>Señal</dt><dd>Cierre a más de 1.5 ATR de la VWAP diaria: comprar si está abajo, vender si está arriba</dd>
+          <dt>Entrada</dt><dd>Apertura de la siguiente vela</dd>
+          <dt>Stop</dt><dd>1 ATR</dd>
+          <dt>Objetivo</dt><dd>1.5 ATR</dd>
+          <dt>Backtest M5</dt><dd>30 ops · 57 % acierto · PF 1.8</dd>
+        </dl>
+      </article>
+    </div>
+    <p class="note">Las dos se cierran solas a las 12 velas si no tocan stop ni objetivo. El indicador sombrea en rojo la franja de 17:00–21:00 UTC, donde todo perdió dinero en el backtest. Los datos alcanzan solo para días, no para meses; pruébalo en demo antes de usar dinero real.</p>
+  </section>
+
+  <section>
+    <h2>Instalar en TradingView</h2>
+    <ol class="steps">
+      <li>Abre un gráfico de <b>XAUUSD</b> en 5 minutos (OANDA o el broker que uses).</li>
+      <li>Abajo, abre el <b>Editor Pine</b> y crea un indicador nuevo en blanco.</li>
+      <li>Borra lo que traiga, pega el código de abajo y pulsa <b>Añadir al gráfico</b>.</li>
+      <li>Para avisos: <b>Alerta</b> → Condición "Oro Scalping" → elige el setup y la dirección.</li>
+    </ol>
+    <details id="code">
+      <summary><span>Código Pine Script v6</span><button class="copy" id="copy" type="button">Copiar código</button></summary>
+      <pre class="code" id="pine">//@version=6
+// ============================================================================
+//  Oro Scalping · Setups + Patrones de velas
+//  Basado en el backtest de gold-backtest/ (scalping.py y patrones_velas.py).
+//
+//  SETUP 1 · Impulso asiático   (00:00-07:00 UTC = 18:00-01:00 CDMX)
+//     Vela con cuerpo &gt;= 60 % de su rango que cierra por encima del máximo
+//     (o por debajo del mínimo) de las 12 velas anteriores.
+//     Entrada: apertura de la vela siguiente.  Stop 1 ATR · Objetivo 2 ATR.
+//  SETUP 2 · Regreso a la VWAP  (12:00-17:00 UTC = 06:00-11:00 CDMX)
+//     Cierre a más de 1.5 ATR de la VWAP diaria -&gt; operar hacia la VWAP.
+//     Entrada: apertura de la vela siguiente.  Stop 1 ATR · Objetivo 1.5 ATR.
+//  Ambos: salida por tiempo a las 12 velas, una sola operación a la vez.
+//
+//  Pensado para XAUUSD en 5 minutos. No es asesoría financiera: valida en demo.
+// ============================================================================
+indicator(&quot;Oro Scalping · Setups + Patrones&quot;, shorttitle = &quot;Oro Scalping&quot;, overlay = true,
+     max_labels_count = 500, max_lines_count = 500)
+
+// ---------------------------------------------------------------- entradas
+grpS = &quot;Setups&quot;
+useImpulse = input.bool(true,  &quot;Setup 1 · Impulso asiático&quot;, group = grpS)
+useVwap    = input.bool(true,  &quot;Setup 2 · Regreso a la VWAP&quot;, group = grpS)
+atrLen     = input.int(14,     &quot;ATR&quot;, minval = 1, group = grpS)
+impLook    = input.int(12,     &quot;Impulso: velas para máximo/mínimo&quot;, minval = 2, group = grpS)
+impBody    = input.float(0.6,  &quot;Impulso: cuerpo mínimo (% del rango)&quot;, minval = 0.1, maxval = 1.0, step = 0.05, group = grpS)
+impSL      = input.float(1.0,  &quot;Impulso: stop (ATR)&quot;, step = 0.1, group = grpS)
+impTP      = input.float(2.0,  &quot;Impulso: objetivo (ATR)&quot;, step = 0.1, group = grpS)
+vwDist     = input.float(1.5,  &quot;VWAP: distancia de entrada (ATR)&quot;, step = 0.1, group = grpS)
+vwSL       = input.float(1.0,  &quot;VWAP: stop (ATR)&quot;, step = 0.1, group = grpS)
+vwTP       = input.float(1.5,  &quot;VWAP: objetivo (ATR)&quot;, step = 0.1, group = grpS)
+maxBars    = input.int(12,     &quot;Salida por tiempo (velas)&quot;, minval = 1, group = grpS)
+realVwap   = input.bool(false, &quot;Usar VWAP con volumen (si tu feed tiene volumen)&quot;, group = grpS,
+     tooltip = &quot;Apagado = promedio del precio típico desde las 00:00 UTC, igual que en el backtest.&quot;)
+
+grpH = &quot;Horarios (UTC)&quot;
+sessAsia = input.session(&quot;0000-0700&quot;, &quot;Sesión Setup 1 (Asia)&quot;, group = grpH)
+sessNY   = input.session(&quot;1200-1700&quot;, &quot;Sesión Setup 2 (NY)&quot;, group = grpH)
+sessBad  = input.session(&quot;1700-2100&quot;, &quot;Zona prohibida (tarde NY)&quot;, group = grpH)
+showBg   = input.bool(true, &quot;Sombrear sesiones&quot;, group = grpH)
+
+grpP = &quot;Patrones de velas&quot;
+showPat   = input.bool(true,  &quot;Mostrar nombres de patrones&quot;, group = grpP)
+showDoji  = input.bool(false, &quot;Incluir Doji (muy frecuente)&quot;, group = grpP)
+patInSess = input.bool(false, &quot;Solo dentro de las sesiones de los setups&quot;, group = grpP)
+
+grpV = &quot;Visual&quot;
+showLevels = input.bool(true, &quot;Dibujar stop y objetivo&quot;, group = grpV)
+showStats  = input.bool(true, &quot;Tabla de estadísticas&quot;, group = grpV)
+colBull = input.color(color.new(#1f9d6b, 0), &quot;Alcista&quot;, group = grpV)
+colBear = input.color(color.new(#d64545, 0), &quot;Bajista&quot;, group = grpV)
+
+// ---------------------------------------------------------------- base
+inSess(s) =&gt; not na(time(timeframe.period, s, &quot;UTC&quot;))
+isAsia = inSess(sessAsia)
+isNY   = inSess(sessNY)
+isBad  = inSess(sessBad)
+
+atrV = ta.atr(atrLen)
+rng  = high - low
+bodyAbs = math.abs(close - open)
+
+// VWAP diaria (ancla 00:00 UTC)
+newDay = dayofmonth(time, &quot;UTC&quot;) != dayofmonth(time[1], &quot;UTC&quot;)
+var float sumTP = 0.0
+var float cntTP = 0.0
+tp = hlc3
+sumTP := newDay ? tp : sumTP + tp
+cntTP := newDay ? 1.0 : cntTP + 1.0
+vwapCalc = realVwap ? ta.vwap(hlc3) : sumTP / cntTP
+plot(useVwap ? vwapCalc : na, &quot;VWAP diaria&quot;, color = color.new(#7a6ff0, 0), linewidth = 2)
+plot(useVwap ? vwapCalc + vwDist * atrV : na, &quot;VWAP + dist&quot;, color = color.new(#7a6ff0, 60))
+plot(useVwap ? vwapCalc - vwDist * atrV : na, &quot;VWAP - dist&quot;, color = color.new(#7a6ff0, 60))
+
+bgcolor(showBg and isAsia ? color.new(#2a78d6, 92) : na, title = &quot;Sesión Asia&quot;)
+bgcolor(showBg and isNY   ? color.new(#7a6ff0, 92) : na, title = &quot;Sesión NY&quot;)
+bgcolor(showBg and isBad  ? color.new(#d64545, 93) : na, title = &quot;Zona prohibida&quot;)
+
+// ---------------------------------------------------------------- señales
+impUp = useImpulse and isAsia and rng &gt; 0 and close &gt; open and bodyAbs / rng &gt;= impBody and close &gt; ta.highest(high, impLook)[1]
+impDn = useImpulse and isAsia and rng &gt; 0 and close &lt; open and bodyAbs / rng &gt;= impBody and close &lt; ta.lowest(low, impLook)[1]
+vwUp  = useVwap and isNY and close &lt; vwapCalc - vwDist * atrV
+vwDn  = useVwap and isNY and close &gt; vwapCalc + vwDist * atrV
+
+// ---------------------------------------------------------------- simulador (una operación a la vez)
+var int   pendDir  = 0      // señal de la vela anterior, se entra en esta apertura
+var int   pendKind = 0      // 1 = impulso, 2 = vwap
+var float pendATR  = na
+var int   posDir   = 0
+var int   posKind  = 0
+var float entry    = na
+var float sl       = na
+var float tgt      = na
+var int   barsIn   = 0
+var line  lSL = na
+var line  lTP = na
+var int   wins1   = 0
+var int   losses1 = 0
+var int   wins2   = 0
+var int   losses2 = 0
+var float pnl1    = 0.0
+var float pnl2    = 0.0
+bool closedNow = false
+
+// 1) abrir la operación pendiente a la apertura de esta vela
+if posDir == 0 and pendDir != 0
+    posDir  := pendDir
+    posKind := pendKind
+    entry   := open
+    float s = posKind == 1 ? impSL : vwSL
+    float t = posKind == 1 ? impTP : vwTP
+    sl      := entry - posDir * s * pendATR
+    tgt     := entry + posDir * t * pendATR
+    barsIn  := 0
+    if showLevels
+        lSL := line.new(bar_index, sl, bar_index + 1, sl, color = colBear, style = line.style_dashed)
+        lTP := line.new(bar_index, tgt, bar_index + 1, tgt, color = colBull, style = line.style_dashed)
+pendDir := 0
+
+// 2) gestionar la operación abierta (si toca stop y objetivo en la misma vela, cuenta como stop)
+if posDir != 0
+    barsIn += 1
+    bool hitSL = posDir == 1 ? low &lt;= sl : high &gt;= sl
+    bool hitTP = posDir == 1 ? high &gt;= tgt : low &lt;= tgt
+    float exitPx = na
+    if hitSL
+        exitPx := sl
+    else if hitTP
+        exitPx := tgt
+    else if barsIn &gt;= maxBars
+        exitPx := close
+    if showLevels and not na(lSL)
+        line.set_x2(lSL, bar_index)
+        line.set_x2(lTP, bar_index)
+    if not na(exitPx)
+        float r = posDir * (exitPx - entry)
+        if posKind == 1
+            pnl1 += r
+            if r &gt; 0
+                wins1 += 1
+            else
+                losses1 += 1
+        else
+            pnl2 += r
+            if r &gt; 0
+                wins2 += 1
+            else
+                losses2 += 1
+        label.new(bar_index, exitPx, (r &gt; 0 ? &quot;✔ &quot; : &quot;✖ &quot;) + str.tostring(r, &quot;#.##&quot;),
+             style = label.style_label_left, size = size.tiny,
+             color = color.new(r &gt; 0 ? colBull : colBear, 20), textcolor = color.white)
+        posDir := 0
+        closedNow := true
+
+// 3) registrar señal nueva solo si no hay operación abierta
+canSignal = posDir == 0 and not closedNow
+sig1Up = canSignal and impUp
+sig1Dn = canSignal and impDn and not sig1Up
+sig2Up = canSignal and vwUp and not (sig1Up or sig1Dn)
+sig2Dn = canSignal and vwDn and not (sig1Up or sig1Dn or sig2Up)
+if sig1Up or sig1Dn or sig2Up or sig2Dn
+    pendDir  := sig1Up or sig2Up ? 1 : -1
+    pendKind := sig1Up or sig1Dn ? 1 : 2
+    pendATR  := atrV
+
+plotshape(sig1Up, &quot;Impulso compra&quot;, shape.triangleup,   location.belowbar, colBull, text = &quot;IMPULSO&quot;, textcolor = colBull, size = size.small)
+plotshape(sig1Dn, &quot;Impulso venta&quot;,  shape.triangledown, location.abovebar, colBear, text = &quot;IMPULSO&quot;, textcolor = colBear, size = size.small)
+plotshape(sig2Up, &quot;VWAP compra&quot;,    shape.triangleup,   location.belowbar, colBull, text = &quot;VWAP&quot;,    textcolor = colBull, size = size.small)
+plotshape(sig2Dn, &quot;VWAP venta&quot;,     shape.triangledown, location.abovebar, colBear, text = &quot;VWAP&quot;,    textcolor = colBear, size = size.small)
+
+alertcondition(sig1Up, &quot;Impulso asiático · COMPRA&quot;, &quot;Oro: Impulso asiático COMPRA. Entrar a la apertura de la siguiente vela.&quot;)
+alertcondition(sig1Dn, &quot;Impulso asiático · VENTA&quot;,  &quot;Oro: Impulso asiático VENTA. Entrar a la apertura de la siguiente vela.&quot;)
+alertcondition(sig2Up, &quot;Regreso a VWAP · COMPRA&quot;,   &quot;Oro: Regreso a VWAP COMPRA. Entrar a la apertura de la siguiente vela.&quot;)
+alertcondition(sig2Dn, &quot;Regreso a VWAP · VENTA&quot;,    &quot;Oro: Regreso a VWAP VENTA. Entrar a la apertura de la siguiente vela.&quot;)
+
+// ---------------------------------------------------------------- patrones de velas (mismas reglas que patrones_velas.py)
+upper    = high - math.max(open, close)
+lower    = math.min(open, close) - low
+bull     = close &gt; open
+bear     = close &lt; open
+avgBody  = ta.sma(bodyAbs, 14)
+downTr   = close[1] &lt; close[6]
+upTr     = close[1] &gt; close[6]
+big1     = bodyAbs[1] &gt; avgBody[1]
+mid1     = (open[1] + close[1]) / 2
+
+hamShape = rng &gt; 0 and lower &gt;= 2 * bodyAbs and upper &lt;= 0.3 * bodyAbs + 0.1 * rng and bodyAbs &gt; 0.05 * rng
+invShape = rng &gt; 0 and upper &gt;= 2 * bodyAbs and lower &lt;= 0.3 * bodyAbs + 0.1 * rng and bodyAbs &gt; 0.05 * rng
+isDoji   = rng &gt; 0 and bodyAbs &lt;= 0.1 * rng
+maru     = rng &gt; 0 and bodyAbs &gt;= 0.9 * rng and bodyAbs &gt; avgBody
+star1    = bodyAbs[1] &lt; 0.3 * avgBody[1]
+
+pHammer   = hamShape and downTr
+pHanging  = hamShape and upTr
+pInvHam   = invShape and downTr
+pShooting = invShape and upTr
+pEngBull  = bull and bear[1] and close &gt;= open[1] and open &lt;= close[1] and bodyAbs &gt; bodyAbs[1]
+pEngBear  = bear and bull[1] and close &lt;= open[1] and open &gt;= close[1] and bodyAbs &gt; bodyAbs[1]
+pHarBull  = bull and bear[1] and big1 and close &lt; open[1] and open &gt; close[1]
+pHarBear  = bear and bull[1] and big1 and close &gt; open[1] and open &lt; close[1]
+pPiercing = bull and bear[1] and big1 and open &lt; close[1] and close &gt; mid1 and close &lt; open[1]
+pDarkCl   = bear and bull[1] and big1 and open &gt; close[1] and close &lt; mid1 and close &gt; open[1]
+pMorning  = bear[2] and bodyAbs[2] &gt; avgBody[2] and star1 and bull and close &gt; (open[2] + close[2]) / 2
+pEvening  = bull[2] and bodyAbs[2] &gt; avgBody[2] and star1 and bear and close &lt; (open[2] + close[2]) / 2
+p3Soldier = bull and bull[1] and bull[2] and close &gt; close[1] and close[1] &gt; close[2] and bodyAbs &gt; 0.5 * rng and bodyAbs[1] &gt; 0.5 * rng[1]
+p3Crows   = bear and bear[1] and bear[2] and close &lt; close[1] and close[1] &lt; close[2] and bodyAbs &gt; 0.5 * rng and bodyAbs[1] &gt; 0.5 * rng[1]
+pMaruBull = bull and maru
+pMaruBear = bear and maru
+pTwzBot   = math.abs(low - low[1]) &lt;= 0.05 * rng and bear[1] and bull and downTr
+pTwzTop   = math.abs(high - high[1]) &lt;= 0.05 * rng and bull[1] and bear and upTr
+
+patOk = showPat and (not patInSess or isAsia or isNY)
+
+// un solo nombre por vela: prioridad a los patrones de 3 y 2 velas
+string bullName = pMorning ? &quot;Estrella de la mañana&quot; : p3Soldier ? &quot;3 soldados blancos&quot; : pEngBull ? &quot;Envolvente alcista&quot; :
+     pPiercing ? &quot;Pauta penetrante&quot; : pHarBull ? &quot;Harami alcista&quot; : pTwzBot ? &quot;Pinzas de suelo&quot; : pHammer ? &quot;Martillo&quot; :
+     pInvHam ? &quot;Martillo invertido&quot; : pMaruBull ? &quot;Marubozu alcista&quot; : &quot;&quot;
+string bearName = pEvening ? &quot;Estrella de la tarde&quot; : p3Crows ? &quot;3 cuervos negros&quot; : pEngBear ? &quot;Envolvente bajista&quot; :
+     pDarkCl ? &quot;Nube oscura&quot; : pHarBear ? &quot;Harami bajista&quot; : pTwzTop ? &quot;Pinzas de techo&quot; : pShooting ? &quot;Estrella fugaz&quot; :
+     pHanging ? &quot;Hombre colgado&quot; : pMaruBear ? &quot;Marubozu bajista&quot; : &quot;&quot;
+
+if patOk and barstate.isconfirmed
+    if bullName != &quot;&quot;
+        label.new(bar_index, low, bullName, yloc = yloc.belowbar, style = label.style_label_up, size = size.tiny,
+             color = color.new(colBull, 75), textcolor = colBull)
+    if bearName != &quot;&quot;
+        label.new(bar_index, high, bearName, yloc = yloc.abovebar, style = label.style_label_down, size = size.tiny,
+             color = color.new(colBear, 75), textcolor = colBear)
+    if showDoji and isDoji and bullName == &quot;&quot; and bearName == &quot;&quot;
+        label.new(bar_index, high, &quot;Doji&quot;, yloc = yloc.abovebar, style = label.style_label_down, size = size.tiny,
+             color = color.new(color.gray, 80), textcolor = color.gray)
+
+// ---------------------------------------------------------------- tabla
+var table tb = table.new(position.top_right, 4, 4, bgcolor = color.new(color.black, 20), border_width = 1)
+wr(w, l) =&gt; w + l &gt; 0 ? str.tostring(100.0 * w / (w + l), &quot;#&quot;) + &quot; %&quot; : &quot;–&quot;
+if showStats and barstate.islast
+    table.cell(tb, 0, 0, &quot;Setup&quot;,    text_color = color.white, text_size = size.small)
+    table.cell(tb, 1, 0, &quot;Ops&quot;,      text_color = color.white, text_size = size.small)
+    table.cell(tb, 2, 0, &quot;Acierto&quot;,  text_color = color.white, text_size = size.small)
+    table.cell(tb, 3, 0, &quot;USD/oz&quot;,   text_color = color.white, text_size = size.small)
+    table.cell(tb, 0, 1, &quot;Impulso asiático&quot;, text_color = color.white, text_size = size.small)
+    table.cell(tb, 1, 1, str.tostring(wins1 + losses1), text_color = color.white, text_size = size.small)
+    table.cell(tb, 2, 1, wr(wins1, losses1), text_color = color.white, text_size = size.small)
+    table.cell(tb, 3, 1, str.tostring(pnl1, &quot;#.##&quot;), text_color = pnl1 &gt;= 0 ? colBull : colBear, text_size = size.small)
+    table.cell(tb, 0, 2, &quot;Regreso a VWAP&quot;, text_color = color.white, text_size = size.small)
+    table.cell(tb, 1, 2, str.tostring(wins2 + losses2), text_color = color.white, text_size = size.small)
+    table.cell(tb, 2, 2, wr(wins2, losses2), text_color = color.white, text_size = size.small)
+    table.cell(tb, 3, 2, str.tostring(pnl2, &quot;#.##&quot;), text_color = pnl2 &gt;= 0 ? colBull : colBear, text_size = size.small)
+    table.cell(tb, 0, 3, &quot;Sin costes: resta ~0.30 USD/oz por operación&quot;, text_color = color.gray, text_size = size.tiny)
+    table.merge_cells(tb, 0, 3, 3, 3)
+</pre>
+    </details>
+  </section>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const DATA = {"meta": {"M1": {"velas": 1000, "desde": "2026-09-24 23:32:00+00:00", "hasta": "2026-09-25 16:11:00+00:00", "base_alcista_pct": 48.1}, "M5": {"velas": 1000, "desde": "2026-09-22 01:55:00+00:00", "hasta": "2026-09-25 16:10:00+00:00", "base_alcista_pct": 48.0}, "M15": {"velas": 1054, "desde": "2026-09-14 07:15:00+00:00", "hasta": "2026-09-25 16:00:00+00:00", "base_alcista_pct": 47.1}, "H1": {"velas": 1000, "desde": "2026-08-11 03:00:00+00:00", "hasta": "2026-09-25 02:00:00+00:00", "base_alcista_pct": 46.6}, "H4": {"velas": 1000, "desde": "2026-02-23 04:00:00+00:00", "hasta": "2026-09-25 00:00:00+00:00", "base_alcista_pct": 47.6}, "D1": {"velas": 1000, "desde": "2022-11-24 00:00:00+00:00", "hasta": "2026-09-25 00:00:00+00:00", "base_alcista_pct": 53.6}}, "patrones": [{"tf": "M1", "patron": "Martillo", "direccion": 1, "n": 26, "sigue_1_vela_pct": 42.3, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": 0.052}, {"tf": "M1", "patron": "Hombre colgado", "direccion": -1, "n": 24, "sigue_1_vela_pct": 62.5, "sigue_3_velas_pct": 45.8, "mov_3_velas_atr": -0.396}, {"tf": "M1", "patron": "Martillo invertido", "direccion": 1, "n": 17, "sigue_1_vela_pct": 41.2, "sigue_3_velas_pct": 47.1, "mov_3_velas_atr": -0.059}, {"tf": "M1", "patron": "Estrella fugaz", "direccion": -1, "n": 25, "sigue_1_vela_pct": 44.0, "sigue_3_velas_pct": 28.0, "mov_3_velas_atr": -0.571}, {"tf": "M1", "patron": "Envolvente alcista", "direccion": 1, "n": 107, "sigue_1_vela_pct": 39.3, "sigue_3_velas_pct": 46.7, "mov_3_velas_atr": -0.068}, {"tf": "M1", "patron": "Envolvente bajista", "direccion": -1, "n": 72, "sigue_1_vela_pct": 48.6, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": -0.05}, {"tf": "M1", "patron": "Harami alcista", "direccion": 1, "n": 5, "sigue_1_vela_pct": 60.0, "sigue_3_velas_pct": 60.0, "mov_3_velas_atr": 0.516}, {"tf": "M1", "patron": "Harami bajista", "direccion": -1, "n": 35, "sigue_1_vela_pct": 57.1, "sigue_3_velas_pct": 65.7, "mov_3_velas_atr": 0.375}, {"tf": "M1", "patron": "Pauta penetrante", "direccion": 1, "n": 9, "sigue_1_vela_pct": 88.9, "sigue_3_velas_pct": 77.8, "mov_3_velas_atr": 0.598}, {"tf": "M1", "patron": "Nube oscura", "direccion": -1, "n": 3, "sigue_1_vela_pct": 33.3, "sigue_3_velas_pct": 33.3, "mov_3_velas_atr": -0.466}, {"tf": "M1", "patron": "Estrella de la mañana", "direccion": 1, "n": 8, "sigue_1_vela_pct": 37.5, "sigue_3_velas_pct": 37.5, "mov_3_velas_atr": -0.368}, {"tf": "M1", "patron": "Estrella de la tarde", "direccion": -1, "n": 9, "sigue_1_vela_pct": 44.4, "sigue_3_velas_pct": 44.4, "mov_3_velas_atr": -0.106}, {"tf": "M1", "patron": "Tres soldados blancos", "direccion": 1, "n": 25, "sigue_1_vela_pct": 48.0, "sigue_3_velas_pct": 56.0, "mov_3_velas_atr": 0.226}, {"tf": "M1", "patron": "Tres cuervos negros", "direccion": -1, "n": 28, "sigue_1_vela_pct": 46.4, "sigue_3_velas_pct": 53.6, "mov_3_velas_atr": -0.08}, {"tf": "M1", "patron": "Marubozu alcista", "direccion": 1, "n": 39, "sigue_1_vela_pct": 51.3, "sigue_3_velas_pct": 51.3, "mov_3_velas_atr": 0.132}, {"tf": "M1", "patron": "Marubozu bajista", "direccion": -1, "n": 39, "sigue_1_vela_pct": 61.5, "sigue_3_velas_pct": 64.1, "mov_3_velas_atr": 0.275}, {"tf": "M1", "patron": "Pinzas de suelo", "direccion": 1, "n": 24, "sigue_1_vela_pct": 41.7, "sigue_3_velas_pct": 54.2, "mov_3_velas_atr": 0.03}, {"tf": "M1", "patron": "Pinzas de techo", "direccion": -1, "n": 29, "sigue_1_vela_pct": 55.2, "sigue_3_velas_pct": 62.1, "mov_3_velas_atr": -0.3}, {"tf": "M1", "patron": "Doji", "direccion": 0, "n": 107, "sigue_1_vela_pct": 48.6, "sigue_3_velas_pct": 42.1, "mov_3_velas_atr": -0.075}, {"tf": "M5", "patron": "Martillo", "direccion": 1, "n": 24, "sigue_1_vela_pct": 25.0, "sigue_3_velas_pct": 25.0, "mov_3_velas_atr": -0.503}, {"tf": "M5", "patron": "Hombre colgado", "direccion": -1, "n": 14, "sigue_1_vela_pct": 78.6, "sigue_3_velas_pct": 42.9, "mov_3_velas_atr": -0.267}, {"tf": "M5", "patron": "Martillo invertido", "direccion": 1, "n": 29, "sigue_1_vela_pct": 51.7, "sigue_3_velas_pct": 34.5, "mov_3_velas_atr": -0.102}, {"tf": "M5", "patron": "Estrella fugaz", "direccion": -1, "n": 13, "sigue_1_vela_pct": 53.8, "sigue_3_velas_pct": 76.9, "mov_3_velas_atr": 0.352}, {"tf": "M5", "patron": "Envolvente alcista", "direccion": 1, "n": 96, "sigue_1_vela_pct": 44.8, "sigue_3_velas_pct": 51.0, "mov_3_velas_atr": 0.089}, {"tf": "M5", "patron": "Envolvente bajista", "direccion": -1, "n": 61, "sigue_1_vela_pct": 45.9, "sigue_3_velas_pct": 47.5, "mov_3_velas_atr": -0.105}, {"tf": "M5", "patron": "Harami alcista", "direccion": 1, "n": 10, "sigue_1_vela_pct": 60.0, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": -0.059}, {"tf": "M5", "patron": "Harami bajista", "direccion": -1, "n": 30, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 40.0, "mov_3_velas_atr": 0.157}, {"tf": "M5", "patron": "Pauta penetrante", "direccion": 1, "n": 15, "sigue_1_vela_pct": 40.0, "sigue_3_velas_pct": 40.0, "mov_3_velas_atr": -0.099}, {"tf": "M5", "patron": "Nube oscura", "direccion": -1, "n": 7, "sigue_1_vela_pct": 28.6, "sigue_3_velas_pct": 57.1, "mov_3_velas_atr": 0.146}, {"tf": "M5", "patron": "Estrella de la mañana", "direccion": 1, "n": 8, "sigue_1_vela_pct": 62.5, "sigue_3_velas_pct": 25.0, "mov_3_velas_atr": -0.015}, {"tf": "M5", "patron": "Estrella de la tarde", "direccion": -1, "n": 9, "sigue_1_vela_pct": 55.6, "sigue_3_velas_pct": 44.4, "mov_3_velas_atr": -0.084}, {"tf": "M5", "patron": "Tres soldados blancos", "direccion": 1, "n": 21, "sigue_1_vela_pct": 47.6, "sigue_3_velas_pct": 52.4, "mov_3_velas_atr": 0.13}, {"tf": "M5", "patron": "Tres cuervos negros", "direccion": -1, "n": 29, "sigue_1_vela_pct": 58.6, "sigue_3_velas_pct": 55.2, "mov_3_velas_atr": 0.252}, {"tf": "M5", "patron": "Marubozu alcista", "direccion": 1, "n": 20, "sigue_1_vela_pct": 35.0, "sigue_3_velas_pct": 45.0, "mov_3_velas_atr": -0.063}, {"tf": "M5", "patron": "Marubozu bajista", "direccion": -1, "n": 26, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 65.4, "mov_3_velas_atr": 0.468}, {"tf": "M5", "patron": "Pinzas de suelo", "direccion": 1, "n": 28, "sigue_1_vela_pct": 57.1, "sigue_3_velas_pct": 53.6, "mov_3_velas_atr": 0.099}, {"tf": "M5", "patron": "Pinzas de techo", "direccion": -1, "n": 29, "sigue_1_vela_pct": 48.3, "sigue_3_velas_pct": 51.7, "mov_3_velas_atr": -0.247}, {"tf": "M5", "patron": "Doji", "direccion": 0, "n": 83, "sigue_1_vela_pct": 49.4, "sigue_3_velas_pct": 50.6, "mov_3_velas_atr": 0.088}, {"tf": "M15", "patron": "Martillo", "direccion": 1, "n": 31, "sigue_1_vela_pct": 48.4, "sigue_3_velas_pct": 54.8, "mov_3_velas_atr": -0.457}, {"tf": "M15", "patron": "Hombre colgado", "direccion": -1, "n": 22, "sigue_1_vela_pct": 59.1, "sigue_3_velas_pct": 45.5, "mov_3_velas_atr": 0.111}, {"tf": "M15", "patron": "Martillo invertido", "direccion": 1, "n": 14, "sigue_1_vela_pct": 35.7, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": 0.049}, {"tf": "M15", "patron": "Estrella fugaz", "direccion": -1, "n": 20, "sigue_1_vela_pct": 60.0, "sigue_3_velas_pct": 55.0, "mov_3_velas_atr": 0.446}, {"tf": "M15", "patron": "Envolvente alcista", "direccion": 1, "n": 85, "sigue_1_vela_pct": 54.1, "sigue_3_velas_pct": 51.8, "mov_3_velas_atr": -0.112}, {"tf": "M15", "patron": "Envolvente bajista", "direccion": -1, "n": 86, "sigue_1_vela_pct": 53.5, "sigue_3_velas_pct": 52.3, "mov_3_velas_atr": 0.178}, {"tf": "M15", "patron": "Harami alcista", "direccion": 1, "n": 13, "sigue_1_vela_pct": 53.8, "sigue_3_velas_pct": 53.8, "mov_3_velas_atr": -0.198}, {"tf": "M15", "patron": "Harami bajista", "direccion": -1, "n": 21, "sigue_1_vela_pct": 61.9, "sigue_3_velas_pct": 47.6, "mov_3_velas_atr": 0.101}, {"tf": "M15", "patron": "Pauta penetrante", "direccion": 1, "n": 10, "sigue_1_vela_pct": 40.0, "sigue_3_velas_pct": 40.0, "mov_3_velas_atr": 0.068}, {"tf": "M15", "patron": "Nube oscura", "direccion": -1, "n": 4, "sigue_1_vela_pct": 75.0, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": 0.703}, {"tf": "M15", "patron": "Estrella de la mañana", "direccion": 1, "n": 3, "sigue_1_vela_pct": 33.3, "sigue_3_velas_pct": 33.3, "mov_3_velas_atr": -0.571}, {"tf": "M15", "patron": "Estrella de la tarde", "direccion": -1, "n": 6, "sigue_1_vela_pct": 66.7, "sigue_3_velas_pct": 33.3, "mov_3_velas_atr": 0.9}, {"tf": "M15", "patron": "Tres soldados blancos", "direccion": 1, "n": 37, "sigue_1_vela_pct": 62.2, "sigue_3_velas_pct": 43.2, "mov_3_velas_atr": -0.663}, {"tf": "M15", "patron": "Tres cuervos negros", "direccion": -1, "n": 19, "sigue_1_vela_pct": 36.8, "sigue_3_velas_pct": 36.8, "mov_3_velas_atr": -0.531}, {"tf": "M15", "patron": "Marubozu alcista", "direccion": 1, "n": 41, "sigue_1_vela_pct": 51.2, "sigue_3_velas_pct": 41.5, "mov_3_velas_atr": 1.111}, {"tf": "M15", "patron": "Marubozu bajista", "direccion": -1, "n": 25, "sigue_1_vela_pct": 36.0, "sigue_3_velas_pct": 60.0, "mov_3_velas_atr": 0.608}, {"tf": "M15", "patron": "Pinzas de suelo", "direccion": 1, "n": 21, "sigue_1_vela_pct": 38.1, "sigue_3_velas_pct": 61.9, "mov_3_velas_atr": -0.094}, {"tf": "M15", "patron": "Pinzas de techo", "direccion": -1, "n": 34, "sigue_1_vela_pct": 58.8, "sigue_3_velas_pct": 58.8, "mov_3_velas_atr": 0.668}, {"tf": "M15", "patron": "Doji", "direccion": 0, "n": 109, "sigue_1_vela_pct": 53.2, "sigue_3_velas_pct": 47.7, "mov_3_velas_atr": 0.035}, {"tf": "H1", "patron": "Martillo", "direccion": 1, "n": 32, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 46.9, "mov_3_velas_atr": -0.326}, {"tf": "H1", "patron": "Hombre colgado", "direccion": -1, "n": 19, "sigue_1_vela_pct": 52.6, "sigue_3_velas_pct": 47.4, "mov_3_velas_atr": -0.067}, {"tf": "H1", "patron": "Martillo invertido", "direccion": 1, "n": 21, "sigue_1_vela_pct": 47.6, "sigue_3_velas_pct": 47.6, "mov_3_velas_atr": 0.102}, {"tf": "H1", "patron": "Estrella fugaz", "direccion": -1, "n": 20, "sigue_1_vela_pct": 70.0, "sigue_3_velas_pct": 75.0, "mov_3_velas_atr": -0.163}, {"tf": "H1", "patron": "Envolvente alcista", "direccion": 1, "n": 86, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 46.5, "mov_3_velas_atr": -0.227}, {"tf": "H1", "patron": "Envolvente bajista", "direccion": -1, "n": 76, "sigue_1_vela_pct": 47.4, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": 0.081}, {"tf": "H1", "patron": "Harami alcista", "direccion": 1, "n": 7, "sigue_1_vela_pct": 57.1, "sigue_3_velas_pct": 28.6, "mov_3_velas_atr": -1.044}, {"tf": "H1", "patron": "Harami bajista", "direccion": -1, "n": 22, "sigue_1_vela_pct": 68.2, "sigue_3_velas_pct": 68.2, "mov_3_velas_atr": 0.57}, {"tf": "H1", "patron": "Pauta penetrante", "direccion": 1, "n": 12, "sigue_1_vela_pct": 58.3, "sigue_3_velas_pct": 58.3, "mov_3_velas_atr": 0.366}, {"tf": "H1", "patron": "Nube oscura", "direccion": -1, "n": 4, "sigue_1_vela_pct": 0.0, "sigue_3_velas_pct": 0.0, "mov_3_velas_atr": -1.104}, {"tf": "H1", "patron": "Estrella de la mañana", "direccion": 1, "n": 7, "sigue_1_vela_pct": 42.9, "sigue_3_velas_pct": 42.9, "mov_3_velas_atr": 0.099}, {"tf": "H1", "patron": "Estrella de la tarde", "direccion": -1, "n": 6, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": 0.714}, {"tf": "H1", "patron": "Tres soldados blancos", "direccion": 1, "n": 29, "sigue_1_vela_pct": 41.4, "sigue_3_velas_pct": 31.0, "mov_3_velas_atr": 0.028}, {"tf": "H1", "patron": "Tres cuervos negros", "direccion": -1, "n": 19, "sigue_1_vela_pct": 52.6, "sigue_3_velas_pct": 47.4, "mov_3_velas_atr": -0.295}, {"tf": "H1", "patron": "Marubozu alcista", "direccion": 1, "n": 29, "sigue_1_vela_pct": 72.4, "sigue_3_velas_pct": 55.2, "mov_3_velas_atr": 0.125}, {"tf": "H1", "patron": "Marubozu bajista", "direccion": -1, "n": 19, "sigue_1_vela_pct": 42.1, "sigue_3_velas_pct": 42.1, "mov_3_velas_atr": -0.394}, {"tf": "H1", "patron": "Pinzas de suelo", "direccion": 1, "n": 33, "sigue_1_vela_pct": 54.5, "sigue_3_velas_pct": 54.5, "mov_3_velas_atr": 0.105}, {"tf": "H1", "patron": "Pinzas de techo", "direccion": -1, "n": 33, "sigue_1_vela_pct": 69.7, "sigue_3_velas_pct": 48.5, "mov_3_velas_atr": -0.112}, {"tf": "H1", "patron": "Doji", "direccion": 0, "n": 99, "sigue_1_vela_pct": 45.5, "sigue_3_velas_pct": 47.5, "mov_3_velas_atr": -0.009}, {"tf": "H4", "patron": "Martillo", "direccion": 1, "n": 30, "sigue_1_vela_pct": 66.7, "sigue_3_velas_pct": 46.7, "mov_3_velas_atr": -0.129}, {"tf": "H4", "patron": "Hombre colgado", "direccion": -1, "n": 28, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 67.9, "mov_3_velas_atr": 0.08}, {"tf": "H4", "patron": "Martillo invertido", "direccion": 1, "n": 22, "sigue_1_vela_pct": 68.2, "sigue_3_velas_pct": 59.1, "mov_3_velas_atr": 0.149}, {"tf": "H4", "patron": "Estrella fugaz", "direccion": -1, "n": 11, "sigue_1_vela_pct": 72.7, "sigue_3_velas_pct": 63.6, "mov_3_velas_atr": -0.192}, {"tf": "H4", "patron": "Envolvente alcista", "direccion": 1, "n": 83, "sigue_1_vela_pct": 44.6, "sigue_3_velas_pct": 41.0, "mov_3_velas_atr": -0.175}, {"tf": "H4", "patron": "Envolvente bajista", "direccion": -1, "n": 80, "sigue_1_vela_pct": 56.2, "sigue_3_velas_pct": 56.2, "mov_3_velas_atr": 0.238}, {"tf": "H4", "patron": "Harami alcista", "direccion": 1, "n": 23, "sigue_1_vela_pct": 56.5, "sigue_3_velas_pct": 43.5, "mov_3_velas_atr": -0.481}, {"tf": "H4", "patron": "Harami bajista", "direccion": -1, "n": 31, "sigue_1_vela_pct": 54.8, "sigue_3_velas_pct": 58.1, "mov_3_velas_atr": 0.198}, {"tf": "H4", "patron": "Pauta penetrante", "direccion": 1, "n": 14, "sigue_1_vela_pct": 64.3, "sigue_3_velas_pct": 35.7, "mov_3_velas_atr": -0.311}, {"tf": "H4", "patron": "Nube oscura", "direccion": -1, "n": 11, "sigue_1_vela_pct": 63.6, "sigue_3_velas_pct": 54.5, "mov_3_velas_atr": -0.348}, {"tf": "H4", "patron": "Estrella de la mañana", "direccion": 1, "n": 10, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 50.0, "mov_3_velas_atr": 0.314}, {"tf": "H4", "patron": "Estrella de la tarde", "direccion": -1, "n": 7, "sigue_1_vela_pct": 71.4, "sigue_3_velas_pct": 42.9, "mov_3_velas_atr": 0.06}, {"tf": "H4", "patron": "Tres soldados blancos", "direccion": 1, "n": 15, "sigue_1_vela_pct": 40.0, "sigue_3_velas_pct": 66.7, "mov_3_velas_atr": 0.17}, {"tf": "H4", "patron": "Tres cuervos negros", "direccion": -1, "n": 21, "sigue_1_vela_pct": 28.6, "sigue_3_velas_pct": 38.1, "mov_3_velas_atr": -0.233}, {"tf": "H4", "patron": "Marubozu alcista", "direccion": 1, "n": 12, "sigue_1_vela_pct": 66.7, "sigue_3_velas_pct": 58.3, "mov_3_velas_atr": 0.073}, {"tf": "H4", "patron": "Marubozu bajista", "direccion": -1, "n": 9, "sigue_1_vela_pct": 66.7, "sigue_3_velas_pct": 55.6, "mov_3_velas_atr": 0.822}, {"tf": "H4", "patron": "Pinzas de suelo", "direccion": 1, "n": 23, "sigue_1_vela_pct": 69.6, "sigue_3_velas_pct": 47.8, "mov_3_velas_atr": -0.462}, {"tf": "H4", "patron": "Pinzas de techo", "direccion": -1, "n": 27, "sigue_1_vela_pct": 51.9, "sigue_3_velas_pct": 59.3, "mov_3_velas_atr": 0.192}, {"tf": "H4", "patron": "Doji", "direccion": 0, "n": 115, "sigue_1_vela_pct": 53.0, "sigue_3_velas_pct": 48.7, "mov_3_velas_atr": 0.007}, {"tf": "D1", "patron": "Martillo", "direccion": 1, "n": 12, "sigue_1_vela_pct": 58.3, "sigue_3_velas_pct": 33.3, "mov_3_velas_atr": -0.252}, {"tf": "D1", "patron": "Hombre colgado", "direccion": -1, "n": 16, "sigue_1_vela_pct": 37.5, "sigue_3_velas_pct": 43.8, "mov_3_velas_atr": -0.835}, {"tf": "D1", "patron": "Martillo invertido", "direccion": 1, "n": 15, "sigue_1_vela_pct": 73.3, "sigue_3_velas_pct": 60.0, "mov_3_velas_atr": 0.256}, {"tf": "D1", "patron": "Estrella fugaz", "direccion": -1, "n": 19, "sigue_1_vela_pct": 31.6, "sigue_3_velas_pct": 10.5, "mov_3_velas_atr": -0.629}, {"tf": "D1", "patron": "Envolvente alcista", "direccion": 1, "n": 48, "sigue_1_vela_pct": 54.2, "sigue_3_velas_pct": 56.2, "mov_3_velas_atr": 0.236}, {"tf": "D1", "patron": "Envolvente bajista", "direccion": -1, "n": 71, "sigue_1_vela_pct": 35.2, "sigue_3_velas_pct": 52.1, "mov_3_velas_atr": -0.172}, {"tf": "D1", "patron": "Harami alcista", "direccion": 1, "n": 57, "sigue_1_vela_pct": 52.6, "sigue_3_velas_pct": 49.1, "mov_3_velas_atr": 0.099}, {"tf": "D1", "patron": "Harami bajista", "direccion": -1, "n": 39, "sigue_1_vela_pct": 48.7, "sigue_3_velas_pct": 33.3, "mov_3_velas_atr": -0.445}, {"tf": "D1", "patron": "Pauta penetrante", "direccion": 1, "n": 11, "sigue_1_vela_pct": 45.5, "sigue_3_velas_pct": 63.6, "mov_3_velas_atr": 0.491}, {"tf": "D1", "patron": "Nube oscura", "direccion": -1, "n": 7, "sigue_1_vela_pct": 42.9, "sigue_3_velas_pct": 57.1, "mov_3_velas_atr": -0.123}, {"tf": "D1", "patron": "Estrella de la mañana", "direccion": 1, "n": 7, "sigue_1_vela_pct": 85.7, "sigue_3_velas_pct": 42.9, "mov_3_velas_atr": 0.826}, {"tf": "D1", "patron": "Estrella de la tarde", "direccion": -1, "n": 9, "sigue_1_vela_pct": 11.1, "sigue_3_velas_pct": 33.3, "mov_3_velas_atr": -0.598}, {"tf": "D1", "patron": "Tres soldados blancos", "direccion": 1, "n": 42, "sigue_1_vela_pct": 31.0, "sigue_3_velas_pct": 45.2, "mov_3_velas_atr": 0.017}, {"tf": "D1", "patron": "Tres cuervos negros", "direccion": -1, "n": 11, "sigue_1_vela_pct": 63.6, "sigue_3_velas_pct": 63.6, "mov_3_velas_atr": 0.632}, {"tf": "D1", "patron": "Marubozu alcista", "direccion": 1, "n": 30, "sigue_1_vela_pct": 50.0, "sigue_3_velas_pct": 53.3, "mov_3_velas_atr": -0.38}, {"tf": "D1", "patron": "Marubozu bajista", "direccion": -1, "n": 9, "sigue_1_vela_pct": 55.6, "sigue_3_velas_pct": 55.6, "mov_3_velas_atr": -0.041}, {"tf": "D1", "patron": "Pinzas de suelo", "direccion": 1, "n": 18, "sigue_1_vela_pct": 55.6, "sigue_3_velas_pct": 55.6, "mov_3_velas_atr": 0.241}, {"tf": "D1", "patron": "Pinzas de techo", "direccion": -1, "n": 26, "sigue_1_vela_pct": 46.2, "sigue_3_velas_pct": 42.3, "mov_3_velas_atr": -0.695}, {"tf": "D1", "patron": "Doji", "direccion": 0, "n": 95, "sigue_1_vela_pct": 48.4, "sigue_3_velas_pct": 49.5, "mov_3_velas_atr": -0.124}], "rachas": [{"tf": "M1", "velas_seguidas": "1", "color": "verdes", "n": 242, "prob_siguiente_igual_pct": 48.8}, {"tf": "M1", "velas_seguidas": "1", "color": "rojas", "n": 244, "prob_siguiente_igual_pct": 51.2}, {"tf": "M1", "velas_seguidas": "2", "color": "verdes", "n": 118, "prob_siguiente_igual_pct": 48.3}, {"tf": "M1", "velas_seguidas": "2", "color": "rojas", "n": 125, "prob_siguiente_igual_pct": 47.2}, {"tf": "M1", "velas_seguidas": "3", "color": "verdes", "n": 57, "prob_siguiente_igual_pct": 66.7}, {"tf": "M1", "velas_seguidas": "3", "color": "rojas", "n": 59, "prob_siguiente_igual_pct": 61.0}, {"tf": "M1", "velas_seguidas": "4", "color": "verdes", "n": 38, "prob_siguiente_igual_pct": 42.1}, {"tf": "M1", "velas_seguidas": "4", "color": "rojas", "n": 36, "prob_siguiente_igual_pct": 44.4}, {"tf": "M1", "velas_seguidas": "5", "color": "verdes", "n": 16, "prob_siguiente_igual_pct": 56.2}, {"tf": "M1", "velas_seguidas": "5", "color": "rojas", "n": 16, "prob_siguiente_igual_pct": 43.8}, {"tf": "M1", "velas_seguidas": "6", "color": "verdes", "n": 9, "prob_siguiente_igual_pct": 55.6}, {"tf": "M1", "velas_seguidas": "6", "color": "rojas", "n": 7, "prob_siguiente_igual_pct": 71.4}, {"tf": "M1", "velas_seguidas": "7+", "color": "verdes", "n": 11, "prob_siguiente_igual_pct": 54.5}, {"tf": "M1", "velas_seguidas": "7+", "color": "rojas", "n": 17, "prob_siguiente_igual_pct": 70.6}, {"tf": "M5", "velas_seguidas": "1", "color": "verdes", "n": 258, "prob_siguiente_igual_pct": 45.7}, {"tf": "M5", "velas_seguidas": "1", "color": "rojas", "n": 257, "prob_siguiente_igual_pct": 50.6}, {"tf": "M5", "velas_seguidas": "2", "color": "verdes", "n": 118, "prob_siguiente_igual_pct": 48.3}, {"tf": "M5", "velas_seguidas": "2", "color": "rojas", "n": 130, "prob_siguiente_igual_pct": 46.2}, {"tf": "M5", "velas_seguidas": "3", "color": "verdes", "n": 57, "prob_siguiente_igual_pct": 45.6}, {"tf": "M5", "velas_seguidas": "3", "color": "rojas", "n": 60, "prob_siguiente_igual_pct": 56.7}, {"tf": "M5", "velas_seguidas": "4", "color": "verdes", "n": 26, "prob_siguiente_igual_pct": 46.2}, {"tf": "M5", "velas_seguidas": "4", "color": "rojas", "n": 34, "prob_siguiente_igual_pct": 55.9}, {"tf": "M5", "velas_seguidas": "5", "color": "verdes", "n": 12, "prob_siguiente_igual_pct": 41.7}, {"tf": "M5", "velas_seguidas": "5", "color": "rojas", "n": 19, "prob_siguiente_igual_pct": 52.6}, {"tf": "M5", "velas_seguidas": "6", "color": "verdes", "n": 5, "prob_siguiente_igual_pct": 80.0}, {"tf": "M5", "velas_seguidas": "6", "color": "rojas", "n": 10, "prob_siguiente_igual_pct": 50.0}, {"tf": "M5", "velas_seguidas": "7+", "color": "verdes", "n": 5, "prob_siguiente_igual_pct": 20.0}, {"tf": "M5", "velas_seguidas": "7+", "color": "rojas", "n": 7, "prob_siguiente_igual_pct": 28.6}, {"tf": "M15", "velas_seguidas": "1", "color": "verdes", "n": 250, "prob_siguiente_igual_pct": 48.8}, {"tf": "M15", "velas_seguidas": "1", "color": "rojas", "n": 240, "prob_siguiente_igual_pct": 51.7}, {"tf": "M15", "velas_seguidas": "2", "color": "verdes", "n": 121, "prob_siguiente_igual_pct": 47.1}, {"tf": "M15", "velas_seguidas": "2", "color": "rojas", "n": 124, "prob_siguiente_igual_pct": 47.6}, {"tf": "M15", "velas_seguidas": "3", "color": "verdes", "n": 57, "prob_siguiente_igual_pct": 54.4}, {"tf": "M15", "velas_seguidas": "3", "color": "rojas", "n": 59, "prob_siguiente_igual_pct": 52.5}, {"tf": "M15", "velas_seguidas": "4", "color": "verdes", "n": 31, "prob_siguiente_igual_pct": 67.7}, {"tf": "M15", "velas_seguidas": "4", "color": "rojas", "n": 31, "prob_siguiente_igual_pct": 38.7}, {"tf": "M15", "velas_seguidas": "5", "color": "verdes", "n": 21, "prob_siguiente_igual_pct": 38.1}, {"tf": "M15", "velas_seguidas": "5", "color": "rojas", "n": 12, "prob_siguiente_igual_pct": 50.0}, {"tf": "M15", "velas_seguidas": "6", "color": "verdes", "n": 8, "prob_siguiente_igual_pct": 37.5}, {"tf": "M15", "velas_seguidas": "6", "color": "rojas", "n": 6, "prob_siguiente_igual_pct": 66.7}, {"tf": "M15", "velas_seguidas": "7+", "color": "verdes", "n": 9, "prob_siguiente_igual_pct": 66.7}, {"tf": "M15", "velas_seguidas": "7+", "color": "rojas", "n": 6, "prob_siguiente_igual_pct": 33.3}, {"tf": "H1", "velas_seguidas": "1", "color": "verdes", "n": 239, "prob_siguiente_igual_pct": 51.9}, {"tf": "H1", "velas_seguidas": "1", "color": "rojas", "n": 237, "prob_siguiente_igual_pct": 55.3}, {"tf": "H1", "velas_seguidas": "2", "color": "verdes", "n": 124, "prob_siguiente_igual_pct": 48.4}, {"tf": "H1", "velas_seguidas": "2", "color": "rojas", "n": 131, "prob_siguiente_igual_pct": 51.1}, {"tf": "H1", "velas_seguidas": "3", "color": "verdes", "n": 60, "prob_siguiente_igual_pct": 46.7}, {"tf": "H1", "velas_seguidas": "3", "color": "rojas", "n": 67, "prob_siguiente_igual_pct": 52.2}, {"tf": "H1", "velas_seguidas": "4", "color": "verdes", "n": 28, "prob_siguiente_igual_pct": 39.3}, {"tf": "H1", "velas_seguidas": "4", "color": "rojas", "n": 35, "prob_siguiente_igual_pct": 51.4}, {"tf": "H1", "velas_seguidas": "5", "color": "verdes", "n": 11, "prob_siguiente_igual_pct": 36.4}, {"tf": "H1", "velas_seguidas": "5", "color": "rojas", "n": 18, "prob_siguiente_igual_pct": 55.6}, {"tf": "H1", "velas_seguidas": "6", "color": "verdes", "n": 4, "prob_siguiente_igual_pct": 50.0}, {"tf": "H1", "velas_seguidas": "6", "color": "rojas", "n": 10, "prob_siguiente_igual_pct": 90.0}, {"tf": "H1", "velas_seguidas": "7+", "color": "verdes", "n": 3, "prob_siguiente_igual_pct": 33.3}, {"tf": "H1", "velas_seguidas": "7+", "color": "rojas", "n": 14, "prob_siguiente_igual_pct": 35.7}, {"tf": "H4", "velas_seguidas": "1", "color": "verdes", "n": 253, "prob_siguiente_igual_pct": 48.2}, {"tf": "H4", "velas_seguidas": "1", "color": "rojas", "n": 254, "prob_siguiente_igual_pct": 53.5}, {"tf": "H4", "velas_seguidas": "2", "color": "verdes", "n": 122, "prob_siguiente_igual_pct": 46.7}, {"tf": "H4", "velas_seguidas": "2", "color": "rojas", "n": 136, "prob_siguiente_igual_pct": 55.1}, {"tf": "H4", "velas_seguidas": "3", "color": "verdes", "n": 57, "prob_siguiente_igual_pct": 47.4}, {"tf": "H4", "velas_seguidas": "3", "color": "rojas", "n": 75, "prob_siguiente_igual_pct": 41.3}, {"tf": "H4", "velas_seguidas": "4", "color": "verdes", "n": 27, "prob_siguiente_igual_pct": 40.7}, {"tf": "H4", "velas_seguidas": "4", "color": "rojas", "n": 31, "prob_siguiente_igual_pct": 45.2}, {"tf": "H4", "velas_seguidas": "5", "color": "verdes", "n": 11, "prob_siguiente_igual_pct": 36.4}, {"tf": "H4", "velas_seguidas": "5", "color": "rojas", "n": 14, "prob_siguiente_igual_pct": 57.1}, {"tf": "H4", "velas_seguidas": "6", "color": "verdes", "n": 4, "prob_siguiente_igual_pct": 75.0}, {"tf": "H4", "velas_seguidas": "6", "color": "rojas", "n": 8, "prob_siguiente_igual_pct": 25.0}, {"tf": "H4", "velas_seguidas": "7+", "color": "verdes", "n": 3, "prob_siguiente_igual_pct": 0.0}, {"tf": "H4", "velas_seguidas": "7+", "color": "rojas", "n": 3, "prob_siguiente_igual_pct": 33.3}, {"tf": "D1", "velas_seguidas": "1", "color": "verdes", "n": 263, "prob_siguiente_igual_pct": 53.2}, {"tf": "D1", "velas_seguidas": "1", "color": "rojas", "n": 263, "prob_siguiente_igual_pct": 42.6}, {"tf": "D1", "velas_seguidas": "2", "color": "verdes", "n": 140, "prob_siguiente_igual_pct": 52.1}, {"tf": "D1", "velas_seguidas": "2", "color": "rojas", "n": 112, "prob_siguiente_igual_pct": 43.8}, {"tf": "D1", "velas_seguidas": "3", "color": "verdes", "n": 73, "prob_siguiente_igual_pct": 41.1}, {"tf": "D1", "velas_seguidas": "3", "color": "rojas", "n": 49, "prob_siguiente_igual_pct": 44.9}, {"tf": "D1", "velas_seguidas": "4", "color": "verdes", "n": 30, "prob_siguiente_igual_pct": 50.0}, {"tf": "D1", "velas_seguidas": "4", "color": "rojas", "n": 22, "prob_siguiente_igual_pct": 40.9}, {"tf": "D1", "velas_seguidas": "5", "color": "verdes", "n": 15, "prob_siguiente_igual_pct": 33.3}, {"tf": "D1", "velas_seguidas": "5", "color": "rojas", "n": 9, "prob_siguiente_igual_pct": 55.6}, {"tf": "D1", "velas_seguidas": "6", "color": "verdes", "n": 5, "prob_siguiente_igual_pct": 80.0}, {"tf": "D1", "velas_seguidas": "6", "color": "rojas", "n": 5, "prob_siguiente_igual_pct": 40.0}, {"tf": "D1", "velas_seguidas": "7+", "color": "verdes", "n": 7, "prob_siguiente_igual_pct": 42.9}, {"tf": "D1", "velas_seguidas": "7+", "color": "rojas", "n": 6, "prob_siguiente_igual_pct": 66.7}]};
+const TFS = ["M1", "M5", "M15", "H1", "H4", "D1"];
+const GLYPH = {
+  "Martillo": [[7,7.5,5,5.5],[4.6,5.3,2,5.2]],
+  "Hombre colgado": [[3,5.5,2.5,5],[5.8,5.9,2.8,5.3]],
+  "Martillo invertido": [[7,7.5,4.5,5],[4,7.5,3.9,4.6]],
+  "Estrella fugaz": [[3,5.6,2.8,5.4],[6,9,5.4,5.5]],
+  "Envolvente alcista": [[6,6.3,4.5,4.8],[4.5,7,4.3,6.8]],
+  "Envolvente bajista": [[4.5,6.2,4.3,6],[6.3,6.5,3.8,4.1]],
+  "Harami alcista": [[8,8.3,3,3.5],[4.5,6.3,4.3,6]],
+  "Harami bajista": [[3,8,2.7,7.5],[6.5,6.8,4.2,4.5]],
+  "Pauta penetrante": [[8,8.2,4,4.3],[3.5,7,3.2,6.8]],
+  "Nube oscura": [[3,7,2.8,6.8],[7.6,7.8,4.3,4.6]],
+  "Estrella de la mañana": [[8,8.2,4,4.3],[3.3,3.9,2.5,3.6],[4,7.5,3.8,7.2]],
+  "Estrella de la tarde": [[3,6.8,2.8,6.5],[7.2,8,7,7.4],[7,7.2,3.5,3.8]],
+  "Tres soldados blancos": [[2,4,1.8,3.8],[3.5,6,3.3,5.8],[5.5,8,5.3,7.8]],
+  "Tres cuervos negros": [[8,8.2,6,6.2],[6.5,6.7,4,4.2],[4.5,4.7,2,2.2]],
+  "Marubozu alcista": [[2,8,2,8]],
+  "Marubozu bajista": [[8,8,2,2]],
+  "Pinzas de suelo": [[7,7.2,3,3.4],[3.4,6,3,5.8]],
+  "Pinzas de techo": [[3,7,2.8,6.6],[6.6,7,3.5,3.8]],
+  "Doji": [[5,8,2,5.05]]
+};
+
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+// Convención japonesa en blanco y negro: alcista = hueca, bajista = rellena.
+function glyph(name) {
+  const cs = GLYPH[name] || [];
+  const w = 44, h = 34, step = 11;
+  const svg = el("svg", { width: w, height: h, viewBox: `0 0 ${w} ${h}`, "aria-hidden": "true" });
+  const x0 = (w - cs.length * step) / 2 + step / 2;
+  const y = v => h - 2 - v * (h - 4) / 10;
+  cs.forEach(([o, hi, lo, c], i) => {
+    const x = x0 + i * step, top = Math.max(o, c), bot = Math.min(o, c), bull = c >= o;
+    el("line", { x1: x, x2: x, y1: y(hi), y2: y(lo), stroke: "var(--candle-fill)", "stroke-width": 1.2 }, svg);
+    el("rect", { x: x - 3.5, y: y(top), width: 7, height: Math.max(1.2, y(bot) - y(top)),
+      fill: bull ? "var(--candle-hollow)" : "var(--candle-fill)", stroke: "var(--candle-fill)", "stroke-width": 1.2 }, svg);
+  });
+  return svg;
+}
+
+const meta = DATA.meta;
+const fmtD = s => s.slice(0, 10);
+document.getElementById("meta").textContent =
+  TFS.map(t => `${t} ${meta[t].velas} velas (${fmtD(meta[t].desde)} → ${fmtD(meta[t].hasta)})`).join("  ·  ");
+
+const byKey = {};
+DATA.patrones.forEach(r => { byKey[r.patron + "|" + r.tf] = r; });
+const names = [...new Set(DATA.patrones.map(r => r.patron))];
+
+function bucket(p) {
+  const d = p - 50;
+  if (Math.abs(d) < 5) return "var(--mid)";
+  const a = Math.abs(d), s = a < 10 ? 1 : a < 20 ? 2 : a < 30 ? 3 : 4;
+  return `var(--${d > 0 ? "b" : "r"}${s})`;
+}
+function inkFor(p) {
+  const a = Math.abs(p - 50);
+  if (a < 20) return "var(--ink)";
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches && document.documentElement.dataset.theme !== "light"
+    || document.documentElement.dataset.theme === "dark";
+  return dark ? "#0b0b0b" : "#ffffff";
+}
+
+const tip = document.getElementById("tip");
+function showTip(ev, html) {
+  tip.innerHTML = html; tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let x = ev.clientX + 14, y = ev.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 14;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+function hideTip() { tip.hidden = true; }
+
+let horizon = "sigue_3_velas_pct";
+function dirLabel(d) { return d > 0 ? "Espera subida" : d < 0 ? "Espera bajada" : "Indecisión · mide si sigue la vela previa"; }
+
+function renderHeat() {
+  const t = document.getElementById("heat");
+  t.innerHTML = "";
+  const head = t.insertRow();
+  const th0 = document.createElement("th"); th0.className = "pat-h"; th0.textContent = "Patrón"; head.appendChild(th0);
+  TFS.forEach(tf => { const th = document.createElement("th"); th.textContent = tf; head.appendChild(th); });
+  const thT = document.createElement("th"); thT.textContent = "A favor / en contra"; head.appendChild(thT);
+
+  names.forEach(name => {
+    const tr = t.insertRow();
+    const td = tr.insertCell(); td.className = "pat";
+    const wrap = document.createElement("div"); wrap.className = "patcell";
+    const any = byKey[name + "|M5"];
+    wrap.appendChild(glyph(name));
+    const lab = document.createElement("div");
+    lab.innerHTML = `<span class="pname"></span><span class="pdir"></span>`;
+    lab.querySelector(".pname").textContent = name;
+    lab.querySelector(".pdir").textContent = dirLabel(any.direccion);
+    wrap.appendChild(lab); td.appendChild(wrap);
+    let fav = 0, con = 0;
+    TFS.forEach(tf => {
+      const r = byKey[name + "|" + tf];
+      const c = tr.insertCell(); c.className = "v";
+      if (!r || !r.n) { c.classList.add("na"); c.textContent = "–"; return; }
+      const p = r[horizon];
+      c.style.background = bucket(p); c.style.color = inkFor(p);
+      if (r.n < 10) c.classList.add("thin");
+      else if (p >= 55) fav++; else if (p <= 45) con++;
+      c.innerHTML = `${p.toFixed(0)}%<small>n ${r.n}</small>`;
+      const tipHtml = `<b>${name} · ${tf}</b><br>Casos: ${r.n}<br>Siguió 1 vela: ${r.sigue_1_vela_pct}%<br>Siguió 3 velas: ${r.sigue_3_velas_pct}%<br>Movimiento medio 3 velas: ${r.mov_3_velas_atr > 0 ? "+" : ""}${r.mov_3_velas_atr} ATR`;
+      c.addEventListener("pointermove", e => showTip(e, tipHtml));
+      c.addEventListener("pointerleave", hideTip);
+    });
+    const tally = tr.insertCell(); tally.className = "tally"; tally.textContent = `${fav} / ${con}`;
+  });
+}
+document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", () => {
+  horizon = b.dataset.h;
+  document.querySelectorAll("[data-h]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderHeat();
+}));
+
+// hallazgos
+(function facts() {
+  const rows = DATA.patrones.filter(r => r.n >= 10 && r.direccion !== 0);
+  const avg = rows.reduce((s, r) => s + r.sigue_3_velas_pct, 0) / rows.length;
+  const consistent = names.filter(n => {
+    const rs = TFS.map(tf => byKey[n + "|" + tf]).filter(r => r && r.n >= 10);
+    return rs.length >= 4 && rs.filter(r => r.sigue_3_velas_pct >= 55).length >= 4;
+  });
+  const items = [
+    [`${avg.toFixed(1)} %`, "Promedio de continuidad a 3 velas de todos los patrones con 10 casos o más. Una moneda da 50 %."],
+    [`${consistent.length} de ${names.length - 1}`, `Patrones que superan 55 % en al menos 4 de las 6 temporalidades${consistent.length ? " (" + consistent.join(", ") + ")" : ""}. Con estas muestras, incluso ese puede ser casualidad.`],
+    ["2", "Setups que sí resistieron el backtest de scalping: el impulso asiático y el regreso a la VWAP. Su ventaja viene del horario, no del nombre de la vela."]
+  ];
+  const box = document.getElementById("facts");
+  items.forEach(([n, t]) => {
+    const d = document.createElement("div"); d.className = "fact";
+    d.innerHTML = `<span class="num"></span><p></p>`;
+    d.querySelector(".num").textContent = n; d.querySelector("p").textContent = t;
+    box.appendChild(d);
+  });
+})();
+
+// rachas
+let tfSel = "M5";
+const seg = document.getElementById("tfseg");
+TFS.forEach(tf => {
+  const b = document.createElement("button"); b.type = "button"; b.id = "tf-" + tf; b.textContent = tf;
+  b.setAttribute("aria-pressed", String(tf === tfSel));
+  b.addEventListener("click", () => { tfSel = tf; seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderLines(); });
+  seg.appendChild(b);
+});
+function renderLines() {
+  const svg = document.getElementById("lines");
+  svg.innerHTML = "";
+  const W = 720, H = 300, L = 44, R = 110, T = 14, B = 34;
+  const rows = DATA.rachas.filter(r => r.tf === tfSel);
+  const ks = [...new Set(rows.map(r => r.velas_seguidas))];
+  const x = i => L + i * (W - L - R) / (ks.length - 1);
+  const y = v => T + (100 - v) * (H - T - B) / 100;
+  [0, 25, 50, 75, 100].forEach(v => {
+    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 50 ? "var(--axis)" : "var(--grid)", "stroke-width": v === 50 ? 1.5 : 1, "stroke-dasharray": v === 50 ? "4 4" : "" }, svg);
+    const t = el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, svg); t.textContent = v + "%";
+  });
+  const mid = el("text", { x: W - R + 6, y: y(50) + 4 }, svg); mid.textContent = "azar 50%";
+  ks.forEach((k, i) => { const t = el("text", { x: x(i), y: H - 12, "text-anchor": "middle" }, svg); t.textContent = k; });
+  const xl = el("text", { x: L, y: H - 0.5 }, svg); xl.textContent = "velas seguidas del mismo color →";
+  const series = [["verdes", "var(--s1)", "Tras alcistas"], ["rojas", "var(--s2)", "Tras bajistas"]];
+  const ends = [];
+  series.forEach(([col, color, name]) => {
+    const pts = ks.map((k, i) => { const r = rows.find(z => z.velas_seguidas === k && z.color === col); return r && r.prob_siguiente_igual_pct != null ? { i, k, r } : null; }).filter(Boolean);
+    el("path", { d: pts.map((p, j) => `${j ? "L" : "M"}${x(p.i)},${y(p.r.prob_siguiente_igual_pct)}`).join(""), fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+    pts.forEach(p => {
+      const cx = x(p.i), cy = y(p.r.prob_siguiente_igual_pct), thin = p.r.n < 10;
+      el("circle", { cx, cy, r: 4.5, fill: thin ? "var(--surface)" : color, stroke: thin ? color : "var(--surface)", "stroke-width": 2 }, svg);
+      const hit = el("circle", { cx, cy, r: 14, fill: "transparent" }, svg);
+      const html = `<b>${name} · ${tfSel}</b><br>Tras ${p.k} vela(s) ${col}: la siguiente repite el ${p.r.prob_siguiente_igual_pct}%<br>Casos: ${p.r.n}${thin ? " (muestra chica)" : ""}`;
+      hit.addEventListener("pointermove", e => showTip(e, html));
+      hit.addEventListener("pointerleave", hideTip);
+    });
+    const last = pts[pts.length - 1];
+    if (last) ends.push({ y: y(last.r.prob_siguiente_igual_pct), color, name });
+  });
+  ends.sort((a, b) => a.y - b.y);
+  if (ends.length === 2 && ends[1].y - ends[0].y < 16) { ends[0].y -= 8; ends[1].y += 8; }
+  ends.forEach(e => { const t = el("text", { x: W - R + 10, y: e.y + 4, class: "dl", fill: "var(--ink-2)" }, svg); t.textContent = e.name; });
+}
+
+document.getElementById("copy").addEventListener("click", async e => {
+  e.preventDefault(); e.stopPropagation();
+  const btn = e.currentTarget, code = document.getElementById("pine").textContent;
+  try { await navigator.clipboard.writeText(code); btn.textContent = "Copiado"; }
+  catch (_) {
+    document.getElementById("code").open = true;
+    const r = document.createRange(); r.selectNodeContents(document.getElementById("pine"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent = "Seleccionado: usa Copiar";
+  }
+  setTimeout(() => { btn.textContent = "Copiar código"; }, 2200);
+});
+
+renderHeat();
+renderLines();
+</script>

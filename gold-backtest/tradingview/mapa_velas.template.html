@@ -1,0 +1,435 @@
+<title>Mapa de velas XAU/USD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --page: #f6f5f1;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #7a7872;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --ring: rgba(11,11,11,0.10);
+  --gold: #8a6100;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --mid: #f0efec;
+  --b1: #cde2fb; --b2: #9ec5f4; --b3: #5598e7; --b4: #1c5cab;
+  --r1: #fbdcd9; --r2: #f4b1ab; --r3: #e8716c; --r4: #b8312f;
+  --candle-fill: #0b0b0b;
+  --candle-hollow: #fcfcfb;
+  --tip-bg: #0b0b0b;
+  --tip-ink: #ffffff;
+  --code-bg: #f0efe9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #979589;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --gold: #e3b554;
+    --s1: #3987e5; --s2: #d95926; --mid: #2c2c2a;
+    --b1: #1d3350; --b2: #1f4f8c; --b3: #3987e5; --b4: #9ec5f4;
+    --r1: #43211f; --r2: #7a2c29; --r3: #d34f4c; --r4: #f4a39e;
+    --candle-fill: #ffffff; --candle-hollow: #1a1a19; --tip-bg: #ffffff; --tip-ink: #0b0b0b; --code-bg: #121211;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #979589;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --gold: #e3b554;
+  --s1: #3987e5; --s2: #d95926; --mid: #2c2c2a;
+  --b1: #1d3350; --b2: #1f4f8c; --b3: #3987e5; --b4: #9ec5f4;
+  --r1: #43211f; --r2: #7a2c29; --r3: #d34f4c; --r4: #f4a39e;
+  --candle-fill: #ffffff; --candle-hollow: #1a1a19; --tip-bg: #ffffff; --tip-ink: #0b0b0b; --code-bg: #121211;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--page); color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding-inline: 16px; padding-block: 28px 56px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 36px; }
+h1, h2 { font-family: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif; font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: 0.005em; }
+h1 { font-size: clamp(34px, 6vw, 52px); line-height: 1.02; }
+h2 { font-size: 28px; line-height: 1.1; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font: 500 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+.lede { color: var(--ink-2); font-size: 17px; }
+header { display: grid; gap: 12px; }
+.quote { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; color: var(--ink-2); }
+section { display: grid; gap: 14px; }
+.panel { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); padding: 18px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.seg { display: inline-flex; border-radius: 8px; box-shadow: 0 0 0 1px var(--ring); overflow: hidden; }
+.seg button {
+  font: 500 13px/1 system-ui, sans-serif; color: var(--ink-2); background: transparent; border: 0;
+  padding: 9px 12px; cursor: pointer; min-height: 36px;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.seg button:focus-visible, .copy:focus-visible, summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+.ctl-label { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* heatmap */
+.scroll { overflow-x: auto; }
+table.heat { border-collapse: separate; border-spacing: 2px; width: 100%; min-width: 640px; font-variant-numeric: tabular-nums; }
+.heat th { font: 500 12px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); padding: 6px 4px; text-align: center; }
+.heat th.pat-h { text-align: left; }
+.heat td.pat { padding: 4px 8px 4px 0; white-space: nowrap; }
+.patcell { display: flex; align-items: center; gap: 10px; }
+.patcell svg { flex: none; }
+.pname { font-weight: 600; font-size: 14px; }
+.pdir { font-size: 11px; color: var(--muted); display: block; line-height: 1.2; }
+.heat td.v {
+  text-align: center; border-radius: 4px; padding: 6px 2px; min-width: 64px; cursor: default;
+  font: 500 13px/1.15 "IBM Plex Mono", ui-monospace, monospace;
+}
+.heat td.v small { display: block; font-size: 10px; opacity: 0.75; }
+.heat td.v.thin { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--ring) 5px 6px); }
+.heat td.v.na { color: var(--muted); background: transparent; }
+.heat td.tally { text-align: center; font: 500 12px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--ink-2); padding-inline: 8px; white-space: nowrap; }
+.heat tr.base td { border-top: 1px solid var(--axis); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12px; color: var(--ink-2); }
+.ramp { display: inline-flex; gap: 2px; }
+.ramp i { width: 22px; height: 12px; border-radius: 2px; display: block; }
+.sw-thin { width: 22px; height: 12px; border-radius: 2px; display: inline-block; background: var(--mid) repeating-linear-gradient(135deg, transparent 0 5px, var(--ring) 5px 6px); vertical-align: middle; }
+
+/* rachas */
+.chart-wrap { position: relative; }
+svg.lines { width: 100%; height: auto; display: block; }
+.lines text { font: 11px "IBM Plex Mono", ui-monospace, monospace; fill: var(--muted); }
+.lines .dl { font: 600 12px system-ui, sans-serif; }
+.key { display: flex; gap: 16px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+.key i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+
+.tip {
+  position: fixed; pointer-events: none; z-index: 10; background: var(--tip-bg); color: var(--tip-ink);
+  font: 12px/1.45 system-ui, sans-serif; padding: 8px 10px; border-radius: 6px; max-width: 240px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18); font-variant-numeric: tabular-nums;
+}
+.tip b { font-weight: 600; }
+
+/* hallazgos y setups */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.fact { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); padding: 16px; display: grid; gap: 6px; align-content: start; }
+.fact .num { font: 600 30px/1 "Barlow Condensed", system-ui, sans-serif; }
+.fact p { color: var(--ink-2); font-size: 14px; }
+.setups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.setup { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); padding: 18px; display: grid; gap: 10px; align-content: start; }
+.setup h3 { margin: 0; font: 600 22px/1.1 "Barlow Condensed", system-ui, sans-serif; }
+.setup .when { font: 500 12px/1.3 "IBM Plex Mono", ui-monospace, monospace; color: var(--gold); }
+.setup dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+.setup dt { color: var(--muted); }
+.setup dd { margin: 0; }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 70ch; }
+details { background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); }
+summary { cursor: pointer; padding: 14px 18px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.copy { font: 500 13px system-ui, sans-serif; background: var(--ink); color: var(--surface); border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; min-height: 36px; }
+pre.code { margin: 0; padding: 16px 18px; background: var(--code-bg); border-radius: 0 0 10px 10px; overflow-x: auto; font: 12px/1.5 "IBM Plex Mono", ui-monospace, monospace; max-height: 520px; }
+.note { font-size: 13px; color: var(--muted); max-width: 72ch; }
+@media (prefers-reduced-motion: no-preference) { .seg button { transition: background .15s, color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">XAU/USD · eToro · M1 a D1</span>
+    <h1>Mapa de velas del oro</h1>
+    <p class="lede">Cada patrón con su nombre, su dibujo y qué tan seguido el precio siguió en la dirección que el patrón "promete". Si una casilla marca 50 %, el patrón vale lo mismo que lanzar una moneda.</p>
+    <p class="quote" id="meta"></p>
+  </header>
+
+  <section class="facts" id="facts"></section>
+
+  <section>
+    <h2>Patrones con nombre</h2>
+    <p class="note">Azul = el precio siguió la dirección esperada más de la mitad de las veces. Rojo = hizo lo contrario. Rayado = menos de 10 casos, no confíes en ese número.</p>
+    <div class="panel" style="display:grid;gap:14px">
+      <div class="controls">
+        <span class="ctl-label">Medir después de</span>
+        <div class="seg" role="group" aria-label="Horizonte">
+          <button id="h1" type="button" aria-pressed="false" data-h="sigue_1_vela_pct">1 vela</button>
+          <button id="h3" type="button" aria-pressed="true" data-h="sigue_3_velas_pct">3 velas</button>
+        </div>
+        <div class="legend">
+          <span class="ramp" aria-hidden="true"><i style="background:var(--r4)"></i><i style="background:var(--r3)"></i><i style="background:var(--r2)"></i><i style="background:var(--r1)"></i><i style="background:var(--mid)"></i><i style="background:var(--b1)"></i><i style="background:var(--b2)"></i><i style="background:var(--b3)"></i><i style="background:var(--b4)"></i></span>
+          <span>≤20 % · 50 % · ≥80 %</span>
+          <span><span class="sw-thin"></span> n &lt; 10</span>
+        </div>
+      </div>
+      <div class="scroll"><table class="heat" id="heat" aria-label="Porcentaje de continuidad por patrón y temporalidad"></table></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rachas: ¿la siguiente vela repite el color?</h2>
+    <p class="note">Probabilidad de que, después de N velas seguidas del mismo color, la siguiente sea igual. Los puntos huecos tienen menos de 10 casos.</p>
+    <div class="panel" style="display:grid;gap:12px">
+      <div class="controls">
+        <span class="ctl-label">Temporalidad</span>
+        <div class="seg" role="group" aria-label="Temporalidad" id="tfseg"></div>
+      </div>
+      <div class="key">
+        <span><i style="background:var(--s1)"></i>Tras velas alcistas</span>
+        <span><i style="background:var(--s2)"></i>Tras velas bajistas</span>
+      </div>
+      <div class="chart-wrap"><svg class="lines" id="lines" viewBox="0 0 720 300" role="img" aria-label="Probabilidad de continuidad por longitud de racha"></svg></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Los dos setups del indicador</h2>
+    <div class="setups">
+      <article class="setup">
+        <span class="when">00:00–07:00 UTC · 18:00–01:00 CDMX</span>
+        <h3>1 · Impulso asiático</h3>
+        <dl>
+          <dt>Señal</dt><dd>Vela con cuerpo ≥ 60 % de su rango que cierra arriba del máximo (o abajo del mínimo) de las 12 velas previas</dd>
+          <dt>Entrada</dt><dd>Apertura de la siguiente vela</dd>
+          <dt>Stop</dt><dd>1 ATR</dd>
+          <dt>Objetivo</dt><dd>2 ATR</dd>
+          <dt>Backtest M5</dt><dd>22 ops · 59 % acierto · PF 2.2</dd>
+        </dl>
+      </article>
+      <article class="setup">
+        <span class="when">12:00–17:00 UTC · 06:00–11:00 CDMX</span>
+        <h3>2 · Regreso a la VWAP</h3>
+        <dl>
+          <dt>Señal</dt><dd>Cierre a más de 1.5 ATR de la VWAP diaria: comprar si está abajo, vender si está arriba</dd>
+          <dt>Entrada</dt><dd>Apertura de la siguiente vela</dd>
+          <dt>Stop</dt><dd>1 ATR</dd>
+          <dt>Objetivo</dt><dd>1.5 ATR</dd>
+          <dt>Backtest M5</dt><dd>30 ops · 57 % acierto · PF 1.8</dd>
+        </dl>
+      </article>
+    </div>
+    <p class="note">Las dos se cierran solas a las 12 velas si no tocan stop ni objetivo. El indicador sombrea en rojo la franja de 17:00–21:00 UTC, donde todo perdió dinero en el backtest. Los datos alcanzan solo para días, no para meses; pruébalo en demo antes de usar dinero real.</p>
+  </section>
+
+  <section>
+    <h2>Instalar en TradingView</h2>
+    <ol class="steps">
+      <li>Abre un gráfico de <b>XAUUSD</b> en 5 minutos (OANDA o el broker que uses).</li>
+      <li>Abajo, abre el <b>Editor Pine</b> y crea un indicador nuevo en blanco.</li>
+      <li>Borra lo que traiga, pega el código de abajo y pulsa <b>Añadir al gráfico</b>.</li>
+      <li>Para avisos: <b>Alerta</b> → Condición "Oro Scalping" → elige el setup y la dirección.</li>
+    </ol>
+    <details id="code">
+      <summary><span>Código Pine Script v6</span><button class="copy" id="copy" type="button">Copiar código</button></summary>
+      <pre class="code" id="pine">__PINE__</pre>
+    </details>
+  </section>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const DATA = __DATA__;
+const TFS = ["M1", "M5", "M15", "H1", "H4", "D1"];
+const GLYPH = {
+  "Martillo": [[7,7.5,5,5.5],[4.6,5.3,2,5.2]],
+  "Hombre colgado": [[3,5.5,2.5,5],[5.8,5.9,2.8,5.3]],
+  "Martillo invertido": [[7,7.5,4.5,5],[4,7.5,3.9,4.6]],
+  "Estrella fugaz": [[3,5.6,2.8,5.4],[6,9,5.4,5.5]],
+  "Envolvente alcista": [[6,6.3,4.5,4.8],[4.5,7,4.3,6.8]],
+  "Envolvente bajista": [[4.5,6.2,4.3,6],[6.3,6.5,3.8,4.1]],
+  "Harami alcista": [[8,8.3,3,3.5],[4.5,6.3,4.3,6]],
+  "Harami bajista": [[3,8,2.7,7.5],[6.5,6.8,4.2,4.5]],
+  "Pauta penetrante": [[8,8.2,4,4.3],[3.5,7,3.2,6.8]],
+  "Nube oscura": [[3,7,2.8,6.8],[7.6,7.8,4.3,4.6]],
+  "Estrella de la mañana": [[8,8.2,4,4.3],[3.3,3.9,2.5,3.6],[4,7.5,3.8,7.2]],
+  "Estrella de la tarde": [[3,6.8,2.8,6.5],[7.2,8,7,7.4],[7,7.2,3.5,3.8]],
+  "Tres soldados blancos": [[2,4,1.8,3.8],[3.5,6,3.3,5.8],[5.5,8,5.3,7.8]],
+  "Tres cuervos negros": [[8,8.2,6,6.2],[6.5,6.7,4,4.2],[4.5,4.7,2,2.2]],
+  "Marubozu alcista": [[2,8,2,8]],
+  "Marubozu bajista": [[8,8,2,2]],
+  "Pinzas de suelo": [[7,7.2,3,3.4],[3.4,6,3,5.8]],
+  "Pinzas de techo": [[3,7,2.8,6.6],[6.6,7,3.5,3.8]],
+  "Doji": [[5,8,2,5.05]]
+};
+
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+// Convención japonesa en blanco y negro: alcista = hueca, bajista = rellena.
+function glyph(name) {
+  const cs = GLYPH[name] || [];
+  const w = 44, h = 34, step = 11;
+  const svg = el("svg", { width: w, height: h, viewBox: `0 0 ${w} ${h}`, "aria-hidden": "true" });
+  const x0 = (w - cs.length * step) / 2 + step / 2;
+  const y = v => h - 2 - v * (h - 4) / 10;
+  cs.forEach(([o, hi, lo, c], i) => {
+    const x = x0 + i * step, top = Math.max(o, c), bot = Math.min(o, c), bull = c >= o;
+    el("line", { x1: x, x2: x, y1: y(hi), y2: y(lo), stroke: "var(--candle-fill)", "stroke-width": 1.2 }, svg);
+    el("rect", { x: x - 3.5, y: y(top), width: 7, height: Math.max(1.2, y(bot) - y(top)),
+      fill: bull ? "var(--candle-hollow)" : "var(--candle-fill)", stroke: "var(--candle-fill)", "stroke-width": 1.2 }, svg);
+  });
+  return svg;
+}
+
+const meta = DATA.meta;
+const fmtD = s => s.slice(0, 10);
+document.getElementById("meta").textContent =
+  TFS.map(t => `${t} ${meta[t].velas} velas (${fmtD(meta[t].desde)} → ${fmtD(meta[t].hasta)})`).join("  ·  ");
+
+const byKey = {};
+DATA.patrones.forEach(r => { byKey[r.patron + "|" + r.tf] = r; });
+const names = [...new Set(DATA.patrones.map(r => r.patron))];
+
+function bucket(p) {
+  const d = p - 50;
+  if (Math.abs(d) < 5) return "var(--mid)";
+  const a = Math.abs(d), s = a < 10 ? 1 : a < 20 ? 2 : a < 30 ? 3 : 4;
+  return `var(--${d > 0 ? "b" : "r"}${s})`;
+}
+function inkFor(p) {
+  const a = Math.abs(p - 50);
+  if (a < 20) return "var(--ink)";
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches && document.documentElement.dataset.theme !== "light"
+    || document.documentElement.dataset.theme === "dark";
+  return dark ? "#0b0b0b" : "#ffffff";
+}
+
+const tip = document.getElementById("tip");
+function showTip(ev, html) {
+  tip.innerHTML = html; tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let x = ev.clientX + 14, y = ev.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 14;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+function hideTip() { tip.hidden = true; }
+
+let horizon = "sigue_3_velas_pct";
+function dirLabel(d) { return d > 0 ? "Espera subida" : d < 0 ? "Espera bajada" : "Indecisión · mide si sigue la vela previa"; }
+
+function renderHeat() {
+  const t = document.getElementById("heat");
+  t.innerHTML = "";
+  const head = t.insertRow();
+  const th0 = document.createElement("th"); th0.className = "pat-h"; th0.textContent = "Patrón"; head.appendChild(th0);
+  TFS.forEach(tf => { const th = document.createElement("th"); th.textContent = tf; head.appendChild(th); });
+  const thT = document.createElement("th"); thT.textContent = "A favor / en contra"; head.appendChild(thT);
+
+  names.forEach(name => {
+    const tr = t.insertRow();
+    const td = tr.insertCell(); td.className = "pat";
+    const wrap = document.createElement("div"); wrap.className = "patcell";
+    const any = byKey[name + "|M5"];
+    wrap.appendChild(glyph(name));
+    const lab = document.createElement("div");
+    lab.innerHTML = `<span class="pname"></span><span class="pdir"></span>`;
+    lab.querySelector(".pname").textContent = name;
+    lab.querySelector(".pdir").textContent = dirLabel(any.direccion);
+    wrap.appendChild(lab); td.appendChild(wrap);
+    let fav = 0, con = 0;
+    TFS.forEach(tf => {
+      const r = byKey[name + "|" + tf];
+      const c = tr.insertCell(); c.className = "v";
+      if (!r || !r.n) { c.classList.add("na"); c.textContent = "–"; return; }
+      const p = r[horizon];
+      c.style.background = bucket(p); c.style.color = inkFor(p);
+      if (r.n < 10) c.classList.add("thin");
+      else if (p >= 55) fav++; else if (p <= 45) con++;
+      c.innerHTML = `${p.toFixed(0)}%<small>n ${r.n}</small>`;
+      const tipHtml = `<b>${name} · ${tf}</b><br>Casos: ${r.n}<br>Siguió 1 vela: ${r.sigue_1_vela_pct}%<br>Siguió 3 velas: ${r.sigue_3_velas_pct}%<br>Movimiento medio 3 velas: ${r.mov_3_velas_atr > 0 ? "+" : ""}${r.mov_3_velas_atr} ATR`;
+      c.addEventListener("pointermove", e => showTip(e, tipHtml));
+      c.addEventListener("pointerleave", hideTip);
+    });
+    const tally = tr.insertCell(); tally.className = "tally"; tally.textContent = `${fav} / ${con}`;
+  });
+}
+document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", () => {
+  horizon = b.dataset.h;
+  document.querySelectorAll("[data-h]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderHeat();
+}));
+
+// hallazgos
+(function facts() {
+  const rows = DATA.patrones.filter(r => r.n >= 10 && r.direccion !== 0);
+  const avg = rows.reduce((s, r) => s + r.sigue_3_velas_pct, 0) / rows.length;
+  const consistent = names.filter(n => {
+    const rs = TFS.map(tf => byKey[n + "|" + tf]).filter(r => r && r.n >= 10);
+    return rs.length >= 4 && rs.filter(r => r.sigue_3_velas_pct >= 55).length >= 4;
+  });
+  const items = [
+    [`${avg.toFixed(1)} %`, "Promedio de continuidad a 3 velas de todos los patrones con 10 casos o más. Una moneda da 50 %."],
+    [`${consistent.length} de ${names.length - 1}`, `Patrones que superan 55 % en al menos 4 de las 6 temporalidades${consistent.length ? " (" + consistent.join(", ") + ")" : ""}. Con estas muestras, incluso ese puede ser casualidad.`],
+    ["2", "Setups que sí resistieron el backtest de scalping: el impulso asiático y el regreso a la VWAP. Su ventaja viene del horario, no del nombre de la vela."]
+  ];
+  const box = document.getElementById("facts");
+  items.forEach(([n, t]) => {
+    const d = document.createElement("div"); d.className = "fact";
+    d.innerHTML = `<span class="num"></span><p></p>`;
+    d.querySelector(".num").textContent = n; d.querySelector("p").textContent = t;
+    box.appendChild(d);
+  });
+})();
+
+// rachas
+let tfSel = "M5";
+const seg = document.getElementById("tfseg");
+TFS.forEach(tf => {
+  const b = document.createElement("button"); b.type = "button"; b.id = "tf-" + tf; b.textContent = tf;
+  b.setAttribute("aria-pressed", String(tf === tfSel));
+  b.addEventListener("click", () => { tfSel = tf; seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderLines(); });
+  seg.appendChild(b);
+});
+function renderLines() {
+  const svg = document.getElementById("lines");
+  svg.innerHTML = "";
+  const W = 720, H = 300, L = 44, R = 110, T = 14, B = 34;
+  const rows = DATA.rachas.filter(r => r.tf === tfSel);
+  const ks = [...new Set(rows.map(r => r.velas_seguidas))];
+  const x = i => L + i * (W - L - R) / (ks.length - 1);
+  const y = v => T + (100 - v) * (H - T - B) / 100;
+  [0, 25, 50, 75, 100].forEach(v => {
+    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 50 ? "var(--axis)" : "var(--grid)", "stroke-width": v === 50 ? 1.5 : 1, "stroke-dasharray": v === 50 ? "4 4" : "" }, svg);
+    const t = el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, svg); t.textContent = v + "%";
+  });
+  const mid = el("text", { x: W - R + 6, y: y(50) + 4 }, svg); mid.textContent = "azar 50%";
+  ks.forEach((k, i) => { const t = el("text", { x: x(i), y: H - 12, "text-anchor": "middle" }, svg); t.textContent = k; });
+  const xl = el("text", { x: L, y: H - 0.5 }, svg); xl.textContent = "velas seguidas del mismo color →";
+  const series = [["verdes", "var(--s1)", "Tras alcistas"], ["rojas", "var(--s2)", "Tras bajistas"]];
+  const ends = [];
+  series.forEach(([col, color, name]) => {
+    const pts = ks.map((k, i) => { const r = rows.find(z => z.velas_seguidas === k && z.color === col); return r && r.prob_siguiente_igual_pct != null ? { i, k, r } : null; }).filter(Boolean);
+    el("path", { d: pts.map((p, j) => `${j ? "L" : "M"}${x(p.i)},${y(p.r.prob_siguiente_igual_pct)}`).join(""), fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+    pts.forEach(p => {
+      const cx = x(p.i), cy = y(p.r.prob_siguiente_igual_pct), thin = p.r.n < 10;
+      el("circle", { cx, cy, r: 4.5, fill: thin ? "var(--surface)" : color, stroke: thin ? color : "var(--surface)", "stroke-width": 2 }, svg);
+      const hit = el("circle", { cx, cy, r: 14, fill: "transparent" }, svg);
+      const html = `<b>${name} · ${tfSel}</b><br>Tras ${p.k} vela(s) ${col}: la siguiente repite el ${p.r.prob_siguiente_igual_pct}%<br>Casos: ${p.r.n}${thin ? " (muestra chica)" : ""}`;
+      hit.addEventListener("pointermove", e => showTip(e, html));
+      hit.addEventListener("pointerleave", hideTip);
+    });
+    const last = pts[pts.length - 1];
+    if (last) ends.push({ y: y(last.r.prob_siguiente_igual_pct), color, name });
+  });
+  ends.sort((a, b) => a.y - b.y);
+  if (ends.length === 2 && ends[1].y - ends[0].y < 16) { ends[0].y -= 8; ends[1].y += 8; }
+  ends.forEach(e => { const t = el("text", { x: W - R + 10, y: e.y + 4, class: "dl", fill: "var(--ink-2)" }, svg); t.textContent = e.name; });
+}
+
+document.getElementById("copy").addEventListener("click", async e => {
+  e.preventDefault(); e.stopPropagation();
+  const btn = e.currentTarget, code = document.getElementById("pine").textContent;
+  try { await navigator.clipboard.writeText(code); btn.textContent = "Copiado"; }
+  catch (_) {
+    document.getElementById("code").open = true;
+    const r = document.createRange(); r.selectNodeContents(document.getElementById("pine"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent = "Seleccionado: usa Copiar";
+  }
+  setTimeout(() => { btn.textContent = "Copiar código"; }, 2200);
+});
+
+renderHeat();
+renderLines();
+</script>

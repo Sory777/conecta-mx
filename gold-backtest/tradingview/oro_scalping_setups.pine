@@ -1,0 +1,250 @@
+//@version=6
+// ============================================================================
+//  Oro Scalping · Setups + Patrones de velas
+//  Basado en el backtest de gold-backtest/ (scalping.py y patrones_velas.py).
+//
+//  SETUP 1 · Impulso asiático   (00:00-07:00 UTC = 18:00-01:00 CDMX)
+//     Vela con cuerpo >= 60 % de su rango que cierra por encima del máximo
+//     (o por debajo del mínimo) de las 12 velas anteriores.
+//     Entrada: apertura de la vela siguiente.  Stop 1 ATR · Objetivo 2 ATR.
+//  SETUP 2 · Regreso a la VWAP  (12:00-17:00 UTC = 06:00-11:00 CDMX)
+//     Cierre a más de 1.5 ATR de la VWAP diaria -> operar hacia la VWAP.
+//     Entrada: apertura de la vela siguiente.  Stop 1 ATR · Objetivo 1.5 ATR.
+//  Ambos: salida por tiempo a las 12 velas, una sola operación a la vez.
+//
+//  Pensado para XAUUSD en 5 minutos. No es asesoría financiera: valida en demo.
+// ============================================================================
+indicator("Oro Scalping · Setups + Patrones", shorttitle = "Oro Scalping", overlay = true,
+     max_labels_count = 500, max_lines_count = 500)
+
+// ---------------------------------------------------------------- entradas
+grpS = "Setups"
+useImpulse = input.bool(true,  "Setup 1 · Impulso asiático", group = grpS)
+useVwap    = input.bool(true,  "Setup 2 · Regreso a la VWAP", group = grpS)
+atrLen     = input.int(14,     "ATR", minval = 1, group = grpS)
+impLook    = input.int(12,     "Impulso: velas para máximo/mínimo", minval = 2, group = grpS)
+impBody    = input.float(0.6,  "Impulso: cuerpo mínimo (% del rango)", minval = 0.1, maxval = 1.0, step = 0.05, group = grpS)
+impSL      = input.float(1.0,  "Impulso: stop (ATR)", step = 0.1, group = grpS)
+impTP      = input.float(2.0,  "Impulso: objetivo (ATR)", step = 0.1, group = grpS)
+vwDist     = input.float(1.5,  "VWAP: distancia de entrada (ATR)", step = 0.1, group = grpS)
+vwSL       = input.float(1.0,  "VWAP: stop (ATR)", step = 0.1, group = grpS)
+vwTP       = input.float(1.5,  "VWAP: objetivo (ATR)", step = 0.1, group = grpS)
+maxBars    = input.int(12,     "Salida por tiempo (velas)", minval = 1, group = grpS)
+realVwap   = input.bool(false, "Usar VWAP con volumen (si tu feed tiene volumen)", group = grpS,
+     tooltip = "Apagado = promedio del precio típico desde las 00:00 UTC, igual que en el backtest.")
+
+grpH = "Horarios (UTC)"
+sessAsia = input.session("0000-0700", "Sesión Setup 1 (Asia)", group = grpH)
+sessNY   = input.session("1200-1700", "Sesión Setup 2 (NY)", group = grpH)
+sessBad  = input.session("1700-2100", "Zona prohibida (tarde NY)", group = grpH)
+showBg   = input.bool(true, "Sombrear sesiones", group = grpH)
+
+grpP = "Patrones de velas"
+showPat   = input.bool(true,  "Mostrar nombres de patrones", group = grpP)
+showDoji  = input.bool(false, "Incluir Doji (muy frecuente)", group = grpP)
+patInSess = input.bool(false, "Solo dentro de las sesiones de los setups", group = grpP)
+
+grpV = "Visual"
+showLevels = input.bool(true, "Dibujar stop y objetivo", group = grpV)
+showStats  = input.bool(true, "Tabla de estadísticas", group = grpV)
+colBull = input.color(color.new(#1f9d6b, 0), "Alcista", group = grpV)
+colBear = input.color(color.new(#d64545, 0), "Bajista", group = grpV)
+
+// ---------------------------------------------------------------- base
+inSess(s) => not na(time(timeframe.period, s, "UTC"))
+isAsia = inSess(sessAsia)
+isNY   = inSess(sessNY)
+isBad  = inSess(sessBad)
+
+atrV = ta.atr(atrLen)
+rng  = high - low
+bodyAbs = math.abs(close - open)
+
+// VWAP diaria (ancla 00:00 UTC)
+newDay = dayofmonth(time, "UTC") != dayofmonth(time[1], "UTC")
+var float sumTP = 0.0
+var float cntTP = 0.0
+tp = hlc3
+sumTP := newDay ? tp : sumTP + tp
+cntTP := newDay ? 1.0 : cntTP + 1.0
+vwapCalc = realVwap ? ta.vwap(hlc3) : sumTP / cntTP
+plot(useVwap ? vwapCalc : na, "VWAP diaria", color = color.new(#7a6ff0, 0), linewidth = 2)
+plot(useVwap ? vwapCalc + vwDist * atrV : na, "VWAP + dist", color = color.new(#7a6ff0, 60))
+plot(useVwap ? vwapCalc - vwDist * atrV : na, "VWAP - dist", color = color.new(#7a6ff0, 60))
+
+bgcolor(showBg and isAsia ? color.new(#2a78d6, 92) : na, title = "Sesión Asia")
+bgcolor(showBg and isNY   ? color.new(#7a6ff0, 92) : na, title = "Sesión NY")
+bgcolor(showBg and isBad  ? color.new(#d64545, 93) : na, title = "Zona prohibida")
+
+// ---------------------------------------------------------------- señales
+impUp = useImpulse and isAsia and rng > 0 and close > open and bodyAbs / rng >= impBody and close > ta.highest(high, impLook)[1]
+impDn = useImpulse and isAsia and rng > 0 and close < open and bodyAbs / rng >= impBody and close < ta.lowest(low, impLook)[1]
+vwUp  = useVwap and isNY and close < vwapCalc - vwDist * atrV
+vwDn  = useVwap and isNY and close > vwapCalc + vwDist * atrV
+
+// ---------------------------------------------------------------- simulador (una operación a la vez)
+var int   pendDir  = 0      // señal de la vela anterior, se entra en esta apertura
+var int   pendKind = 0      // 1 = impulso, 2 = vwap
+var float pendATR  = na
+var int   posDir   = 0
+var int   posKind  = 0
+var float entry    = na
+var float sl       = na
+var float tgt      = na
+var int   barsIn   = 0
+var line  lSL = na
+var line  lTP = na
+var int   wins1   = 0
+var int   losses1 = 0
+var int   wins2   = 0
+var int   losses2 = 0
+var float pnl1    = 0.0
+var float pnl2    = 0.0
+bool closedNow = false
+
+// 1) abrir la operación pendiente a la apertura de esta vela
+if posDir == 0 and pendDir != 0
+    posDir  := pendDir
+    posKind := pendKind
+    entry   := open
+    float s = posKind == 1 ? impSL : vwSL
+    float t = posKind == 1 ? impTP : vwTP
+    sl      := entry - posDir * s * pendATR
+    tgt     := entry + posDir * t * pendATR
+    barsIn  := 0
+    if showLevels
+        lSL := line.new(bar_index, sl, bar_index + 1, sl, color = colBear, style = line.style_dashed)
+        lTP := line.new(bar_index, tgt, bar_index + 1, tgt, color = colBull, style = line.style_dashed)
+pendDir := 0
+
+// 2) gestionar la operación abierta (si toca stop y objetivo en la misma vela, cuenta como stop)
+if posDir != 0
+    barsIn += 1
+    bool hitSL = posDir == 1 ? low <= sl : high >= sl
+    bool hitTP = posDir == 1 ? high >= tgt : low <= tgt
+    float exitPx = na
+    if hitSL
+        exitPx := sl
+    else if hitTP
+        exitPx := tgt
+    else if barsIn >= maxBars
+        exitPx := close
+    if showLevels and not na(lSL)
+        line.set_x2(lSL, bar_index)
+        line.set_x2(lTP, bar_index)
+    if not na(exitPx)
+        float r = posDir * (exitPx - entry)
+        if posKind == 1
+            pnl1 += r
+            if r > 0
+                wins1 += 1
+            else
+                losses1 += 1
+        else
+            pnl2 += r
+            if r > 0
+                wins2 += 1
+            else
+                losses2 += 1
+        label.new(bar_index, exitPx, (r > 0 ? "✔ " : "✖ ") + str.tostring(r, "#.##"),
+             style = label.style_label_left, size = size.tiny,
+             color = color.new(r > 0 ? colBull : colBear, 20), textcolor = color.white)
+        posDir := 0
+        closedNow := true
+
+// 3) registrar señal nueva solo si no hay operación abierta
+canSignal = posDir == 0 and not closedNow
+sig1Up = canSignal and impUp
+sig1Dn = canSignal and impDn and not sig1Up
+sig2Up = canSignal and vwUp and not (sig1Up or sig1Dn)
+sig2Dn = canSignal and vwDn and not (sig1Up or sig1Dn or sig2Up)
+if sig1Up or sig1Dn or sig2Up or sig2Dn
+    pendDir  := sig1Up or sig2Up ? 1 : -1
+    pendKind := sig1Up or sig1Dn ? 1 : 2
+    pendATR  := atrV
+
+plotshape(sig1Up, "Impulso compra", shape.triangleup,   location.belowbar, colBull, text = "IMPULSO", textcolor = colBull, size = size.small)
+plotshape(sig1Dn, "Impulso venta",  shape.triangledown, location.abovebar, colBear, text = "IMPULSO", textcolor = colBear, size = size.small)
+plotshape(sig2Up, "VWAP compra",    shape.triangleup,   location.belowbar, colBull, text = "VWAP",    textcolor = colBull, size = size.small)
+plotshape(sig2Dn, "VWAP venta",     shape.triangledown, location.abovebar, colBear, text = "VWAP",    textcolor = colBear, size = size.small)
+
+alertcondition(sig1Up, "Impulso asiático · COMPRA", "Oro: Impulso asiático COMPRA. Entrar a la apertura de la siguiente vela.")
+alertcondition(sig1Dn, "Impulso asiático · VENTA",  "Oro: Impulso asiático VENTA. Entrar a la apertura de la siguiente vela.")
+alertcondition(sig2Up, "Regreso a VWAP · COMPRA",   "Oro: Regreso a VWAP COMPRA. Entrar a la apertura de la siguiente vela.")
+alertcondition(sig2Dn, "Regreso a VWAP · VENTA",    "Oro: Regreso a VWAP VENTA. Entrar a la apertura de la siguiente vela.")
+
+// ---------------------------------------------------------------- patrones de velas (mismas reglas que patrones_velas.py)
+upper    = high - math.max(open, close)
+lower    = math.min(open, close) - low
+bull     = close > open
+bear     = close < open
+avgBody  = ta.sma(bodyAbs, 14)
+downTr   = close[1] < close[6]
+upTr     = close[1] > close[6]
+big1     = bodyAbs[1] > avgBody[1]
+mid1     = (open[1] + close[1]) / 2
+
+hamShape = rng > 0 and lower >= 2 * bodyAbs and upper <= 0.3 * bodyAbs + 0.1 * rng and bodyAbs > 0.05 * rng
+invShape = rng > 0 and upper >= 2 * bodyAbs and lower <= 0.3 * bodyAbs + 0.1 * rng and bodyAbs > 0.05 * rng
+isDoji   = rng > 0 and bodyAbs <= 0.1 * rng
+maru     = rng > 0 and bodyAbs >= 0.9 * rng and bodyAbs > avgBody
+star1    = bodyAbs[1] < 0.3 * avgBody[1]
+
+pHammer   = hamShape and downTr
+pHanging  = hamShape and upTr
+pInvHam   = invShape and downTr
+pShooting = invShape and upTr
+pEngBull  = bull and bear[1] and close >= open[1] and open <= close[1] and bodyAbs > bodyAbs[1]
+pEngBear  = bear and bull[1] and close <= open[1] and open >= close[1] and bodyAbs > bodyAbs[1]
+pHarBull  = bull and bear[1] and big1 and close < open[1] and open > close[1]
+pHarBear  = bear and bull[1] and big1 and close > open[1] and open < close[1]
+pPiercing = bull and bear[1] and big1 and open < close[1] and close > mid1 and close < open[1]
+pDarkCl   = bear and bull[1] and big1 and open > close[1] and close < mid1 and close > open[1]
+pMorning  = bear[2] and bodyAbs[2] > avgBody[2] and star1 and bull and close > (open[2] + close[2]) / 2
+pEvening  = bull[2] and bodyAbs[2] > avgBody[2] and star1 and bear and close < (open[2] + close[2]) / 2
+p3Soldier = bull and bull[1] and bull[2] and close > close[1] and close[1] > close[2] and bodyAbs > 0.5 * rng and bodyAbs[1] > 0.5 * rng[1]
+p3Crows   = bear and bear[1] and bear[2] and close < close[1] and close[1] < close[2] and bodyAbs > 0.5 * rng and bodyAbs[1] > 0.5 * rng[1]
+pMaruBull = bull and maru
+pMaruBear = bear and maru
+pTwzBot   = math.abs(low - low[1]) <= 0.05 * rng and bear[1] and bull and downTr
+pTwzTop   = math.abs(high - high[1]) <= 0.05 * rng and bull[1] and bear and upTr
+
+patOk = showPat and (not patInSess or isAsia or isNY)
+
+// un solo nombre por vela: prioridad a los patrones de 3 y 2 velas
+string bullName = pMorning ? "Estrella de la mañana" : p3Soldier ? "3 soldados blancos" : pEngBull ? "Envolvente alcista" :
+     pPiercing ? "Pauta penetrante" : pHarBull ? "Harami alcista" : pTwzBot ? "Pinzas de suelo" : pHammer ? "Martillo" :
+     pInvHam ? "Martillo invertido" : pMaruBull ? "Marubozu alcista" : ""
+string bearName = pEvening ? "Estrella de la tarde" : p3Crows ? "3 cuervos negros" : pEngBear ? "Envolvente bajista" :
+     pDarkCl ? "Nube oscura" : pHarBear ? "Harami bajista" : pTwzTop ? "Pinzas de techo" : pShooting ? "Estrella fugaz" :
+     pHanging ? "Hombre colgado" : pMaruBear ? "Marubozu bajista" : ""
+
+if patOk and barstate.isconfirmed
+    if bullName != ""
+        label.new(bar_index, low, bullName, yloc = yloc.belowbar, style = label.style_label_up, size = size.tiny,
+             color = color.new(colBull, 75), textcolor = colBull)
+    if bearName != ""
+        label.new(bar_index, high, bearName, yloc = yloc.abovebar, style = label.style_label_down, size = size.tiny,
+             color = color.new(colBear, 75), textcolor = colBear)
+    if showDoji and isDoji and bullName == "" and bearName == ""
+        label.new(bar_index, high, "Doji", yloc = yloc.abovebar, style = label.style_label_down, size = size.tiny,
+             color = color.new(color.gray, 80), textcolor = color.gray)
+
+// ---------------------------------------------------------------- tabla
+var table tb = table.new(position.top_right, 4, 4, bgcolor = color.new(color.black, 20), border_width = 1)
+wr(w, l) => w + l > 0 ? str.tostring(100.0 * w / (w + l), "#") + " %" : "–"
+if showStats and barstate.islast
+    table.cell(tb, 0, 0, "Setup",    text_color = color.white, text_size = size.small)
+    table.cell(tb, 1, 0, "Ops",      text_color = color.white, text_size = size.small)
+    table.cell(tb, 2, 0, "Acierto",  text_color = color.white, text_size = size.small)
+    table.cell(tb, 3, 0, "USD/oz",   text_color = color.white, text_size = size.small)
+    table.cell(tb, 0, 1, "Impulso asiático", text_color = color.white, text_size = size.small)
+    table.cell(tb, 1, 1, str.tostring(wins1 + losses1), text_color = color.white, text_size = size.small)
+    table.cell(tb, 2, 1, wr(wins1, losses1), text_color = color.white, text_size = size.small)
+    table.cell(tb, 3, 1, str.tostring(pnl1, "#.##"), text_color = pnl1 >= 0 ? colBull : colBear, text_size = size.small)
+    table.cell(tb, 0, 2, "Regreso a VWAP", text_color = color.white, text_size = size.small)
+    table.cell(tb, 1, 2, str.tostring(wins2 + losses2), text_color = color.white, text_size = size.small)
+    table.cell(tb, 2, 2, wr(wins2, losses2), text_color = color.white, text_size = size.small)
+    table.cell(tb, 3, 2, str.tostring(pnl2, "#.##"), text_color = pnl2 >= 0 ? colBull : colBear, text_size = size.small)
+    table.cell(tb, 0, 3, "Sin costes: resta ~0.30 USD/oz por operación", text_color = color.gray, text_size = size.tiny)
+    table.merge_cells(tb, 0, 3, 3, 3)

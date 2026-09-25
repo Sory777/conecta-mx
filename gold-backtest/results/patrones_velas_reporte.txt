@@ -1,0 +1,192 @@
+
+==========================================================================================
+M1: 1000 velas  (2026-09-24 → 2026-09-25)  velas que suben después de cualquier vela: 48.1%
+               patron  direccion   n  sigue_1_vela_pct  sigue_3_velas_pct  mov_3_velas_atr
+             Martillo          1  26              42.3               50.0            0.052
+       Hombre colgado         -1  24              62.5               45.8           -0.396
+   Martillo invertido          1  17              41.2               47.1           -0.059
+       Estrella fugaz         -1  25              44.0               28.0           -0.571
+   Envolvente alcista          1 107              39.3               46.7           -0.068
+   Envolvente bajista         -1  72              48.6               50.0           -0.050
+       Harami alcista          1   5              60.0               60.0            0.516
+       Harami bajista         -1  35              57.1               65.7            0.375
+     Pauta penetrante          1   9              88.9               77.8            0.598
+          Nube oscura         -1   3              33.3               33.3           -0.466
+Estrella de la mañana          1   8              37.5               37.5           -0.368
+ Estrella de la tarde         -1   9              44.4               44.4           -0.106
+Tres soldados blancos          1  25              48.0               56.0            0.226
+  Tres cuervos negros         -1  28              46.4               53.6           -0.080
+     Marubozu alcista          1  39              51.3               51.3            0.132
+     Marubozu bajista         -1  39              61.5               64.1            0.275
+      Pinzas de suelo          1  24              41.7               54.2            0.030
+      Pinzas de techo         -1  29              55.2               62.1           -0.300
+                 Doji          0 107              48.6               42.1           -0.075
+color           rojas  verdes
+velas_seguidas               
+1                51.2    48.8
+2                47.2    48.3
+3                61.0    66.7
+4                44.4    42.1
+5                43.8    56.2
+6                71.4    55.6
+7+               70.6    54.5
+
+==========================================================================================
+M5: 1000 velas  (2026-09-22 → 2026-09-25)  velas que suben después de cualquier vela: 48.0%
+               patron  direccion  n  sigue_1_vela_pct  sigue_3_velas_pct  mov_3_velas_atr
+             Martillo          1 24              25.0               25.0           -0.503
+       Hombre colgado         -1 14              78.6               42.9           -0.267
+   Martillo invertido          1 29              51.7               34.5           -0.102
+       Estrella fugaz         -1 13              53.8               76.9            0.352
+   Envolvente alcista          1 96              44.8               51.0            0.089
+   Envolvente bajista         -1 61              45.9               47.5           -0.105
+       Harami alcista          1 10              60.0               50.0           -0.059
+       Harami bajista         -1 30              50.0               40.0            0.157
+     Pauta penetrante          1 15              40.0               40.0           -0.099
+          Nube oscura         -1  7              28.6               57.1            0.146
+Estrella de la mañana          1  8              62.5               25.0           -0.015
+ Estrella de la tarde         -1  9              55.6               44.4           -0.084
+Tres soldados blancos          1 21              47.6               52.4            0.130
+  Tres cuervos negros         -1 29              58.6               55.2            0.252
+     Marubozu alcista          1 20              35.0               45.0           -0.063
+     Marubozu bajista         -1 26              50.0               65.4            0.468
+      Pinzas de suelo          1 28              57.1               53.6            0.099
+      Pinzas de techo         -1 29              48.3               51.7           -0.247
+                 Doji          0 83              49.4               50.6            0.088
+color           rojas  verdes
+velas_seguidas               
+1                50.6    45.7
+2                46.2    48.3
+3                56.7    45.6
+4                55.9    46.2
+5                52.6    41.7
+6                50.0    80.0
+7+               28.6    20.0
+
+==========================================================================================
+M15: 1054 velas  (2026-09-14 → 2026-09-25)  velas que suben después de cualquier vela: 47.1%
+               patron  direccion   n  sigue_1_vela_pct  sigue_3_velas_pct  mov_3_velas_atr
+             Martillo          1  31              48.4               54.8           -0.457
+       Hombre colgado         -1  22              59.1               45.5            0.111
+   Martillo invertido          1  14              35.7               50.0            0.049
+       Estrella fugaz         -1  20              60.0               55.0            0.446
+   Envolvente alcista          1  85              54.1               51.8           -0.112
+   Envolvente bajista         -1  86              53.5               52.3            0.178
+       Harami alcista          1  13              53.8               53.8           -0.198
+       Harami bajista         -1  21              61.9               47.6            0.101
+     Pauta penetrante          1  10              40.0               40.0            0.068
+          Nube oscura         -1   4              75.0               50.0            0.703
+Estrella de la mañana          1   3              33.3               33.3           -0.571
+ Estrella de la tarde         -1   6              66.7               33.3            0.900
+Tres soldados blancos          1  37              62.2               43.2           -0.663
+  Tres cuervos negros         -1  19              36.8               36.8           -0.531
+     Marubozu alcista          1  41              51.2               41.5            1.111
+     Marubozu bajista         -1  25              36.0               60.0            0.608
+      Pinzas de suelo          1  21              38.1               61.9           -0.094
+      Pinzas de techo         -1  34              58.8               58.8            0.668
+                 Doji          0 109              53.2               47.7            0.035
+color           rojas  verdes
+velas_seguidas               
+1                51.7    48.8
+2                47.6    47.1
+3                52.5    54.4
+4                38.7    67.7
+5                50.0    38.1
+6                66.7    37.5
+7+               33.3    66.7
+
+==========================================================================================
+H1: 1000 velas  (2026-08-11 → 2026-09-25)  velas que suben después de cualquier vela: 46.6%
+               patron  direccion  n  sigue_1_vela_pct  sigue_3_velas_pct  mov_3_velas_atr
+             Martillo          1 32              50.0               46.9           -0.326
+       Hombre colgado         -1 19              52.6               47.4           -0.067
+   Martillo invertido          1 21              47.6               47.6            0.102
+       Estrella fugaz         -1 20              70.0               75.0           -0.163
+   Envolvente alcista          1 86              50.0               46.5           -0.227
+   Envolvente bajista         -1 76              47.4               50.0            0.081
+       Harami alcista          1  7              57.1               28.6           -1.044
+       Harami bajista         -1 22              68.2               68.2            0.570
+     Pauta penetrante          1 12              58.3               58.3            0.366
+          Nube oscura         -1  4               0.0                0.0           -1.104
+Estrella de la mañana          1  7              42.9               42.9            0.099
+ Estrella de la tarde         -1  6              50.0               50.0            0.714
+Tres soldados blancos          1 29              41.4               31.0            0.028
+  Tres cuervos negros         -1 19              52.6               47.4           -0.295
+     Marubozu alcista          1 29              72.4               55.2            0.125
+     Marubozu bajista         -1 19              42.1               42.1           -0.394
+      Pinzas de suelo          1 33              54.5               54.5            0.105
+      Pinzas de techo         -1 33              69.7               48.5           -0.112
+                 Doji          0 99              45.5               47.5           -0.009
+color           rojas  verdes
+velas_seguidas               
+1                55.3    51.9
+2                51.1    48.4
+3                52.2    46.7
+4                51.4    39.3
+5                55.6    36.4
+6                90.0    50.0
+7+               35.7    33.3
+
+==========================================================================================
+H4: 1000 velas  (2026-02-23 → 2026-09-25)  velas que suben después de cualquier vela: 47.6%
+               patron  direccion   n  sigue_1_vela_pct  sigue_3_velas_pct  mov_3_velas_atr
+             Martillo          1  30              66.7               46.7           -0.129
+       Hombre colgado         -1  28              50.0               67.9            0.080
+   Martillo invertido          1  22              68.2               59.1            0.149
+       Estrella fugaz         -1  11              72.7               63.6           -0.192
+   Envolvente alcista          1  83              44.6               41.0           -0.175
+   Envolvente bajista         -1  80              56.2               56.2            0.238
+       Harami alcista          1  23              56.5               43.5           -0.481
+       Harami bajista         -1  31              54.8               58.1            0.198
+     Pauta penetrante          1  14              64.3               35.7           -0.311
+          Nube oscura         -1  11              63.6               54.5           -0.348
+Estrella de la mañana          1  10              50.0               50.0            0.314
+ Estrella de la tarde         -1   7              71.4               42.9            0.060
+Tres soldados blancos          1  15              40.0               66.7            0.170
+  Tres cuervos negros         -1  21              28.6               38.1           -0.233
+     Marubozu alcista          1  12              66.7               58.3            0.073
+     Marubozu bajista         -1   9              66.7               55.6            0.822
+      Pinzas de suelo          1  23              69.6               47.8           -0.462
+      Pinzas de techo         -1  27              51.9               59.3            0.192
+                 Doji          0 115              53.0               48.7            0.007
+color           rojas  verdes
+velas_seguidas               
+1                53.5    48.2
+2                55.1    46.7
+3                41.3    47.4
+4                45.2    40.7
+5                57.1    36.4
+6                25.0    75.0
+7+               33.3     0.0
+
+==========================================================================================
+D1: 1000 velas  (2022-11-24 → 2026-09-25)  velas que suben después de cualquier vela: 53.6%
+               patron  direccion  n  sigue_1_vela_pct  sigue_3_velas_pct  mov_3_velas_atr
+             Martillo          1 12              58.3               33.3           -0.252
+       Hombre colgado         -1 16              37.5               43.8           -0.835
+   Martillo invertido          1 15              73.3               60.0            0.256
+       Estrella fugaz         -1 19              31.6               10.5           -0.629
+   Envolvente alcista          1 48              54.2               56.2            0.236
+   Envolvente bajista         -1 71              35.2               52.1           -0.172
+       Harami alcista          1 57              52.6               49.1            0.099
+       Harami bajista         -1 39              48.7               33.3           -0.445
+     Pauta penetrante          1 11              45.5               63.6            0.491
+          Nube oscura         -1  7              42.9               57.1           -0.123
+Estrella de la mañana          1  7              85.7               42.9            0.826
+ Estrella de la tarde         -1  9              11.1               33.3           -0.598
+Tres soldados blancos          1 42              31.0               45.2            0.017
+  Tres cuervos negros         -1 11              63.6               63.6            0.632
+     Marubozu alcista          1 30              50.0               53.3           -0.380
+     Marubozu bajista         -1  9              55.6               55.6           -0.041
+      Pinzas de suelo          1 18              55.6               55.6            0.241
+      Pinzas de techo         -1 26              46.2               42.3           -0.695
+                 Doji          0 95              48.4               49.5           -0.124
+color           rojas  verdes
+velas_seguidas               
+1                42.6    53.2
+2                43.8    52.1
+3                44.9    41.1
+4                40.9    50.0
+5                55.6    33.3
+6                40.0    80.0
+7+               66.7    42.9
