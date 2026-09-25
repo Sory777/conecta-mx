@@ -126,3 +126,80 @@ tendencia: muchas pérdidas pequeñas y unas pocas ganancias grandes.
 
 **Siguiente paso recomendado:** prueba la estrategia en una cuenta demo de eToro durante 2‑3 meses
 y compara los resultados con este backtest antes de usar dinero real.
+
+---
+
+# Scalping (M1 / M5 / M15)
+
+Script: `python3 scalping.py` → `results/scalping_resultados.csv`, `results/scalping_reporte.txt`
+
+## Datos y supuestos
+| TF | Periodo (UTC) | Movimiento medio por vela |
+|---|---|---|
+| M1 | 24‑sep 23:32 → 25‑sep 16:11 (~17 h) | 1.88 USD |
+| M5 | 22‑sep 01:55 → 25‑sep 16:10 (~3.5 días) | 4.49 USD |
+| M15 | 14‑sep 07:15 → 25‑sep 16:00 (~9 días) | 6.89 USD |
+
+- **Coste:** 0.30 USD/oz por operación (spread de eToro de 0.20 más 0.10 de deslizamiento). Repetí todo con 0.50.
+  En M1 el spread se come ~10 % del movimiento medio de una vela, **y ese es el enemigo número uno del scalping**.
+- Entrada a la apertura de la vela siguiente a la señal. Si una vela toca el stop y el objetivo a la vez, se cuenta como **stop**.
+  Salida forzada por tiempo: 30 velas en M1, 12 en M5 y 8 en M15.
+- ⚠️ **Muestra mínima:** 1 día de M1, 4 de M5 y 11 de M15, y los periodos se solapan (M1 ⊂ M5 ⊂ M15).
+  Probé 64 combinaciones, así que algunas "ganan" por puro azar. **Nada de esto está validado estadísticamente.**
+
+## Qué se probó
+5 estrategias × 5 sesiones × 3 temporalidades (más ORB en M5 y M15):
+retroceso a la EMA 9/21/50, reversión con Bollinger y RSI, ruptura con vela de impulso, reversión a una "VWAP" diaria y ruptura del rango de apertura (ORB) de Londres y Nueva York.
+
+## Resultados clave
+- **Operar todo el día pierde dinero** en casi todas las estrategias. **El horario lo es todo.**
+- **Tarde de NY (17‑21 UTC):** perdió en todas las estrategias de tendencia (PF de 0.03 a 0.32). No hagas scalping ahí.
+- **ORB de Nueva York 13:30:** PF 0.16. La apertura de NY en el oro da rupturas falsas y barre stops.
+- **Retroceso a la EMA** (el setup "clásico" de YouTube): perdió en el día completo en las 3 temporalidades.
+
+Las **únicas dos** combinaciones que ganaron en las 3 temporalidades, con largos y cortos, y que siguen ganando con coste de 0.50:
+
+| Setup | TF | Ops | % acierto | P&L (USD/oz) | PF (coste 0.30 → 0.50) |
+|---|---|---|---|---|---|
+| **Vela de impulso en Asia** | M1 | 25 | 60 % | +21 | 2.11 → 1.76 |
+| | **M5** | 22 | 59 % | +45 | **2.20 → 2.03** |
+| | M15 | 25 | 56 % | +73 | 2.33 → 2.19 |
+| **Reversión a la VWAP en NY** | M1 | 52 | 54 % | +26 | 1.36 → 1.20 |
+| | **M5** | 30 | 57 % | +58 | **1.82 → 1.70** |
+| | M15 | 33 | 42 % | +6 | 1.05 |
+
+## La estrategia de scalping propuesta (en M5)
+
+### Setup 1 — "Impulso asiático" · 00:00‑07:00 UTC (18:00‑01:00 hora de CDMX)
+1. Timeframe de 5 minutos. Calcula el ATR(14).
+2. **Señal:** una vela cuyo **cuerpo sea ≥ 60 % de su rango** y que **cierre por encima del máximo
+   (o por debajo del mínimo) de las 12 velas anteriores**, es decir, de la última hora.
+3. **Entrada:** a la apertura de la siguiente vela, a favor de la vela de impulso.
+4. **Stop:** 1 × ATR. **Objetivo:** 2 × ATR (en M5 son ~4.5 USD de stop y ~9 USD de objetivo).
+5. **Salida por tiempo:** si en 12 velas (1 hora) no tocó ni el stop ni el objetivo, cierra.
+
+### Setup 2 — "Regreso a la VWAP" · 12:00‑17:00 UTC (06:00‑11:00 hora de CDMX)
+1. Timeframe de 5 minutos. VWAP del día (si tu plataforma tiene VWAP, úsala; aquí se usó el promedio
+   del precio típico desde las 00:00 UTC porque eToro no da volumen) y ATR(14).
+2. **Señal:** el cierre queda **a más de 1.5 ATR por debajo de la VWAP → compra**, o **por encima → venta**.
+3. **Stop:** 1 × ATR. **Objetivo:** 1.5 × ATR.
+4. **Salida por tiempo:** 12 velas (1 hora).
+5. **No operes** de 12:25 a 12:45 UTC los días de datos de EE. UU. (NFP, CPI, PPI, ventas minoristas)
+   ni a las 18:00 UTC los días de decisión de la FOMC. Ahí el precio se aleja de la VWAP y no regresa.
+
+### Gestión de riesgo (obligatoria en scalping)
+- **Riesgo por operación: 0.5 % de la cuenta.** Onzas = (0.5 % × capital) / (1 × ATR en USD).
+  Ejemplo: con 2,000 USD de cuenta y un ATR de 4.5, son 10 USD / 4.5 = 2.2 oz (~9,500 USD de exposición, ~x5).
+- **Máximo 3 pérdidas seguidas o ‑1.5 % en el día → apaga la pantalla.** En el backtest hubo rachas de 2 a 4 pérdidas.
+- **Una sola posición a la vez.** No promedies a la baja.
+- **No hagas scalping de 17:00 a 21:00 UTC** (11:00‑15:00 CDMX) ni en la apertura de NY a las 13:30 UTC.
+- El spread de eToro se ensancha en noticias y en el rollover (21:00‑22:00 UTC). Si ves un spread mayor a 0.40, no entres.
+- eToro no permite órdenes de entrada pendientes en el oro (solo market/MIT), así que entrarás a mercado.
+  Con eso el deslizamiento es real, y por eso el backtest se repitió con coste de 0.50.
+
+### Cómo validarlo antes de arriesgar dinero
+1. Opera **los dos setups en demo durante al menos 100 operaciones** (unas 4‑6 semanas).
+2. Anota cada operación: hora, setup, entrada, stop, objetivo, resultado y spread.
+3. Pasa a real solo si el PF de la demo es > 1.3 con al menos 100 operaciones. Si no, el "edge" era ruido.
+4. Vuelve a correr `scalping.py` cada semana con datos nuevos de eToro. Si el PF de los últimos 30 días cae
+   por debajo de 1.0, deja de operar ese setup.

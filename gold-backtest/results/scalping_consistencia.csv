@@ -1,0 +1,22 @@
+estrategia,sesion,tfs,tfs_ganadoras,pf_mediano
+ORB Londres 07:00 (15 min),Todo el día,1,1,1.28
+ORB Nueva York 13:30 (15 min),Todo el día,1,0,0.16
+Retroceso EMA 9/21/50,Asia 00-07,3,1,0.52
+Retroceso EMA 9/21/50,Londres 07-12,3,1,0.97
+Retroceso EMA 9/21/50,NY 12-17,3,2,1.35
+Retroceso EMA 9/21/50,Tarde NY 17-21,2,0,0.385
+Retroceso EMA 9/21/50,Todo el día,3,0,0.88
+Reversión Bollinger+RSI,Asia 00-07,3,1,0.74
+Reversión Bollinger+RSI,Londres 07-12,3,3,1.6
+Reversión Bollinger+RSI,NY 12-17,2,0,0.73
+Reversión Bollinger+RSI,Todo el día,3,2,1.08
+Reversión a 'VWAP' diaria,Asia 00-07,3,1,0.95
+Reversión a 'VWAP' diaria,Londres 07-12,3,0,0.85
+Reversión a 'VWAP' diaria,NY 12-17,3,3,1.36
+Reversión a 'VWAP' diaria,Tarde NY 17-21,2,2,1.0899999999999999
+Reversión a 'VWAP' diaria,Todo el día,3,2,1.14
+Ruptura vela de impulso,Asia 00-07,3,3,2.2
+Ruptura vela de impulso,Londres 07-12,3,1,0.68
+Ruptura vela de impulso,NY 12-17,3,1,0.69
+Ruptura vela de impulso,Tarde NY 17-21,2,0,0.29000000000000004
+Ruptura vela de impulso,Todo el día,3,1,0.93
