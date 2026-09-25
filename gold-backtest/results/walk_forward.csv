@@ -1,0 +1,9 @@
+estrategia,periodo,trades,ret_total_pct,profit_factor,max_dd_pct
+Ruptura Donchian 20/10 + stop 2.0ATR,1ª mitad,13,12.7,2.01,-7.6
+Ruptura Donchian 20/10 + stop 2.0ATR,2ª mitad,17,42.8,2.7,-8.8
+Tendencia SMA20/50 (solo largos),1ª mitad,6,16.4,3.35,-4.3
+Tendencia SMA20/50 (solo largos),2ª mitad,7,89.5,37.81,-1.9
+Retroceso RSI(2)<10 con precio>SMA200,1ª mitad,10,10.3,22.06,-0.3
+Retroceso RSI(2)<10 con precio>SMA200,2ª mitad,14,10.6,1.89,-10.7
+Comprar y mantener,1ª mitad,1,56.3,inf,-11.2
+Comprar y mantener,2ª mitad,1,118.4,inf,-26.6

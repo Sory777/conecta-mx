@@ -1,0 +1,133 @@
+==========================================================================================
+DATOS  D1: 2022-11-24 → 2026-09-25 (1000 velas)
+       H4: 2026-02-23 → 2026-09-25 (1000 velas)
+       H1: 2026-08-11 → 2026-09-25 (1000 velas)
+Coste asumido por operación: 0.5 USD/oz (spread + deslizamiento)
+
+==========================================================================================
+estacionalidad_mensual_1971_hoy
+     ret_prom_pct  mediana_pct  pct_alcistas  t_stat  n_años
+Ene          2.79         1.64          66.1    2.65      56
+Feb          1.49         1.01          53.6    2.39      56
+Mar          0.02         0.15          50.0    0.03      56
+Abr          0.48        -0.58          44.6    0.92      56
+May          0.64        -0.34          39.3    1.13      56
+Jun          0.20         0.00          46.4    0.30      56
+Jul          0.10         0.00          48.2    0.19      56
+Ago          1.11         0.80          57.1    1.87      56
+Sep          1.39        -0.16          49.1    1.91      55
+Oct          1.09         0.00          49.1    2.00      55
+Nov          0.05         0.00          47.3    0.08      55
+Dic          0.64         0.32          50.9    1.05      55
+
+==========================================================================================
+dia_semana_D1
+     ret_prom_pct  t_stat  pct_alcistas    n
+Lun         0.084    0.97          50.5  196
+Mar         0.103    1.22          58.0  200
+Mié         0.102    1.21          52.5  198
+Jue         0.107    1.33          52.5  198
+Vie         0.093    0.97          55.3  197
+
+==========================================================================================
+bloques_4h_H4
+                      ret_prom_pct  t_stat  pct_alcistas  rango_prom_pct    n
+bloque_4h_inicio_utc                                                         
+0                          -0.0265   -0.52          49.1           1.008  163
+4                          -0.0269   -0.57          44.8           0.829  163
+8                          -0.0094   -0.19          54.0           0.800  163
+12                         -0.0001   -0.00          45.7           1.282  162
+16                         -0.0824   -1.73          46.0           0.842  163
+20                          0.0415    1.17          47.3           0.570  186
+
+==========================================================================================
+hora_utc_H1
+          ret_prom_pct  t_stat  pct_velas_alcistas  rango_prom_pct   n
+hora_utc                                                              
+0               0.0307    0.91                58.1           0.364  43
+1              -0.0058   -0.12                46.5           0.455  43
+2              -0.0149   -0.38                44.2           0.344  43
+3              -0.0161   -0.61                46.5           0.255  43
+4               0.0020    0.09                51.2           0.197  43
+5              -0.0100   -0.25                41.9           0.361  43
+6               0.0202    0.63                51.2           0.285  43
+7              -0.0327   -1.15                39.5           0.281  43
+8              -0.0474   -1.19                41.9           0.306  43
+9              -0.0196   -0.74                46.5           0.266  43
+10              0.0343    1.33                51.2           0.249  43
+11              0.0524    1.58                48.8           0.282  43
+12              0.0466    0.60                53.5           0.534  43
+13              0.0061    0.11                48.8           0.524  43
+14              0.0217    0.45                60.5           0.490  43
+15              0.0126    0.30                58.1           0.408  43
+16             -0.0097   -0.24                41.9           0.335  43
+17             -0.0441   -1.69                34.9           0.272  43
+18             -0.0939   -1.64                37.2           0.329  43
+19              0.0129    0.42                44.2           0.287  43
+20             -0.0432   -2.39                32.6           0.182  43
+21              0.0009    0.13                36.4           0.046  11
+22              0.0150    0.62                46.5           0.220  43
+23              0.0040    0.15                55.8           0.239  43
+
+==========================================================================================
+ESTRATEGIAS DIARIAS (D1, ~4 años)
+                           estrategia  trades  win_rate  ret_total_pct  prom_trade_pct  profit_factor  max_dd_pct  peor_trade_pct  racha_perdedora_max
+                   Comprar y mantener       1     100.0          144.2         144.233            inf       -26.6          144.23                    0
+     Tendencia SMA20/50 (solo largos)      10      60.0           78.3           6.533           8.32        -4.3           -3.46                    3
+    Tendencia SMA50/200 (solo largos)       2      50.0           90.2          46.685          29.76         0.0           -3.25                    1
+ Ruptura Donchian 20/10 + stop 2.0ATR      24      45.8           40.1           1.557           2.23        -8.8           -4.58                    3
+ Ruptura Donchian 55/20 + stop 3.0ATR       8      75.0           83.4           8.669           9.40        -4.5           -4.52                    1
+Retroceso RSI(2)<10 con precio>SMA200      23      82.6           20.7           0.868           2.53       -10.7          -10.70                    1
+    Venta RSI(2)>90 con precio<SMA200       4      50.0           -5.2          -1.282           0.37        -2.0           -6.07                    1
+
+==========================================================================================
+ESTRATEGIAS INTRADÍA (H1, ~6 semanas — muestra MUY pequeña)
+                                                       estrategia  trades  win_rate  ret_total_pct  prom_trade_pct  profit_factor  max_dd_pct  peor_trade_pct  racha_perdedora_max
+                      Ruptura rango asiático (00-06 UTC), R:R 1.0      39      56.4            6.6           0.165           2.03        -1.5           -0.98                    3
+                      Ruptura rango asiático (00-06 UTC), R:R 1.5      39      56.4            7.5           0.188           2.18        -1.6           -0.98                    3
+                      Ruptura rango asiático (00-06 UTC), R:R 2.0      39      56.4            8.9           0.222           2.39        -1.5           -0.98                    3
+Ruptura rango asiático (00-06 UTC), R:R 1.5 + filtro tendencia D1      23      56.5            4.7           0.203           2.62        -1.7           -0.95                    3
+                                      Largo sesión Asia 00-07 UTC      42      45.2            0.2           0.007           1.03        -3.4           -1.16                    6
+                                   Largo sesión Londres 07-13 UTC      43      51.2            0.9           0.024           1.10        -4.8           -1.92                    4
+                                        Largo sesión NY 13-21 UTC      43      51.2           -6.4          -0.150           0.59        -6.8           -3.20                    4
+                                        Corto sesión NY 13-21 UTC      43      48.8            5.5           0.127           1.57        -3.6           -1.91                    3
+                           Momentum vela apertura NY (13 UTC), 3h      43      44.2           -4.7          -0.111           0.55        -7.4           -2.74                    5
+
+==========================================================================================
+LARGO POR BLOQUE DE 4H (H4, ~7 meses)
+               estrategia  trades  win_rate  ret_total_pct  prom_trade_pct  profit_factor  max_dd_pct  peor_trade_pct  racha_perdedora_max
+Largo bloque H4 00-04 UTC     163      47.9           -6.3          -0.038           0.86       -13.7           -2.52                    9
+Largo bloque H4 04-08 UTC     163      44.2           -6.3          -0.038           0.83        -8.6           -3.45                    6
+Largo bloque H4 08-12 UTC     163      53.4           -3.6          -0.021           0.90        -8.7           -3.45                    5
+Largo bloque H4 12-16 UTC     162      44.4           -2.3          -0.011           0.96       -11.3           -3.03                    9
+Largo bloque H4 16-20 UTC     163      45.4          -14.4          -0.094           0.63       -17.1           -2.93                    8
+Largo bloque H4 20-24 UTC     186      44.1            5.6           0.030           1.25        -3.5           -1.92                    6
+
+==========================================================================================
+WALK-FORWARD (1ª mitad vs 2ª mitad de D1)
+                           estrategia  periodo  trades  ret_total_pct  profit_factor  max_dd_pct
+ Ruptura Donchian 20/10 + stop 2.0ATR 1ª mitad      13           12.7           2.01        -7.6
+ Ruptura Donchian 20/10 + stop 2.0ATR 2ª mitad      17           42.8           2.70        -8.8
+     Tendencia SMA20/50 (solo largos) 1ª mitad       6           16.4           3.35        -4.3
+     Tendencia SMA20/50 (solo largos) 2ª mitad       7           89.5          37.81        -1.9
+Retroceso RSI(2)<10 con precio>SMA200 1ª mitad      10           10.3          22.06        -0.3
+Retroceso RSI(2)<10 con precio>SMA200 2ª mitad      14           10.6           1.89       -10.7
+                   Comprar y mantener 1ª mitad       1           56.3            inf       -11.2
+                   Comprar y mantener 2ª mitad       1          118.4            inf       -26.6
+
+==========================================================================================
+SENSIBILIDAD DE PARÁMETROS — Donchian (36 combinaciones)
+Combinaciones rentables: 36/36 | PF mediano 4.29 | ret mediano 64.0%
+ entrada  salida  atr  trades  ret    pf   dd
+      40      20  3.0       8 98.9 18.44 -2.8
+      40      20  1.5       9 94.5 16.27 -1.9
+      55      20  1.5       8 89.6 15.37 -3.2
+      40      20  2.0       9 92.4 13.33 -2.5
+      55      20  2.0       8 86.3 11.55 -4.2
+      55      20  3.0       8 83.4  9.40 -4.5
+      40       5  1.5      19 65.0  6.99 -4.1
+      55       5  1.5      18 57.5  6.99 -4.1
+
+==========================================================================================
+MONTE CARLO (5000 remuestreos de las operaciones Donchian 20/10)
+{'prob_perder': np.float64(9.1), 'dd_p95': np.float64(-21.8), 'ret_p5': np.float64(-7.1), 'ret_mediana': np.float64(38.3)}

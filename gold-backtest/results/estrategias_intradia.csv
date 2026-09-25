@@ -1,0 +1,10 @@
+estrategia,trades,win_rate,ret_total_pct,prom_trade_pct,profit_factor,max_dd_pct,peor_trade_pct,racha_perdedora_max
+"Ruptura rango asiático (00-06 UTC), R:R 1.0",39,56.4,6.6,0.165,2.03,-1.5,-0.98,3
+"Ruptura rango asiático (00-06 UTC), R:R 1.5",39,56.4,7.5,0.188,2.18,-1.6,-0.98,3
+"Ruptura rango asiático (00-06 UTC), R:R 2.0",39,56.4,8.9,0.222,2.39,-1.5,-0.98,3
+"Ruptura rango asiático (00-06 UTC), R:R 1.5 + filtro tendencia D1",23,56.5,4.7,0.203,2.62,-1.7,-0.95,3
+Largo sesión Asia 00-07 UTC,42,45.2,0.2,0.007,1.03,-3.4,-1.16,6
+Largo sesión Londres 07-13 UTC,43,51.2,0.9,0.024,1.1,-4.8,-1.92,4
+Largo sesión NY 13-21 UTC,43,51.2,-6.4,-0.15,0.59,-6.8,-3.2,4
+Corto sesión NY 13-21 UTC,43,48.8,5.5,0.127,1.57,-3.6,-1.91,3
+"Momentum vela apertura NY (13 UTC), 3h",43,44.2,-4.7,-0.111,0.55,-7.4,-2.74,5

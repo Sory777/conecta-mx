@@ -1,0 +1,8 @@
+estrategia,trades,win_rate,ret_total_pct,prom_trade_pct,profit_factor,max_dd_pct,peor_trade_pct,racha_perdedora_max
+Comprar y mantener,1,100.0,144.2,144.233,inf,-26.6,144.23,0
+Tendencia SMA20/50 (solo largos),10,60.0,78.3,6.533,8.32,-4.3,-3.46,3
+Tendencia SMA50/200 (solo largos),2,50.0,90.2,46.685,29.76,0.0,-3.25,1
+Ruptura Donchian 20/10 + stop 2.0ATR,24,45.8,40.1,1.557,2.23,-8.8,-4.58,3
+Ruptura Donchian 55/20 + stop 3.0ATR,8,75.0,83.4,8.669,9.4,-4.5,-4.52,1
+Retroceso RSI(2)<10 con precio>SMA200,23,82.6,20.7,0.868,2.53,-10.7,-10.7,1
+Venta RSI(2)>90 con precio<SMA200,4,50.0,-5.2,-1.282,0.37,-2.0,-6.07,1
