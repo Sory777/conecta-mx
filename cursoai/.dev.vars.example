@@ -1,0 +1,8 @@
+# Copy to .dev.vars for local development (never commit .dev.vars).
+ENVIRONMENT=development
+# "mock" = deterministic offline AI for development/tests. "anthropic" = real Claude.
+AI_PROVIDER=mock
+# Required when AI_PROVIDER=anthropic:
+# ANTHROPIC_API_KEY=sk-ant-...
+# Burst limit of real AI calls per user per minute (production default 20).
+AI_RATE_PER_MIN=600
