@@ -20,5 +20,9 @@ export default tseslint.config(
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['worker/**/*.ts', 'shared/**/*.ts', 'tests/**/*.ts'],
     languageOptions: { ecmaVersion: 2022, globals: { ...globals.node, ...globals.worker } },
+  },
+  {
+    files: ['tests/**/*.ts'],
+    rules: { '@typescript-eslint/no-explicit-any': 'off' },
   }
 );

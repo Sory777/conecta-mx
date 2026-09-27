@@ -160,3 +160,13 @@ ai_conversations 1─N ai_messages
 **Dentro:** registro/login; crear curso desde texto libre; diagnóstico (≤3 preguntas); plan con aceptar/modificar; etapas y actividades bajo demanda; ejercicios con corrección local e IA; dominio por concepto y competencia; refuerzo automático; evaluación de etapa; tutor con contexto; regeneración de actividades; biblioteca (continuar, duplicar, pausar, reiniciar, eliminar, compartir e importar, agregar contenido); progreso; perfil con uso y límites; proyecto final; certificado verificable; fuentes en temas volátiles; avisos en temas sensibles.
 
 **Fuera (arquitectura preparada):** pagos (`users.plan` ya existe), multimedia (`content_json` admite bloques nuevos como `image`, `diagram` o `audio`), recuperación de contraseña por correo (necesita un proveedor de email), OAuth.
+
+## 14. Verificación
+
+| Nivel | Qué cubre | Cómo |
+|---|---|---|
+| Unitarias (25) | motor de dominio, corrección por reglas, defensas contra inyección, hashing de contraseñas, ventana de memoria del tutor, costos | `npm test` |
+| API (23) | intake sin preguntas innecesarias → plan → modificación versionada → aceptación → contenido bajo demanda sin fugas de claves de respuesta → corrección → dominio → refuerzo automático → evaluación de etapa (y su camino de fallo) → etapas siguientes generadas al llegar → proyecto → certificado verificable; diagnóstico ≤3 preguntas; temas sensibles y prohibidos; biblioteca completa; tutor; aislamiento entre usuarios, CSRF, validación, rate limit y sesiones | `npm run test:integration` |
+| UI E2E (12 = 4 × iPhone/tablet/escritorio) | el recorrido real en el navegador, sin errores de consola ni scroll horizontal | `npm run test:e2e` |
+
+Todas se ejecutan con `AI_PROVIDER=mock`. **La calidad real de las respuestas de Claude queda pendiente de validar** en cuanto exista `ANTHROPIC_API_KEY`.

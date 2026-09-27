@@ -12,7 +12,9 @@
     "test": "vitest run",
     "db:migrate:local": "wrangler d1 migrations apply cursoai --local",
     "db:migrate:remote": "wrangler d1 migrations apply cursoai --remote",
-    "deploy": "vite build && wrangler deploy"
+    "deploy": "vite build && wrangler deploy",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",

@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800 antialiased;
+}
+
+:focus-visible {
+  @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-sm hover:bg-brand-700;
+  }
+  .btn-secondary {
+    @apply btn border border-slate-200 bg-white text-slate-700 hover:border-brand-500 hover:text-brand-700;
+  }
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100;
+  }
+  .btn-danger {
+    @apply btn border border-rose-200 bg-white text-rose-600 hover:bg-rose-50;
+  }
+  .input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+  .card {
+    @apply rounded-2xl border border-slate-200/70 bg-white shadow-sm;
+  }
+  .chip {
+    @apply inline-flex min-h-[36px] items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 transition hover:border-brand-500 hover:text-brand-700;
+  }
+  .page {
+    @apply mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6 md:pb-12;
+  }
+}
+
+.prose-lite p { @apply my-2 leading-relaxed; }
+.prose-lite ul { @apply my-2 list-disc space-y-1 pl-5; }
+.prose-lite ol { @apply my-2 list-decimal space-y-1 pl-5; }
+.prose-lite code { @apply rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.9em] text-slate-800; }
+.prose-lite pre { @apply my-3 overflow-x-auto rounded-xl bg-slate-900 p-4 text-sm text-slate-100; }
+.prose-lite pre code { @apply bg-transparent p-0 text-slate-100; }
+.prose-lite h3, .prose-lite h4 { @apply mb-1 mt-3 font-semibold text-slate-900; }
+.prose-lite a { @apply text-brand-700 underline; }
+.prose-lite table { @apply my-3 w-full border-collapse text-sm; }
+.prose-lite th, .prose-lite td { @apply border border-slate-200 px-2 py-1 text-left; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}
