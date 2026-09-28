@@ -52,6 +52,28 @@ export async function uploadImage(file: File, folder = 'businesses'): Promise<st
   return data.publicUrl;
 }
 
+// ID photos and ownership proof for business claims go to a private
+// bucket (never a public URL, unlike uploadImage above), readable only by
+// the uploader and admins — see the authenticated_insert/owner_read/
+// admin_read claim-documents storage policies. Returns the storage path,
+// not a URL; fetch a short-lived signed URL to actually view it.
+export async function uploadClaimDocument(file: File): Promise<string> {
+  if (!ALLOWED.includes(file.type)) {
+    throw new Error('Formato no soportado. Usa JPG, PNG o WebP.');
+  }
+  if (file.size > MAX_BYTES) {
+    throw new Error('La imagen pesa más de 4MB. Reduce el tamaño.');
+  }
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Debes iniciar sesión.');
+  const compressed = await compressImage(file);
+  const ext = compressed.type === 'image/jpeg' ? 'jpg' : (file.name.split('.').pop()?.toLowerCase() || 'jpg');
+  const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage.from('claim-documents').upload(path, compressed, { cacheControl: '3600', upsert: true });
+  if (error) throw error;
+  return path;
+}
+
 const MAX_VIDEO_BYTES = 100_000_000; // 100MB
 const ALLOWED_VIDEO = ['video/mp4', 'video/webm', 'video/quicktime'];
 

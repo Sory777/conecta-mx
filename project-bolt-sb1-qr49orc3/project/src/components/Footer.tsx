@@ -1,5 +1,5 @@
 import { Logo } from './Logo';
-import { Store, Briefcase, QrCode, Shield, Heart, Calendar } from 'lucide-react';
+import { Store, Briefcase, QrCode, Shield, Heart, Calendar, HelpCircle } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (route: string) => void;
@@ -24,6 +24,7 @@ export function Footer({ onNavigate }: FooterProps) {
               <li><button onClick={() => onNavigate('events')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><Calendar className="h-4 w-4" /> Eventos</button></li>
               <li><button onClick={() => onNavigate('qr')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><QrCode className="h-4 w-4" /> Códigos QR</button></li>
               <li><button onClick={() => onNavigate('plans')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><Shield className="h-4 w-4" /> Planes</button></li>
+              <li><button onClick={() => onNavigate('faq')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><HelpCircle className="h-4 w-4" /> Preguntas frecuentes</button></li>
             </ul>
           </div>
           <div>

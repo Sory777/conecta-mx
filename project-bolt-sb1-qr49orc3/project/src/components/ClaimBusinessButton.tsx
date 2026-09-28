@@ -1,13 +1,75 @@
-import { useState } from 'react';
-import { BadgeCheck, Send, X, LogIn } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { BadgeCheck, Send, X, LogIn, Upload, Loader2, Check } from 'lucide-react';
 import { Modal } from './Modal';
 import { useToast } from './Toast';
 import { storage } from '../lib/storage';
+import { uploadClaimDocument } from '../lib/upload';
 import { useAuth } from '../lib/auth';
 
 interface ClaimBusinessButtonProps {
   businessId: string;
   businessName: string;
+}
+
+function DocumentPicker({
+  label, hint, required, path, onChange,
+}: {
+  label: string;
+  hint: string;
+  required?: boolean;
+  path: string;
+  onChange: (path: string) => void;
+}) {
+  const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setPreviewUrl(URL.createObjectURL(file));
+    setBusy(true);
+    try {
+      const uploadedPath = await uploadClaimDocument(file);
+      onChange(uploadedPath);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'No se pudo subir el documento';
+      toast(msg, 'error');
+      setPreviewUrl('');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="label">{label}{required ? '' : ' (opcional, recomendado)'}</label>
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} className="hidden" />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={busy}
+        className={`flex w-full items-center gap-3 rounded-xl border-2 border-dashed p-3 text-left transition ${path ? 'border-emerald-300 bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:border-[#1565C0]'}`}
+      >
+        {previewUrl ? (
+          <img src={previewUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+        ) : (
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+            <Upload className="h-5 w-5" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-slate-700">
+            {busy ? 'Subiendo...' : path ? 'Listo, toca para cambiarla' : 'Toca para subir una foto'}
+          </p>
+          <p className="text-xs text-slate-400">{hint}</p>
+        </div>
+        {busy ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-slate-400" /> : path ? <Check className="h-4 w-4 shrink-0 text-emerald-500" /> : null}
+      </button>
+    </div>
+  );
 }
 
 export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessButtonProps) {
@@ -16,6 +78,8 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [idPhotoPath, setIdPhotoPath] = useState('');
+  const [proofPhotoPath, setProofPhotoPath] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -25,9 +89,13 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
       toast('Tu nombre es requerido', 'error');
       return;
     }
+    if (!idPhotoPath) {
+      toast('Sube una foto de tu identificación para verificarte', 'error');
+      return;
+    }
     setSubmitting(true);
     try {
-      await storage.submitBusinessClaim(businessId, name.trim(), user.email || '', user.id, phone.trim() || undefined);
+      await storage.submitBusinessClaim(businessId, name.trim(), user.email || '', user.id, phone.trim() || undefined, idPhotoPath, proofPhotoPath || undefined);
       setSent(true);
       toast('Solicitud enviada', 'success');
     } catch {
@@ -42,6 +110,8 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
     setSent(false);
     setName('');
     setPhone('');
+    setIdPhotoPath('');
+    setProofPhotoPath('');
   };
 
   // Requiring a signed-in account (instead of a free-text name/email form
@@ -70,7 +140,7 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
             <BadgeCheck className="mx-auto h-10 w-10 text-emerald-500" />
             <p className="mt-3 text-sm font-semibold text-slate-700">¡Solicitud enviada!</p>
             <p className="mt-1 text-sm text-slate-500">
-              Revisaremos que seas el dueño de "{businessName}" y te contactaremos al correo de tu cuenta.
+              Revisaremos tus documentos y te contactaremos al correo de tu cuenta.
             </p>
             <button onClick={close} className="btn-primary mt-4 w-full text-sm">Cerrar</button>
           </div>
@@ -91,6 +161,22 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
               <label className="label">Teléfono (opcional)</label>
               <input className="input" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder="4771234567" inputMode="numeric" />
             </div>
+            <DocumentPicker
+              label="Foto de tu identificación"
+              hint="INE, licencia u otra identificación oficial"
+              required
+              path={idPhotoPath}
+              onChange={setIdPhotoPath}
+            />
+            <DocumentPicker
+              label="Comprobante de que el negocio es tuyo"
+              hint="Recibo, factura, o una foto tuya frente al negocio con el letrero visible"
+              path={proofPhotoPath}
+              onChange={setProofPhotoPath}
+            />
+            <p className="text-xs text-slate-400">
+              Estos documentos solo los puede ver un administrador para verificarte, y no se muestran públicamente.
+            </p>
             <div className="flex gap-2">
               <button onClick={close} className="btn-outline flex-1 text-sm">
                 <X className="h-4 w-4" /> Cancelar

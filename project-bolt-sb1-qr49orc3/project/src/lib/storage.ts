@@ -375,11 +375,26 @@ export const storage = {
   },
 
   // --- Business claims ---
-  async submitBusinessClaim(businessId: string, userName: string, userEmail: string, claimantUserId: string, userPhone?: string): Promise<void> {
+  async submitBusinessClaim(
+    businessId: string,
+    userName: string,
+    userEmail: string,
+    claimantUserId: string,
+    userPhone?: string,
+    idPhotoPath?: string,
+    proofPhotoPath?: string,
+  ): Promise<void> {
     const { error } = await supabase.from('business_claims').insert({
-      business_id: businessId, user_name: userName, user_email: userEmail, user_phone: userPhone, claimant_user_id: claimantUserId,
+      business_id: businessId, user_name: userName, user_email: userEmail, user_phone: userPhone,
+      claimant_user_id: claimantUserId, id_photo_path: idPhotoPath, proof_photo_path: proofPhotoPath,
     });
     if (error) throw error;
+  },
+
+  async getClaimDocumentUrl(path: string): Promise<string> {
+    const { data, error } = await supabase.storage.from('claim-documents').createSignedUrl(path, 300);
+    if (error) throw error;
+    return data.signedUrl;
   },
 
   async getBusinessClaims(): Promise<BusinessClaim[]> {

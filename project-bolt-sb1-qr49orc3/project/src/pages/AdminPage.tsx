@@ -158,6 +158,16 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
     }
   };
 
+  const viewClaimDocument = async (path?: string) => {
+    if (!path) return;
+    try {
+      const url = await storage.getClaimDocumentUrl(path);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {
+      toast('No se pudo abrir el documento', 'error');
+    }
+  };
+
   const pendingClaims = claims.filter((c) => c.status === 'pending').length;
 
   const changePassword = async (e: FormEvent) => {
@@ -510,6 +520,14 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                         <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500"><Mail className="h-3.5 w-3.5" /> {c.user_email}</p>
                         {c.user_phone && <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500"><Phone className="h-3.5 w-3.5" /> {c.user_phone}</p>}
                         <p className="mt-1 text-xs text-slate-400">{new Date(c.created_at).toLocaleString('es-MX')}</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          <button onClick={() => viewClaimDocument(c.id_photo_path)} disabled={!c.id_photo_path} className="btn-outline px-2.5 py-1 text-xs disabled:opacity-40">
+                            <Eye className="h-3.5 w-3.5" /> Identificación
+                          </button>
+                          <button onClick={() => viewClaimDocument(c.proof_photo_path)} disabled={!c.proof_photo_path} className="btn-outline px-2.5 py-1 text-xs disabled:opacity-40">
+                            <Eye className="h-3.5 w-3.5" /> Comprobante
+                          </button>
+                        </div>
                       </div>
                       {c.status === 'pending' && (
                         <div className="flex gap-1.5">

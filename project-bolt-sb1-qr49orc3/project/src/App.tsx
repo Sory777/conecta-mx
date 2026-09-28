@@ -20,6 +20,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { InstallBanner } from './components/InstallBanner';
 import { AdGate } from './components/AdGate';
 import { LegalPage } from './pages/LegalPage';
+import { FAQPage } from './pages/FAQPage';
 
 type Route =
   | { name: 'home' }
@@ -34,7 +35,8 @@ type Route =
   | { name: 'admin' }
   | { name: 'plans' }
   | { name: 'terms' }
-  | { name: 'privacy' };
+  | { name: 'privacy' }
+  | { name: 'faq' };
 
 function parseHash(): Route {
   const raw = window.location.hash.replace(/^#\/?/, '');
@@ -73,6 +75,8 @@ function parseHash(): Route {
       return { name: 'terms' };
     case 'privacy':
       return { name: 'privacy' };
+    case 'faq':
+      return { name: 'faq' };
     default:
       return { name: 'home' };
   }
@@ -91,7 +95,7 @@ function setHash(route: Route, params?: Record<string, string>) {
   const map: Record<string, string> = {
     home: '', directory: '/directory', register: '/register', login: '/login', dashboard: '/dashboard',
     jobs: '/jobs', events: '/events', qr: '/qr', admin: '/admin', plans: '/plans',
-    terms: '/terms', privacy: '/privacy',
+    terms: '/terms', privacy: '/privacy', faq: '/faq',
   };
   if (route.name === 'business') {
     window.location.hash = `#/business/${route.id}`;
@@ -351,6 +355,7 @@ function AppInner() {
         {route.name === 'plans' && <PlansPage totalBusinesses={totalBusinesses} />}
         {route.name === 'terms' && <LegalPage initialTab="terms" />}
         {route.name === 'privacy' && <LegalPage initialTab="privacy" />}
+        {route.name === 'faq' && <FAQPage onNavigate={navigate} />}
       </main>
       <Footer onNavigate={navigate} />
       <InstallBanner />

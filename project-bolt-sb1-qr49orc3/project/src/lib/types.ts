@@ -182,6 +182,8 @@ export interface BusinessClaim {
   user_name?: string;
   user_phone?: string;
   claimant_user_id?: string;
+  id_photo_path?: string;
+  proof_photo_path?: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }
