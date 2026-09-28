@@ -37,12 +37,18 @@ type Route =
   | { name: 'privacy' };
 
 function parseHash(): Route {
-  const hash = window.location.hash.replace(/^#\/?/, '');
-  const parts = hash.split('/').filter(Boolean);
+  const raw = window.location.hash.replace(/^#\/?/, '');
+  // Split off the query string (e.g. "directory?c=Restaurantes") before
+  // splitting into path segments — otherwise "directory?c=Restaurantes"
+  // never equals "directory" below and every filtered link (category
+  // buttons, the states modal) silently falls through to the default
+  // 'home' route instead of opening the directory with that filter.
+  const [pathOnly, queryString] = raw.split('?');
+  const parts = pathOnly.split('/').filter(Boolean);
   if (parts.length === 0) return { name: 'home' };
   switch (parts[0]) {
     case 'directory': {
-      const params = new URLSearchParams(parts.slice(1).join('&'));
+      const params = new URLSearchParams(queryString || '');
       return { name: 'directory', query: params.get('q') || '', muni: params.get('m') || '', category: params.get('c') || '' };
     }
     case 'register':
