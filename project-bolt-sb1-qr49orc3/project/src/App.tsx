@@ -311,8 +311,20 @@ function AppInner() {
         {route.name === 'dashboard' && user && business && (
           <DashboardPage business={business} onNavigate={navigate} onRefresh={refreshBusiness} />
         )}
-        {route.name === 'dashboard' && (!user || !business) && (
+        {route.name === 'dashboard' && !user && (
           <AuthPage mode="login" onSuccess={() => navigate('dashboard')} onSwitch={() => navigate('register')} />
+        )}
+        {route.name === 'dashboard' && user && !business && (
+          <div className="mx-auto max-w-md px-4 py-20 text-center">
+            <p className="text-lg font-bold text-slate-700">Aún no tienes un negocio vinculado</p>
+            <p className="mt-2 text-sm text-slate-500">
+              Regístralo desde cero, o si ya existe en el directorio, ábrelo y toca "Reclámalo" para pedir que se vincule a tu cuenta.
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <button onClick={() => navigate('directory')} className="btn-outline">Ver directorio</button>
+              <button onClick={() => navigate('register')} className="btn-primary">Registrar negocio</button>
+            </div>
+          </div>
         )}
         {route.name === 'business' && currentBusiness && (
           <BusinessDetailPage business={currentBusiness} onBack={() => navigate('directory')} onTrack={track} onJobsChange={refreshJobs} />

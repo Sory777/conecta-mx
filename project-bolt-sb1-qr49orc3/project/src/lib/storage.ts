@@ -375,9 +375,9 @@ export const storage = {
   },
 
   // --- Business claims ---
-  async submitBusinessClaim(businessId: string, userName: string, userEmail: string, userPhone?: string): Promise<void> {
+  async submitBusinessClaim(businessId: string, userName: string, userEmail: string, claimantUserId: string, userPhone?: string): Promise<void> {
     const { error } = await supabase.from('business_claims').insert({
-      business_id: businessId, user_name: userName, user_email: userEmail, user_phone: userPhone,
+      business_id: businessId, user_name: userName, user_email: userEmail, user_phone: userPhone, claimant_user_id: claimantUserId,
     });
     if (error) throw error;
   },
@@ -392,7 +392,12 @@ export const storage = {
     const { error } = await supabase.from('business_claims').update({ status: approve ? 'approved' : 'rejected' }).eq('id', claim.id);
     if (error) throw error;
     if (approve) {
-      const { error: bErr } = await supabase.from('businesses').update({ verified: true }).eq('id', claim.business_id);
+      // Link the business to the claimant's own account (never overwriting
+      // one that's already claimed) so approving actually grants them
+      // access to their dashboard — not just a "verified" badge.
+      const updates: { verified: boolean; user_id?: string } = { verified: true };
+      if (claim.claimant_user_id) updates.user_id = claim.claimant_user_id;
+      const { error: bErr } = await supabase.from('businesses').update(updates).eq('id', claim.business_id).is('user_id', null);
       if (bErr) throw bErr;
     }
   },

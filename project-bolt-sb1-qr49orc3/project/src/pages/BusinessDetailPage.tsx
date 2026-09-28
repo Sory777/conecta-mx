@@ -16,6 +16,7 @@ import { useToast } from '../components/Toast';
 import { ReportButton } from '../components/ReportButton';
 import { ClaimBusinessButton } from '../components/ClaimBusinessButton';
 import { LiveVendorMap } from '../components/LiveVendorMap';
+import { BusinessImagePlaceholder } from '../components/BusinessImagePlaceholder';
 
 interface BusinessDetailPageProps {
   business: Business;
@@ -26,12 +27,17 @@ interface BusinessDetailPageProps {
 
 export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: BusinessDetailPageProps) {
   const { toast } = useToast();
+  const [heroImgError, setHeroImgError] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [businessJobs, setBusinessJobs] = useState<Job[]>([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [showAddJob, setShowAddJob] = useState(false);
+
+  useEffect(() => {
+    setHeroImgError(false);
+  }, [business.id]);
 
   useEffect(() => {
     let active = true;
@@ -117,11 +123,16 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
 
       {/* Hero image */}
       <div className="relative overflow-hidden rounded-2xl">
-        <img
-          src={business.imageUrl || 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=1000&q=80'}
-          alt={business.name}
-          className="h-48 w-full object-cover sm:h-64"
-        />
+        {business.imageUrl && !heroImgError ? (
+          <img
+            src={business.imageUrl}
+            alt={business.name}
+            className="h-48 w-full object-cover sm:h-64"
+            onError={() => setHeroImgError(true)}
+          />
+        ) : (
+          <BusinessImagePlaceholder category={business.category} className="h-48 w-full sm:h-64" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <div className="flex flex-wrap items-center gap-2">

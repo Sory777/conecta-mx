@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, BadgeCheck, Star } from 'lucide-react';
 import type { Business } from '../lib/types';
 import { categoryIcon } from '../lib/constants';
+import { BusinessImagePlaceholder } from './BusinessImagePlaceholder';
 
 interface FeaturedCarouselProps {
   businesses: Business[];
@@ -10,6 +11,7 @@ interface FeaturedCarouselProps {
 
 export function FeaturedCarousel({ businesses, onOpen }: FeaturedCarouselProps) {
   const [active, setActive] = useState(0);
+  const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const count = businesses.length;
 
@@ -81,13 +83,17 @@ export function FeaturedCarousel({ businesses, onOpen }: FeaturedCarouselProps) 
               onClick={() => (isActive ? onOpen(b) : goTo(i))}
             >
               <div className="relative h-44 overflow-hidden bg-slate-100">
-                <img
-                  src={b.imageUrl || 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=600&q=80'}
-                  alt={b.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=600&q=80'; }}
-                />
+                {b.imageUrl && !imgErrors.has(b.id) ? (
+                  <img
+                    src={b.imageUrl}
+                    alt={b.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                    onError={() => setImgErrors((s) => new Set(s).add(b.id))}
+                  />
+                ) : (
+                  <BusinessImagePlaceholder category={b.category} className="h-full w-full" />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
                 {b.verified && (
                   <span className="absolute left-3 top-3 badge bg-[#1565C0] text-white shadow">

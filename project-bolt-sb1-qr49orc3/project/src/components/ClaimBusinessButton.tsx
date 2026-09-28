@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { BadgeCheck, Send, X } from 'lucide-react';
+import { BadgeCheck, Send, X, LogIn } from 'lucide-react';
 import { Modal } from './Modal';
 import { useToast } from './Toast';
 import { storage } from '../lib/storage';
+import { useAuth } from '../lib/auth';
 
 interface ClaimBusinessButtonProps {
   businessId: string;
@@ -10,26 +11,23 @@ interface ClaimBusinessButtonProps {
 }
 
 export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessButtonProps) {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
 
   const submit = async () => {
-    if (!name.trim() || !email.trim()) {
-      toast('Nombre y correo son requeridos', 'error');
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      toast('Correo inválido', 'error');
+    if (!user) return;
+    if (!name.trim()) {
+      toast('Tu nombre es requerido', 'error');
       return;
     }
     setSubmitting(true);
     try {
-      await storage.submitBusinessClaim(businessId, name.trim(), email.trim(), phone.trim() || undefined);
+      await storage.submitBusinessClaim(businessId, name.trim(), user.email || '', user.id, phone.trim() || undefined);
       setSent(true);
       toast('Solicitud enviada', 'success');
     } catch {
@@ -43,9 +41,20 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
     setOpen(false);
     setSent(false);
     setName('');
-    setEmail('');
     setPhone('');
   };
+
+  // Requiring a signed-in account (instead of a free-text name/email form
+  // anyone could fill out) means the email on the claim is genuinely
+  // theirs, and approving it can safely link their real account to the
+  // business — which a free-text form never let us do.
+  if (!user) {
+    return (
+      <a href="#/login" className="btn-outline px-4 py-2 text-sm text-[#1565C0]">
+        <LogIn className="h-4 w-4" /> ¿Es tu negocio? Inicia sesión para reclamarlo
+      </a>
+    );
+  }
 
   return (
     <>
@@ -61,7 +70,7 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
             <BadgeCheck className="mx-auto h-10 w-10 text-emerald-500" />
             <p className="mt-3 text-sm font-semibold text-slate-700">¡Solicitud enviada!</p>
             <p className="mt-1 text-sm text-slate-500">
-              Revisaremos que seas el dueño de "{businessName}" y te contactaremos al correo que dejaste.
+              Revisaremos que seas el dueño de "{businessName}" y te contactaremos al correo de tu cuenta.
             </p>
             <button onClick={close} className="btn-primary mt-4 w-full text-sm">Cerrar</button>
           </div>
@@ -75,8 +84,8 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre completo" />
             </div>
             <div>
-              <label className="label">Correo</label>
-              <input type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" />
+              <label className="label">Correo de tu cuenta</label>
+              <input className="input bg-slate-50 text-slate-500" value={user.email || ''} disabled readOnly />
             </div>
             <div>
               <label className="label">Teléfono (opcional)</label>

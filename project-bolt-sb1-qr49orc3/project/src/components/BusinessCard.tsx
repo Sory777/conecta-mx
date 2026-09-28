@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { MapPin, Phone, BadgeCheck, Clock, Sparkles, Navigation, Truck } from 'lucide-react';
 import type { Business } from '../lib/types';
 import { categoryIcon, PLAN_LABELS } from '../lib/constants';
 import { businessWaLink, isOpenNow, formatPhone, mapsDirectionsLink } from '../lib/utils';
 import { StarRating } from './StarRating';
+import { BusinessImagePlaceholder } from './BusinessImagePlaceholder';
 
 interface BusinessCardProps {
   business: Business;
@@ -13,17 +15,22 @@ export function BusinessCard({ business, onOpen }: BusinessCardProps) {
   const status = isOpenNow(business.hours);
   const CatIcon = categoryIcon(business.category);
   const dirLink = mapsDirectionsLink(business);
+  const [imgError, setImgError] = useState(false);
   return (
     <div className="card group flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative block aspect-[16/10] overflow-hidden bg-slate-100">
         <button onClick={() => onOpen(business)} className="absolute inset-0 z-0" aria-label={`Ver ${business.name}`} />
-        <img
-          src={business.imageUrl || 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=600&q=80'}
-          alt={business.name}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1441986300917-64674ad600d9?w=600&q=80'; }}
-        />
+        {business.imageUrl && !imgError ? (
+          <img
+            src={business.imageUrl}
+            alt={business.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <BusinessImagePlaceholder category={business.category} className="h-full w-full transition-transform duration-500 group-hover:scale-105" />
+        )}
         {dirLink && (
           <a
             href={dirLink}
