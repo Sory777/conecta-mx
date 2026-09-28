@@ -1,22 +1,23 @@
-import { useMemo, useState, useEffect } from 'react';
-import { Search, SlidersHorizontal, X, LayoutGrid, List, Heart, Share2, Copy, Flag } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Search, SlidersHorizontal, X, LayoutGrid, List, Heart, Share2, Copy, Loader2 } from 'lucide-react';
 import type { Business } from '../lib/types';
-import { MUNICIPALITIES, CATEGORIES, SMART_SEARCH_MAP_NORMALIZED, categoryIcon } from '../lib/constants';
+import { MUNICIPALITIES, CATEGORIES, categoryIcon } from '../lib/constants';
 import { BusinessCard } from '../components/BusinessCard';
 import { EmptyState } from '../components/EmptyState';
 import { storage } from '../lib/storage';
 import { useToast } from '../components/Toast';
-import { isOpenNow, normalizeText } from '../lib/utils';
+import { isOpenNow } from '../lib/utils';
 
 interface DirectoryPageProps {
-  businesses: Business[];
   onOpenBusiness: (b: Business) => void;
   initialQuery?: string;
   initialMuni?: string;
   initialCategory?: string;
 }
 
-export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', initialMuni = '', initialCategory = '' }: DirectoryPageProps) {
+const PAGE_SIZE = 24;
+
+export function DirectoryPage({ onOpenBusiness, initialQuery = '', initialMuni = '', initialCategory = '' }: DirectoryPageProps) {
   const { toast } = useToast();
   const [query, setQuery] = useState(initialQuery);
   const [muni, setMuni] = useState(initialMuni);
@@ -25,6 +26,13 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  const [results, setResults] = useState<Business[]>([]);
+  const [total, setTotal] = useState(0);
+  const [smartCategories, setSmartCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const requestId = useRef(0);
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -36,55 +44,48 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
     storage.getFavoriteIds('business').then(setFavorites).catch(() => {});
   }, []);
 
-  const smartCategories = useMemo((): string[] => {
-    if (!query.trim()) return [];
-    const q = normalizeText(query.trim());
-    const matched = new Set<string>();
-    const parts = q.split(/\s+/);
-    for (const part of parts) {
-      const cats = SMART_SEARCH_MAP_NORMALIZED[part];
-      if (cats) cats.forEach((c) => matched.add(c));
-    }
-    return Array.from(matched);
+  // Debounce the search box so we don't fire a query on every keystroke.
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(t);
   }, [query]);
 
-  const filtered = useMemo(() => {
-    let list = businesses.slice();
-    if (query.trim()) {
-      const q = query.toLowerCase().trim();
-      const cats = smartCategories;
-      list = list.filter((b) => {
-        const nameMatch = b.name.toLowerCase().includes(q);
-        if (cats.length > 0) {
-          // The query matched a known category (e.g. "restaurante" -> Restaurantes).
-          // Trust that mapping instead of also matching loosely on description/address,
-          // which often share boilerplate wording across unrelated categories
-          // (e.g. many DENUE descriptions start with "Restaurantes con servicio de...").
-          return cats.includes(b.category) || nameMatch;
-        }
-        return nameMatch ||
-          b.category.toLowerCase().includes(q) ||
-          b.description.toLowerCase().includes(q) ||
-          (b.address || '').toLowerCase().includes(q);
-      });
+  const fetchPage = async (offset: number, append: boolean) => {
+    const myRequest = ++requestId.current;
+    if (append) setLoadingMore(true); else setLoading(true);
+    try {
+      const res = await storage.getBusinessesPage({ q: debouncedQuery, muni, category, sort }, offset, PAGE_SIZE);
+      if (myRequest !== requestId.current) return;
+      setResults((prev) => (append ? [...prev, ...res.data] : res.data));
+      setTotal(res.count);
+      setSmartCategories(res.smartCategories);
+    } catch (err) {
+      console.error('Failed to load businesses:', err);
+      if (myRequest === requestId.current && !append) toast('No se pudieron cargar los negocios', 'error');
+    } finally {
+      if (myRequest === requestId.current) { setLoading(false); setLoadingMore(false); }
     }
-    if (muni) list = list.filter((b) => b.municipality === muni);
-    if (category) list = list.filter((b) => b.category === category);
-    if (sort === 'rating') list.sort((a, b) => b.rating - a.rating);
-    else if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
-    else if (sort === 'open') {
-      list.sort((a, b) => {
-        const aOpen = isOpenNow(a.hours).open ? 1 : 0;
-        const bOpen = isOpenNow(b.hours).open ? 1 : 0;
-        return bOpen - aOpen;
-      });
-    } else list.sort((a, b) => b.createdAt - a.createdAt);
-    list.sort((a, b) => {
-      const rank = (p: string) => (p === 'premium' ? 0 : p === 'featured' ? 1 : 2);
-      return rank(a.plan) - rank(b.plan);
+  };
+
+  useEffect(() => {
+    fetchPage(0, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, muni, category, sort]);
+
+  const loadMore = () => fetchPage(results.length, true);
+
+  // "Abiertos ahora" depends on each business's free-text hours, which we
+  // can't sort by in SQL — apply it as a best-effort re-sort of the
+  // currently loaded page rather than the whole result set.
+  const displayed = useMemo(() => {
+    if (sort !== 'open') return results;
+    return [...results].sort((a, b) => {
+      const aOpen = isOpenNow(a.hours).open ? 1 : 0;
+      const bOpen = isOpenNow(b.hours).open ? 1 : 0;
+      return bOpen - aOpen;
     });
-    return list;
-  }, [businesses, query, muni, category, sort, smartCategories]);
+  }, [results, sort]);
 
   const clearFilters = () => {
     setQuery('');
@@ -133,7 +134,7 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
     <div className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-5">
         <h1 className="text-2xl font-extrabold text-slate-800">Negocios</h1>
-        <p className="text-sm text-slate-500">{filtered.length} de {businesses.length} negocios</p>
+        <p className="text-sm text-slate-500">{displayed.length} de {total} negocios</p>
       </div>
 
       {/* Search bar */}
@@ -228,30 +229,34 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
 
       {/* Grid / List */}
       <div className="mt-5">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-7 w-7 animate-spin text-slate-300" />
+          </div>
+        ) : displayed.length === 0 ? (
           <EmptyState
             title="No se encontraron negocios"
             message="Prueba con otros términos de búsqueda o cambia los filtros."
             action={
-              <button onClick={clearFilters} className="btn-outline mt-1 text-xs">Limpiar filtros</button>
+              hasFilters ? <button onClick={clearFilters} className="btn-outline mt-1 text-xs">Limpiar filtros</button> : undefined
             }
           />
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((b) => (
+            {displayed.map((b) => (
               <BusinessCard key={b.id} business={b} onOpen={onOpenBusiness} />
             ))}
           </div>
         ) : (
           <div className="space-y-2">
-            {filtered.map((b) => {
+            {displayed.map((b) => {
               const Icon = categoryIcon(b.category);
               const openInfo = isOpenNow(b.hours);
               return (
                 <div key={b.id} className="card flex items-center gap-3 p-3">
                   <button onClick={() => onOpenBusiness(b)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
                     {b.imageUrl ? (
-                      <img src={b.imageUrl} alt={b.name} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
+                      <img src={b.imageUrl} alt={b.name} loading="lazy" className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                     ) : (
                       <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100">
                         <Icon className="h-7 w-7 text-slate-400" />
@@ -285,6 +290,15 @@ export function DirectoryPage({ businesses, onOpenBusiness, initialQuery = '', i
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {!loading && displayed.length > 0 && displayed.length < total && (
+          <div className="mt-6 flex justify-center">
+            <button onClick={loadMore} disabled={loadingMore} className="btn-outline px-6">
+              {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {loadingMore ? 'Cargando...' : `Ver más (${total - displayed.length} restantes)`}
+            </button>
           </div>
         )}
       </div>

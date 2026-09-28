@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { storage } from './lib/storage';
 import { supabase } from './lib/supabase';
 import { AuthProvider, useAuth } from './lib/auth';
@@ -96,9 +96,8 @@ function setHash(route: Route, params?: Record<string, string>) {
 
 function AppInner() {
   const { toast } = useToast();
-  const { user, business, isAdmin } = useAuth();
+  const { user, business, isAdmin, refreshBusiness } = useAuth();
   const [route, setRoute] = useState<Route>(() => parseHash());
-  const [businesses, setBusinesses] = useState<Business[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [savedJobs, setSavedJobs] = useState<string[]>(() => {
@@ -107,39 +106,94 @@ function AppInner() {
   const [loading, setLoading] = useState(true);
   const [adPassed, setAdPassed] = useState(() => !!sessionStorage.getItem('cmx_ad_shown_session'));
 
+  // Home page only needs aggregate numbers and a handful of featured
+  // businesses — not the full 6,000+ row table. The directory page fetches
+  // its own results server-side, paginated, as the visitor searches/filters.
+  const [totalBusinesses, setTotalBusinesses] = useState(0);
+  const [municipalityCounts, setMunicipalityCounts] = useState<{ name: string; count: number }[]>([]);
+  const [featured, setFeatured] = useState<Business[]>([]);
+
+  // The businesses table's full contents (every column) are only needed by
+  // the admin panel — loaded lazily the first time it's opened, not for
+  // every regular visitor.
+  const [adminBusinesses, setAdminBusinesses] = useState<Business[]>([]);
+  const [adminLoaded, setAdminLoaded] = useState(false);
+
+  // The business detail page is fetched on demand by id rather than looked
+  // up from a preloaded full list.
+  const [currentBusiness, setCurrentBusiness] = useState<Business | null>(null);
+  const [businessLoading, setBusinessLoading] = useState(false);
+
   useEffect(() => {
     let active = true;
     (async () => {
-      const [biz, jb, ev] = await Promise.allSettled([storage.getBusinesses(), storage.getJobs(), storage.getEvents()]);
+      const [count, munis, feat, jb, ev] = await Promise.allSettled([
+        storage.getBusinessesCount(),
+        storage.getMunicipalityCounts(),
+        storage.getFeaturedBusinesses(),
+        storage.getJobs(),
+        storage.getEvents(),
+      ]);
       if (!active) return;
-      if (biz.status === 'fulfilled') setBusinesses(biz.value);
-      else console.error('Failed to load businesses:', biz.reason);
+      let bizFailed = false;
+      if (count.status === 'fulfilled') setTotalBusinesses(count.value); else bizFailed = true;
+      if (munis.status === 'fulfilled') setMunicipalityCounts(munis.value); else bizFailed = true;
+      if (feat.status === 'fulfilled') setFeatured(feat.value); else bizFailed = true;
       if (jb.status === 'fulfilled') setJobs(jb.value);
       else console.error('Failed to load jobs:', jb.reason);
       if (ev.status === 'fulfilled') setEvents(ev.value);
       else console.error('Failed to load events:', ev.reason);
-      if (biz.status === 'rejected' && active) toast('No se pudieron cargar los negocios. Revisa tu conexión.', 'error');
+      if (bizFailed && active) toast('No se pudieron cargar los negocios. Revisa tu conexión.', 'error');
       await storage.incrementStat('visits').catch(() => {});
       if (active) setLoading(false);
     })();
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // Patch local state directly from the realtime payload instead of
-    // re-fetching the entire (6,000+ row) table on every single insert or
-    // delete anywhere — that pattern re-downloads everything for every
-    // connected client on every change, and gets slower for everyone as
-    // both the dataset and the number of simultaneous users grow.
+    if (route.name !== 'admin' || adminLoaded) return;
+    let active = true;
+    storage.getBusinesses().then((list) => {
+      if (active) { setAdminBusinesses(list); setAdminLoaded(true); }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [route.name, adminLoaded]);
+
+  const refreshAdminBusinesses = async () => setAdminBusinesses(await storage.getBusinesses());
+
+  const currentBusinessId = route.name === 'business' ? route.id : null;
+
+  useEffect(() => {
+    if (!currentBusinessId) { setCurrentBusiness(null); return; }
+    let active = true;
+    setBusinessLoading(true);
+    storage.getBusinessById(currentBusinessId).then((b) => {
+      if (!active) return;
+      setCurrentBusiness(b);
+      setBusinessLoading(false);
+    }).catch(() => {
+      if (active) setBusinessLoading(false);
+    });
+    return () => { active = false; };
+  }, [currentBusinessId]);
+
+  useEffect(() => {
+    // Keep the admin panel's own copy of the list (when loaded) and the
+    // jobs/events lists in sync live. Aggregate home-page numbers
+    // (totals, per-state counts, featured) are intentionally not
+    // live-patched here — recomputing them accurately on every insert or
+    // delete across every connected visitor is exactly the kind of thing
+    // that stops scaling; they refresh on the next full page load instead.
     const channel = supabase
       .channel('public:businesses_jobs')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'businesses' }, (payload) => {
         const row = payload.new as Business;
-        setBusinesses((prev) => (prev.some((b) => b.id === row.id) ? prev : [row, ...prev]));
+        setAdminBusinesses((prev) => (prev.length === 0 || prev.some((b) => b.id === row.id) ? prev : [row, ...prev]));
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'businesses' }, (payload) => {
         const id = (payload.old as { id?: string }).id;
-        setBusinesses((prev) => prev.filter((b) => b.id !== id));
+        setAdminBusinesses((prev) => prev.filter((b) => b.id !== id));
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jobs' }, (payload) => {
         const row = payload.new as Job;
@@ -180,9 +234,14 @@ function AppInner() {
     }
   };
 
-  const refreshBusinesses = async () => setBusinesses(await storage.getBusinesses());
   const refreshJobs = async () => setJobs(await storage.getJobs());
   const refreshEvents = async () => setEvents(await storage.getEvents());
+
+  const refreshHomeStats = async () => {
+    const [count, munis] = await Promise.all([storage.getBusinessesCount(), storage.getMunicipalityCounts()]);
+    setTotalBusinesses(count);
+    setMunicipalityCounts(munis);
+  };
 
   const openBusiness = (b: Business) => {
     navigate('business', { id: b.id });
@@ -198,11 +257,6 @@ function AppInner() {
   const track = (key: 'whatsappClicks' | 'mapClicks' | 'qrDownloads') => {
     storage.incrementStat(key).catch(() => {});
   };
-
-  const currentBusiness = useMemo(() => {
-    if (route.name !== 'business') return null;
-    return businesses.find((b) => b.id === route.id) || null;
-  }, [route, businesses]);
 
   if (!adPassed) {
     return <AdGate onDone={() => setAdPassed(true)} />;
@@ -224,11 +278,18 @@ function AppInner() {
       <Navbar current={route.name} onNavigate={(r) => navigate(r)} user={user} business={business} isAdmin={isAdmin} onSignOut={() => { /* handled in navbar */ }} />
       <main className="flex-1">
         {route.name === 'home' && (
-          <HomePage businesses={businesses} jobsCount={jobs.length} events={events} onOpenBusiness={openBusiness} onNavigate={navigate} />
+          <HomePage
+            totalBusinesses={totalBusinesses}
+            municipalityCounts={municipalityCounts}
+            featured={featured}
+            jobsCount={jobs.length}
+            events={events}
+            onOpenBusiness={openBusiness}
+            onNavigate={navigate}
+          />
         )}
         {route.name === 'directory' && (
           <DirectoryPage
-            businesses={businesses}
             onOpenBusiness={openBusiness}
             initialQuery={route.query}
             initialMuni={route.muni}
@@ -236,13 +297,13 @@ function AppInner() {
           />
         )}
         {route.name === 'register' && (
-          <RegisterPage onRegistered={(b) => { refreshBusinesses(); openBusiness(b); }} />
+          <RegisterPage onRegistered={(b) => { refreshHomeStats(); openBusiness(b); }} />
         )}
         {route.name === 'login' && (
           <AuthPage mode="login" onSuccess={() => navigate('dashboard')} onSwitch={() => navigate('register')} />
         )}
         {route.name === 'dashboard' && user && business && (
-          <DashboardPage business={business} onNavigate={navigate} onRefresh={refreshBusinesses} />
+          <DashboardPage business={business} onNavigate={navigate} onRefresh={refreshBusiness} />
         )}
         {route.name === 'dashboard' && (!user || !business) && (
           <AuthPage mode="login" onSuccess={() => navigate('dashboard')} onSwitch={() => navigate('register')} />
@@ -250,7 +311,12 @@ function AppInner() {
         {route.name === 'business' && currentBusiness && (
           <BusinessDetailPage business={currentBusiness} onBack={() => navigate('directory')} onTrack={track} onJobsChange={refreshJobs} />
         )}
-        {route.name === 'business' && !currentBusiness && (
+        {route.name === 'business' && !currentBusiness && businessLoading && (
+          <div className="flex justify-center py-24">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#1565C0]" />
+          </div>
+        )}
+        {route.name === 'business' && !currentBusiness && !businessLoading && (
           <div className="mx-auto max-w-md px-4 py-20 text-center">
             <p className="text-lg font-bold text-slate-700">Negocio no encontrado</p>
             <button onClick={() => navigate('directory')} className="btn-primary mt-4">Ver directorio</button>
@@ -263,8 +329,8 @@ function AppInner() {
           <EventsPage events={events} onChange={refreshEvents} />
         )}
         {route.name === 'qr' && <QRPage onTrack={track} />}
-        {route.name === 'admin' && <AdminPage businesses={businesses} onChange={refreshBusinesses} />}
-        {route.name === 'plans' && <PlansPage totalBusinesses={businesses.length} />}
+        {route.name === 'admin' && <AdminPage businesses={adminBusinesses} onChange={refreshAdminBusinesses} />}
+        {route.name === 'plans' && <PlansPage totalBusinesses={totalBusinesses} />}
         {route.name === 'terms' && <LegalPage initialTab="terms" />}
         {route.name === 'privacy' && <LegalPage initialTab="privacy" />}
       </main>

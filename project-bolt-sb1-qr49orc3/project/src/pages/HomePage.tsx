@@ -1,47 +1,32 @@
 import { Store, Briefcase, QrCode, TrendingUp, Building2, Sparkles, ArrowRight, ChevronRight, MapPin, Calendar } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { Business, Event } from '../lib/types';
-import { CATEGORIES, MUNICIPALITIES, APP_NAME, APP_TAGLINE } from '../lib/constants';
+import { CATEGORIES, APP_NAME, APP_TAGLINE } from '../lib/constants';
 import { FeaturedCarousel } from '../components/FeaturedCarousel';
 import { EventsCarousel } from '../components/EventsCarousel';
 import { Logo } from '../components/Logo';
 import { Modal } from '../components/Modal';
 
 interface HomePageProps {
-  businesses: Business[];
+  totalBusinesses: number;
+  municipalityCounts: { name: string; count: number }[];
   jobsCount: number;
   events: Event[];
+  featured: Business[];
   onOpenBusiness: (b: Business) => void;
   onNavigate: (route: string, params?: Record<string, string>) => void;
 }
 
-export function HomePage({ businesses, jobsCount, events, onOpenBusiness, onNavigate }: HomePageProps) {
+export function HomePage({ totalBusinesses, municipalityCounts, jobsCount, events, featured, onOpenBusiness, onNavigate }: HomePageProps) {
   const [showMunis, setShowMunis] = useState(false);
 
-  const featured = useMemo(() => {
-    const premium = businesses.filter((b) => b.plan !== 'free');
-    const sorted = [...(premium.length ? premium : businesses)].sort((a, b) => b.rating - a.rating);
-    return sorted.slice(0, 6);
-  }, [businesses]);
+  const stats = {
+    total: totalBusinesses,
+    states: municipalityCounts.length,
+    jobs: jobsCount,
+  };
 
-  const stats = useMemo(() => {
-    const states = new Set(businesses.map((b) => b.municipality));
-    return {
-      total: businesses.length,
-      states: states.size,
-      jobs: jobsCount,
-    };
-  }, [businesses, jobsCount]);
-
-  const locationCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    businesses.forEach((b) => {
-      counts[b.municipality] = (counts[b.municipality] || 0) + 1;
-    });
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count }));
-  }, [businesses]);
+  const locationCounts = municipalityCounts;
 
   const heroCards = [
     {

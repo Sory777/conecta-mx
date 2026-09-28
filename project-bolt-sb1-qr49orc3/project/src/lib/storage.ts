@@ -1,5 +1,7 @@
 import type { Business, Job, Product, Review, Stats, CV, Event, AnalyticsEventType, Favorite, Report, ReportReason, BusinessClaim, Ad, VendorLocation } from './types';
 import { supabase } from './supabase';
+import { SMART_SEARCH_MAP_NORMALIZED } from './constants';
+import { normalizeText } from './utils';
 
 export function uid(prefix = 'id'): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -58,6 +60,76 @@ export const storage = {
     const { data, error } = await supabase.from('businesses').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return data as Business | null;
+  },
+
+  // --- Lightweight home-page stats (no need to load every business row) ---
+  async getBusinessesCount(): Promise<number> {
+    const { count, error } = await supabase.from('businesses').select('id', { count: 'exact', head: true });
+    if (error) throw error;
+    return count || 0;
+  },
+
+  async getMunicipalityCounts(): Promise<{ name: string; count: number }[]> {
+    const { data, error } = await supabase.from('businesses').select('municipality');
+    if (error) throw error;
+    const counts: Record<string, number> = {};
+    (data || []).forEach((r: { municipality: string }) => {
+      counts[r.municipality] = (counts[r.municipality] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }));
+  },
+
+  async getFeaturedBusinesses(limit = 6): Promise<Business[]> {
+    const premium = await supabase.from('businesses').select(BUSINESS_LIST_FIELDS).neq('plan', 'free').order('rating', { ascending: false }).limit(limit);
+    if (premium.error) throw premium.error;
+    if ((premium.data || []).length > 0) return premium.data as Business[];
+    const fallback = await supabase.from('businesses').select(BUSINESS_LIST_FIELDS).order('rating', { ascending: false }).limit(limit);
+    if (fallback.error) throw fallback.error;
+    return (fallback.data || []) as Business[];
+  },
+
+  // --- Server-side paginated directory search/filter/sort. Keeps the
+  // browser from ever having to load and re-filter every business, which
+  // stops scaling once there are thousands of them. ---
+  async getBusinessesPage(
+    params: { q?: string; muni?: string; category?: string; sort?: 'recent' | 'rating' | 'name' | 'open' },
+    offset: number,
+    limit: number,
+  ): Promise<{ data: Business[]; count: number; smartCategories: string[] }> {
+    const { q = '', muni = '', category = '', sort = 'recent' } = params;
+    let query = supabase.from('businesses').select(BUSINESS_LIST_FIELDS, { count: 'exact' });
+
+    if (muni) query = query.eq('municipality', muni);
+    if (category) query = query.eq('category', category);
+
+    let smartCategories: string[] = [];
+    const trimmed = q.trim();
+    if (trimmed) {
+      const matched = new Set<string>();
+      normalizeText(trimmed).split(/\s+/).forEach((part) => {
+        (SMART_SEARCH_MAP_NORMALIZED[part] || []).forEach((c) => matched.add(c));
+      });
+      smartCategories = Array.from(matched);
+      if (smartCategories.length > 0) {
+        query = query.in('category', smartCategories);
+      } else {
+        // PostgREST or-filter syntax: wrap each value in double quotes so
+        // commas/parentheses in the search text can't break the filter.
+        const escaped = trimmed.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        const pattern = `"%${escaped}%"`;
+        query = query.or(`name.ilike.${pattern},category.ilike.${pattern},description.ilike.${pattern},address.ilike.${pattern}`);
+      }
+    }
+
+    const sortColumn = sort === 'rating' ? 'rating' : sort === 'name' ? 'name' : 'createdAt';
+    query = query
+      .order('plan_rank', { ascending: true })
+      .order(sortColumn, { ascending: sort === 'name' })
+      .range(offset, offset + limit - 1);
+
+    const { data, error, count } = await query;
+    if (error) throw error;
+    return { data: (data || []) as Business[], count: count || 0, smartCategories };
   },
 
   async saveBusinesses(list: Business[]): Promise<void> {
