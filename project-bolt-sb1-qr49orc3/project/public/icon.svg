@@ -16,8 +16,8 @@
   <circle cx="36" cy="38" r="2.2" fill="#8FC4CB"/>
   <circle cx="64" cy="38" r="2.2" fill="#8FC4CB"/>
   <circle cx="50" cy="32" r="3" fill="#D4AF37"/>
-  <circle cx="50" cy="47" r="3.5" fill="#FF8F00"/>
+  <circle cx="50" cy="47" r="3.5" fill="#9C6F0A"/>
   <!-- Pin -->
-  <circle cx="50" cy="63" r="5" fill="#00C853"/>
-  <polygon points="45,66 55,66 50,75" fill="#00C853"/>
+  <circle cx="50" cy="63" r="5" fill="#0D6575"/>
+  <polygon points="45,66 55,66 50,75" fill="#0D6575"/>
 </svg>

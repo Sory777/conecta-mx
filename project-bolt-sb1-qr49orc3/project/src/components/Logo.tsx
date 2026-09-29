@@ -52,15 +52,15 @@ export function Logo({ size = 48, showText = false, className = '' }: LogoProps)
           <path d="M 45.8 37.5 A 4.2 4.2 0 0 1 54.2 37.5 Z" />
         </g>
 
-        {/* Front-center person (orange, largest — the "you") */}
-        <g fill="#FF8F00">
+        {/* Front-center person (dark gold, largest — the "you") */}
+        <g fill="#9C6F0A">
           <circle cx="50" cy="47.5" r="3.6" />
           <path d="M 45.2 54 A 4.8 4.8 0 0 1 54.8 54 Z" />
         </g>
 
-        {/* Location pin (green) */}
-        <circle cx="50" cy="64" r="5.5" fill="#00C853" />
-        <polygon points="44.5,67 55.5,67 50,76" fill="#00C853" />
+        {/* Location pin (dark teal) */}
+        <circle cx="50" cy="64" r="5.5" fill="#0D6575" />
+        <polygon points="44.5,67 55.5,67 50,76" fill="#0D6575" />
       </svg>
 
       {showText && (
@@ -69,7 +69,7 @@ export function Logo({ size = 48, showText = false, className = '' }: LogoProps)
           <div
             className="text-[15px] font-black tracking-widest"
             style={{
-              background: 'linear-gradient(90deg, #00C853, #FF8F00)',
+              background: 'linear-gradient(90deg, #9C6F0A, #D4AF37)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
