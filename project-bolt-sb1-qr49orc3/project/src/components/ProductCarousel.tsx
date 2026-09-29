@@ -90,7 +90,7 @@ export function ProductCarousel({ products, business, onDelete, onTrack }: Produ
                 <div className="flex flex-1 flex-col p-3">
                   <h3 className="line-clamp-1 text-sm font-bold text-slate-800">{p.name}</h3>
                   {p.description && <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{p.description}</p>}
-                  <p className="mt-1.5 text-lg font-extrabold text-[#1565C0]">${p.price}</p>
+                  <p className="mt-1.5 text-lg font-extrabold text-[#9C6F0A]">${p.price}</p>
                   {isActive && (
                     <div className="mt-3 flex items-center gap-1.5">
                       <a
@@ -146,7 +146,7 @@ export function ProductCarousel({ products, business, onDelete, onTrack }: Produ
               key={i}
               onClick={() => goTo(i)}
               className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? 'w-6 bg-[#1565C0]' : 'w-2 bg-slate-300 hover:bg-slate-400'
+                i === active ? 'w-6 bg-[#9C6F0A]' : 'w-2 bg-slate-300 hover:bg-slate-400'
               }`}
               aria-label={`Ir al producto ${i + 1}`}
             />

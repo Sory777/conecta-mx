@@ -85,7 +85,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
   if (authLoading) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#1565C0]" />
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#9C6F0A]" />
         <p className="mt-3 text-sm text-slate-500">Verificando permisos...</p>
       </div>
     );
@@ -277,7 +277,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
       {/* Top municipalities */}
       <div className="card mb-5 p-4">
         <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-          <BarChart3 className="h-4 w-4 text-[#1565C0]" /> Top estados
+          <BarChart3 className="h-4 w-4 text-[#9C6F0A]" /> Top estados
         </div>
         <div className="mt-3 space-y-2">
           {stats.topMunis.map(([m, count]) => (
@@ -350,7 +350,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                   <td className="px-3 py-2.5">
                     <button
                       onClick={() => toggleVerified(b.id)}
-                      className={`badge ${b.verified ? 'bg-[#1565C0] text-white' : 'bg-slate-100 text-slate-500'}`}
+                      className={`badge ${b.verified ? 'bg-[#9C6F0A] text-white' : 'bg-slate-100 text-slate-500'}`}
                     >
                       <BadgeCheck className="h-3.5 w-3.5" /> {b.verified ? 'Sí' : 'No'}
                     </button>
@@ -367,7 +367,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                     </select>
                   </td>
                   <td className="px-3 py-2.5 text-right">
-                    <button onClick={() => setQrBusiness(b)} className="rounded-lg p-1.5 text-slate-300 hover:bg-[#1565C0] hover:text-white" aria-label="Generar QR" title="Generar QR del negocio">
+                    <button onClick={() => setQrBusiness(b)} className="rounded-lg p-1.5 text-slate-300 hover:bg-[#9C6F0A] hover:text-white" aria-label="Generar QR" title="Generar QR del negocio">
                       <QrCode className="h-4 w-4" />
                     </button>
                   </td>
@@ -417,7 +417,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="text-base font-bold text-slate-800">{c.fullName}</h3>
-                    <p className="text-sm font-medium text-[#1565C0]">{c.position}</p>
+                    <p className="text-sm font-medium text-[#9C6F0A]">{c.position}</p>
                   </div>
                   <button onClick={() => deleteCV(c.id)} className="rounded-lg p-1.5 text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Eliminar CV">
                     <Trash2 className="h-4 w-4" />
@@ -556,7 +556,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="card p-4">
-              <Package className="h-5 w-5 text-[#1565C0]" />
+              <Package className="h-5 w-5 text-[#9C6F0A]" />
               <p className="mt-2 text-2xl font-extrabold text-slate-800">{stats.total}</p>
               <p className="text-xs text-slate-500">Negocios registrados</p>
             </div>
@@ -579,7 +579,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
 
           <div className="mt-5 card p-4">
             <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-              <Map className="h-4 w-4 text-[#1565C0]" /> Estados más activos
+              <Map className="h-4 w-4 text-[#9C6F0A]" /> Estados más activos
             </div>
             <div className="mt-3 space-y-2">
               {stats.topMunis.map(([m, count]) => (
@@ -596,7 +596,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
 
           <div className="mt-5 card p-4">
             <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-              <Clock className="h-4 w-4 text-[#1565C0]" /> Negocios nuevos hoy
+              <Clock className="h-4 w-4 text-[#9C6F0A]" /> Negocios nuevos hoy
             </div>
             <p className="mt-2 text-3xl font-extrabold text-emerald-600">+{stats.newToday}</p>
             <p className="text-xs text-slate-500">negocios registrados en las últimas 24 horas</p>
@@ -619,7 +619,7 @@ export function AdminPage({ businesses, onChange }: AdminPageProps) {
 
             <form onSubmit={changePassword} className="space-y-4 border-t border-slate-100 pt-4">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                <KeyRound className="h-4 w-4 text-[#1565C0]" /> Cambiar contraseña
+                <KeyRound className="h-4 w-4 text-[#9C6F0A]" /> Cambiar contraseña
               </div>
               <div>
                 <label className="label">Nueva contraseña</label>

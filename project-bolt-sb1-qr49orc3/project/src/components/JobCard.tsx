@@ -16,7 +16,7 @@ export function JobCard({ job, saved, onToggleSave, onApplyCV }: JobCardProps) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <h3 className="text-base font-bold text-slate-800">{job.title}</h3>
-          <p className="text-sm font-medium text-[#1565C0]">{job.companyName}</p>
+          <p className="text-sm font-medium text-[#9C6F0A]">{job.companyName}</p>
         </div>
         <button
           onClick={() => onToggleSave(job.id)}

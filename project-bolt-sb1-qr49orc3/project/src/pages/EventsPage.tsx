@@ -126,7 +126,7 @@ function EventCard({ event, onShare, onFavorite, isFavorite }: {
             </div>
             <p className="mt-1 flex items-center gap-1 text-xs text-slate-500"><MapPin className="h-3.5 w-3.5" /> {event.location || event.municipality}</p>
           </div>
-          {event.category && <span className="chip shrink-0 bg-blue-50 text-xs text-blue-700">{event.category}</span>}
+          {event.category && <span className="chip shrink-0 bg-teal-50 text-xs text-teal-700">{event.category}</span>}
         </div>
         {event.description && <p className="mt-2 text-sm text-slate-600 line-clamp-2">{event.description}</p>}
 
@@ -160,7 +160,7 @@ function EventCard({ event, onShare, onFavorite, isFavorite }: {
           <button onClick={() => setShowMap((v) => !v)} className="btn-outline px-2.5 py-1.5 text-xs">
             <MapPin className="h-3.5 w-3.5" /> {showMap ? 'Ocultar mapa' : 'Ver mapa'}
           </button>
-          <button onClick={() => onShare(event)} className="rounded-lg p-2 text-slate-400 hover:bg-blue-50 hover:text-[#1565C0]" aria-label="Compartir">
+          <button onClick={() => onShare(event)} className="rounded-lg p-2 text-slate-400 hover:bg-teal-50 hover:text-[#9C6F0A]" aria-label="Compartir">
             <Share2 className="h-4 w-4" />
           </button>
           <button onClick={() => onFavorite(event.id)} className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" aria-label="Favorito">
@@ -249,7 +249,7 @@ export function EventsPage({ events, onChange }: EventsPageProps) {
           </select>
         </div>
         {hasFilters && (
-          <button onClick={() => { setQuery(''); setMuni(''); setCategory(''); }} className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#1565C0] hover:underline">
+          <button onClick={() => { setQuery(''); setMuni(''); setCategory(''); }} className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#9C6F0A] hover:underline">
             <X className="h-3.5 w-3.5" /> Limpiar filtros
           </button>
         )}

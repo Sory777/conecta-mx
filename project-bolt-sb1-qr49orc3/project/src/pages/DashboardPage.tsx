@@ -160,7 +160,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
   }
 
   const metricCards = [
-    { icon: Eye, label: 'Vistas totales', value: analytics['view'] || 0, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { icon: Eye, label: 'Vistas totales', value: analytics['view'] || 0, color: 'text-teal-600', bg: 'bg-teal-50' },
     { icon: Users, label: 'Usuarios únicos', value: uniqueVisitors, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { icon: MessageCircle, label: 'Clics WhatsApp', value: analytics['whatsapp_click'] || 0, color: 'text-green-600', bg: 'bg-green-50' },
     { icon: MapPin, label: 'Cómo llegar', value: analytics['directions_click'] || 0, color: 'text-orange-600', bg: 'bg-orange-50' },
@@ -185,7 +185,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
 
       {/* Conecta Index */}
       <div className="mb-5 card overflow-hidden">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#0D47A1] to-[#1565C0] px-5 py-4 text-white">
+        <div className="flex items-center justify-between bg-gradient-to-r from-[#9C6F0A] to-[#D4AF37] px-5 py-4 text-white">
           <div className="flex items-center gap-3">
             <Award className="h-8 w-8" />
             <div>
@@ -220,7 +220,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {/* Publications summary */}
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <div className="card p-4">
-          <Package className="h-5 w-5 text-[#1565C0]" />
+          <Package className="h-5 w-5 text-[#9C6F0A]" />
           <p className="mt-2 text-2xl font-extrabold text-slate-800">{products.length}</p>
           <p className="text-xs text-slate-500">Publicaciones totales</p>
         </div>
@@ -240,7 +240,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {topProducts.length > 0 && (
         <div className="mb-5 card p-4">
           <div className="mb-3 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-[#1565C0]" />
+            <BarChart3 className="h-4 w-4 text-[#9C6F0A]" />
             <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Publicaciones más vistas</h2>
           </div>
           <div className="space-y-2">
@@ -262,7 +262,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {/* Photo gallery */}
       <div className="mb-5 card p-4">
         <div className="mb-3 flex items-center gap-2">
-          <Camera className="h-4 w-4 text-[#1565C0]" />
+          <Camera className="h-4 w-4 text-[#9C6F0A]" />
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Fotos de tu espacio</h2>
         </div>
         <PhotoGallery photos={business.photos || []} limit={photoLimit} onChange={savePhotos} />
@@ -281,7 +281,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
                 type="button"
                 disabled={savingBg}
                 onClick={() => saveBackground(bg.key)}
-                className={`aspect-square rounded-xl border-2 ${bg.className} ${selected ? 'border-[#1565C0]' : 'border-transparent'} transition hover:scale-105`}
+                className={`aspect-square rounded-xl border-2 ${bg.className} ${selected ? 'border-[#9C6F0A]' : 'border-transparent'} transition hover:scale-105`}
                 title={bg.label}
                 aria-label={bg.label}
               />
@@ -293,7 +293,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
       {/* Ambulant vendor */}
       <div className="mb-5 card p-4">
         <div className="mb-3 flex items-center gap-2">
-          <Truck className="h-4 w-4 text-[#1565C0]" />
+          <Truck className="h-4 w-4 text-[#9C6F0A]" />
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Vendedor ambulante</h2>
         </div>
         <label className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3">
@@ -302,7 +302,7 @@ export function DashboardPage({ business, onNavigate, onRefresh }: DashboardPage
             checked={!!business.is_ambulante}
             disabled={savingAmbulante}
             onChange={toggleAmbulante}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#9C6F0A]"
           />
           <span className="text-xs text-slate-600">
             Marca esto si vendes en movimiento (carrito, puesto ambulante, etc.). Al activarlo, podrás compartir tu ubicación en vivo para que los clientes vean por dónde vas.

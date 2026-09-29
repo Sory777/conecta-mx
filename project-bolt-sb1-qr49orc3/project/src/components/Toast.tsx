@@ -34,7 +34,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const icon = (type: ToastType) => {
     if (type === 'success') return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
     if (type === 'error') return <XCircle className="h-5 w-5 text-rose-500" />;
-    return <Info className="h-5 w-5 text-[#1565C0]" />;
+    return <Info className="h-5 w-5 text-[#9C6F0A]" />;
   };
 
   return (

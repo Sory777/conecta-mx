@@ -154,7 +154,7 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
       </div>
 
       <form onSubmit={submit} className="card space-y-4 p-5">
-        <div className="rounded-xl bg-blue-50 p-3 text-xs text-blue-700 flex gap-2">
+        <div className="rounded-xl bg-teal-50 p-3 text-xs text-teal-700 flex gap-2">
           <Info className="h-4 w-4 shrink-0" />
           <span>Los primeros 30 negocios registrados obtienen membresía <strong>Fundador</strong> gratis para siempre.</span>
         </div>
@@ -229,10 +229,10 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
             type="checkbox"
             checked={form.isAmbulante}
             onChange={(e) => set('isAmbulante', e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#9C6F0A]"
           />
           <span className="text-xs text-slate-600">
-            <Truck className="mr-1 inline h-3.5 w-3.5 text-[#1565C0]" />
+            <Truck className="mr-1 inline h-3.5 w-3.5 text-[#9C6F0A]" />
             Soy un negocio ambulante (vendo en movimiento, ej. carrito de comida). Podrás compartir tu ubicación en vivo desde tu panel.
           </span>
         </label>
@@ -267,11 +267,11 @@ export function RegisterPage({ onRegistered }: RegisterPageProps) {
             type="checkbox"
             checked={form.acceptTerms}
             onChange={(e) => set('acceptTerms', e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#9C6F0A]"
           />
           <span className="text-xs text-slate-600">
-            Acepto los <a href="#/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-[#1565C0] hover:underline">términos y condiciones</a> y el{' '}
-            <a href="#/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-[#1565C0] hover:underline">aviso de privacidad</a> de Conecta MX, y autorizo la publicación de mi información de contacto.
+            Acepto los <a href="#/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-[#9C6F0A] hover:underline">términos y condiciones</a> y el{' '}
+            <a href="#/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-[#9C6F0A] hover:underline">aviso de privacidad</a> de Conecta MX, y autorizo la publicación de mi información de contacto.
           </span>
         </label>
         {errors.acceptTerms && <p className="-mt-2 text-xs text-rose-500">{errors.acceptTerms}</p>}

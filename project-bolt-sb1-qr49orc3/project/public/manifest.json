@@ -6,7 +6,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
-  "theme_color": "#1565C0",
+  "theme_color": "#0D6575",
   "categories": ["business", "shopping", "lifestyle"],
   "icons": [
     {

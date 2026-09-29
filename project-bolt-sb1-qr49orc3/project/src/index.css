@@ -5,10 +5,10 @@
 @tailwind utilities;
 
 :root {
-  --cmx-dark: #0d1b2e;
-  --cmx-blue-dark: #0D47A1;
-  --cmx-blue: #1565C0;
-  --cmx-blue-light: #1E88E5;
+  --cmx-dark: #0A1F22;
+  --cmx-blue-dark: #0D6575;
+  --cmx-blue: #9C6F0A;
+  --cmx-blue-light: #D4AF37;
   --cmx-green: #00C853;
   --cmx-orange: #FF8F00;
   --cmx-wa: #25d366;
@@ -25,17 +25,17 @@ body {
 
 @layer components {
   .mng-gradient {
-    background: linear-gradient(135deg, #0d1b2e 0%, #0D47A1 60%, #1565C0 100%);
+    background: linear-gradient(135deg, #0A1F22 0%, #0D6575 60%, #9C6F0A 100%);
   }
   .mng-gradient-soft {
-    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 70%, #1E88E5 100%);
+    background: linear-gradient(135deg, #0D6575 0%, #9C6F0A 70%, #D4AF37 100%);
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
     @apply btn text-white shadow-md hover:shadow-lg hover:-translate-y-0.5;
-    background: linear-gradient(135deg, #0D47A1, #1565C0);
+    background: linear-gradient(135deg, #9C6F0A, #D4AF37);
   }
   .btn-wa {
     @apply btn text-white shadow-md hover:shadow-lg hover:-translate-y-0.5;
@@ -45,13 +45,13 @@ body {
     background: #1fb855;
   }
   .btn-outline {
-    @apply btn border-2 border-slate-200 bg-white text-slate-700 hover:border-[#1565C0] hover:text-[#1565C0];
+    @apply btn border-2 border-slate-200 bg-white text-slate-700 hover:border-[#9C6F0A] hover:text-[#9C6F0A];
   }
   .btn-ghost {
     @apply btn text-slate-600 hover:bg-slate-100;
   }
   .input {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#1565C0] focus:ring-2 focus:ring-[#1565C0]/20;
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#9C6F0A] focus:ring-2 focus:ring-[#9C6F0A]/20;
   }
   .label {
     @apply mb-1.5 block text-sm font-medium text-slate-700;
@@ -108,7 +108,7 @@ body {
   body { @apply bg-slate-900 text-slate-200; }
   .card { @apply border-slate-700 bg-slate-800; }
   .input { @apply border-slate-600 bg-slate-800 text-slate-200 placeholder:text-slate-500; }
-  .btn-outline { @apply border-slate-600 bg-slate-800 text-slate-300 hover:border-[#1565C0] hover:text-[#1565C0]; }
+  .btn-outline { @apply border-slate-600 bg-slate-800 text-slate-300 hover:border-[#9C6F0A] hover:text-[#9C6F0A]; }
   .btn-ghost { @apply text-slate-300 hover:bg-slate-700; }
   .label { @apply text-slate-300; }
 }

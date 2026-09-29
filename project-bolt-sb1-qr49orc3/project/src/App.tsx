@@ -276,7 +276,7 @@ function AppInner() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#1565C0]" />
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#9C6F0A]" />
           <p className="mt-3 text-sm text-slate-500">Cargando...</p>
         </div>
       </div>
@@ -335,7 +335,7 @@ function AppInner() {
         )}
         {route.name === 'business' && !currentBusiness && businessLoading && (
           <div className="flex justify-center py-24">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#1565C0]" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#9C6F0A]" />
           </div>
         )}
         {route.name === 'business' && !currentBusiness && !businessLoading && (

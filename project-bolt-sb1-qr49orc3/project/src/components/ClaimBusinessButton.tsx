@@ -51,7 +51,7 @@ function DocumentPicker({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={busy}
-        className={`flex w-full items-center gap-3 rounded-xl border-2 border-dashed p-3 text-left transition ${path ? 'border-emerald-300 bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:border-[#1565C0]'}`}
+        className={`flex w-full items-center gap-3 rounded-xl border-2 border-dashed p-3 text-left transition ${path ? 'border-emerald-300 bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:border-[#9C6F0A]'}`}
       >
         {previewUrl ? (
           <img src={previewUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
@@ -120,7 +120,7 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
   // business — which a free-text form never let us do.
   if (!user) {
     return (
-      <a href="#/login" className="btn-outline px-4 py-2 text-sm text-[#1565C0]">
+      <a href="#/login" className="btn-outline px-4 py-2 text-sm text-[#9C6F0A]">
         <LogIn className="h-4 w-4" /> ¿Es tu negocio? Inicia sesión para reclamarlo
       </a>
     );
@@ -130,7 +130,7 @@ export function ClaimBusinessButton({ businessId, businessName }: ClaimBusinessB
     <>
       <button
         onClick={() => setOpen(true)}
-        className="btn-outline px-4 py-2 text-sm text-[#1565C0]"
+        className="btn-outline px-4 py-2 text-sm text-[#9C6F0A]"
       >
         <BadgeCheck className="h-4 w-4" /> ¿Es tu negocio? Reclámalo
       </button>

@@ -36,7 +36,7 @@ export function BusinessCard({ business, onOpen }: BusinessCardProps) {
             href={dirLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-lg bg-[#1565C0]/90 px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-sm transition-all hover:bg-[#1565C0] hover:scale-105"
+            className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-lg bg-[#9C6F0A]/90 px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-sm transition-all hover:bg-[#9C6F0A] hover:scale-105"
             aria-label="Cómo llegar"
           >
             <Navigation className="h-3.5 w-3.5" /> Cómo llegar
@@ -44,7 +44,7 @@ export function BusinessCard({ business, onOpen }: BusinessCardProps) {
         )}
         <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
           {business.verified && (
-            <span className="badge bg-[#1565C0] text-white shadow">
+            <span className="badge bg-[#9C6F0A] text-white shadow">
               <BadgeCheck className="h-3.5 w-3.5" /> Verificado
             </span>
           )}
@@ -71,7 +71,7 @@ export function BusinessCard({ business, onOpen }: BusinessCardProps) {
 
       <div className="flex flex-1 flex-col p-3.5">
         <button onClick={() => onOpen(business)} className="text-left">
-          <h3 className="line-clamp-1 text-base font-bold text-slate-800 group-hover:text-[#1565C0]">{business.name}</h3>
+          <h3 className="line-clamp-1 text-base font-bold text-slate-800 group-hover:text-[#9C6F0A]">{business.name}</h3>
         </button>
         <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
           <span className="chip bg-slate-100 text-slate-600">

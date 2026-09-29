@@ -136,7 +136,7 @@ export function BusinessDetailPage({ business, onBack, onTrack, onJobsChange }: 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <div className="flex flex-wrap items-center gap-2">
-            {business.verified && <span className="badge bg-[#1565C0] text-white"><BadgeCheck className="h-3.5 w-3.5" /> Verificado</span>}
+            {business.verified && <span className="badge bg-[#9C6F0A] text-white"><BadgeCheck className="h-3.5 w-3.5" /> Verificado</span>}
             {business.founding && <span className="badge bg-amber-400 text-amber-900"><Sparkles className="h-3.5 w-3.5" /> Fundador</span>}
             <span className="badge bg-emerald-500 text-white">{PLAN_LABELS[business.plan]}</span>
           </div>
@@ -474,7 +474,7 @@ function AddProductForm({ onAdd, businessCategory }: { onAdd: (p: Omit<Product, 
               key={t.value}
               type="button"
               onClick={() => toggleTag(t.value)}
-              className={`chip text-xs ${tags.includes(t.value) ? 'bg-[#0D47A1] text-white' : 'bg-slate-100 text-slate-600'}`}
+              className={`chip text-xs ${tags.includes(t.value) ? 'bg-[#0D6575] text-white' : 'bg-slate-100 text-slate-600'}`}
             >
               {t.label}
             </button>

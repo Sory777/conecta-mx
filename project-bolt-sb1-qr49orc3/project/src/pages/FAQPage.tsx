@@ -91,7 +91,7 @@ export function FAQPage({ onNavigate }: FAQPageProps) {
       </div>
 
       <div className="mt-6 flex flex-col items-center gap-2 rounded-2xl bg-slate-50 p-5 text-center">
-        <MessageCircle className="h-6 w-6 text-[#1565C0]" />
+        <MessageCircle className="h-6 w-6 text-[#9C6F0A]" />
         <p className="text-sm font-semibold text-slate-700">¿No encontraste lo que buscabas?</p>
         <p className="text-xs text-slate-500">Escríbenos a contacto@conectamx.app</p>
         <button onClick={() => onNavigate('home')} className="btn-outline mt-2 text-xs">Volver al inicio</button>

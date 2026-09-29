@@ -33,8 +33,8 @@ export function HomePage({ totalBusinesses, municipalityCounts, jobsCount, event
       icon: Store,
       label: 'Negocios Registrados',
       value: stats.total,
-      gradient: 'from-[#0D47A1] to-[#1565C0]',
-      glow: 'shadow-[#1565C0]/40',
+      gradient: 'from-[#9C6F0A] to-[#D4AF37]',
+      glow: 'shadow-[#9C6F0A]/40',
       route: 'directory' as const,
       desc: 'Encuentra negocios cerca de ti',
     },
@@ -71,6 +71,12 @@ export function HomePage({ totalBusinesses, municipalityCounts, jobsCount, event
       {/* Hero */}
       <section className="relative overflow-hidden mng-gradient text-white">
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 70%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <img
+          src="/brand/uriangato-shield.png"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 -top-10 h-[130%] max-w-none opacity-[0.12] sm:-right-8 sm:h-[115%]"
+        />
         <div className="relative mx-auto max-w-5xl px-4 py-12 sm:py-16 text-center">
           <div className="flex justify-center">
             <Logo size={88} />
@@ -181,10 +187,10 @@ export function HomePage({ totalBusinesses, municipalityCounts, jobsCount, event
               <button
                 key={cat.name}
                 onClick={() => onNavigate('directory', { category: cat.name })}
-                className="card relative flex cursor-pointer flex-col items-center gap-1 p-3 transition-all hover:-translate-y-0.5 hover:border-[#1565C0] hover:shadow-md active:scale-[0.97] active:bg-slate-50"
+                className="card relative flex cursor-pointer flex-col items-center gap-1 p-3 transition-all hover:-translate-y-0.5 hover:border-[#9C6F0A] hover:shadow-md active:scale-[0.97] active:bg-slate-50"
               >
                 <ChevronRight className="absolute right-1.5 top-1.5 h-3 w-3 text-slate-300" />
-                <Icon className="h-6 w-6 text-[#1565C0]" />
+                <Icon className="h-6 w-6 text-[#9C6F0A]" />
                 <span className="text-center text-[11px] font-medium leading-tight text-slate-600">{cat.name}</span>
               </button>
             );
@@ -200,7 +206,7 @@ export function HomePage({ totalBusinesses, municipalityCounts, jobsCount, event
             <TrendingUp className="mx-auto h-8 w-8" />
             <h2 className="mt-3 text-2xl font-extrabold sm:text-3xl">¿Tienes un negocio en México?</h2>
             <p className="mx-auto mt-2 max-w-xl text-white/85">Regístralo gratis y empieza a conseguir más clientes. Mide cuántas personas te buscan, cuántos te contactan por WhatsApp y cuántos comparten tu negocio.</p>
-            <button onClick={() => onNavigate('register')} className="mt-5 btn bg-white text-[#0D47A1] hover:-translate-y-0.5 hover:shadow-lg">
+            <button onClick={() => onNavigate('register')} className="mt-5 btn bg-white text-[#0D6575] hover:-translate-y-0.5 hover:shadow-lg">
               <Store className="h-4 w-4" /> Empezar gratis
             </button>
           </div>
@@ -223,7 +229,7 @@ export function HomePage({ totalBusinesses, municipalityCounts, jobsCount, event
                     className="flex w-full items-center justify-between rounded-xl border border-slate-100 px-4 py-3 text-left transition-all hover:bg-slate-50"
                   >
                     <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                      <MapPin className="h-4 w-4 text-[#1565C0]" /> {name}
+                      <MapPin className="h-4 w-4 text-[#9C6F0A]" /> {name}
                     </span>
                     <span className="chip bg-slate-100 text-xs text-slate-600">
                       {count} {count === 1 ? 'negocio' : 'negocios'}

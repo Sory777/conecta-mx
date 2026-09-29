@@ -100,15 +100,15 @@ export function InstallBanner() {
           </div>
           <ol className="space-y-2 text-xs text-slate-600">
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1565C0] text-[10px] font-bold text-white">1</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#9C6F0A] text-[10px] font-bold text-white">1</span>
               <span>Toca el botón de Compartir <strong>Share</strong> en Safari.</span>
             </li>
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1565C0] text-[10px] font-bold text-white">2</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#9C6F0A] text-[10px] font-bold text-white">2</span>
               <span>Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong>.</span>
             </li>
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1565C0] text-[10px] font-bold text-white">3</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#9C6F0A] text-[10px] font-bold text-white">3</span>
               <span>Toca <strong>"Añadir"</strong>. ¡Listo! Conecta MX aparecerá como una app.</span>
             </li>
           </ol>

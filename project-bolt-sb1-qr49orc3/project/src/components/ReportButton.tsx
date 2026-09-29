@@ -55,10 +55,10 @@ export function ReportButton({ itemType, itemId }: ReportButtonProps) {
                 key={r.value}
                 onClick={() => setReason(r.value as ReportReason)}
                 className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm transition-colors ${
-                  reason === r.value ? 'border-[#1565C0] bg-blue-50 text-[#0D47A1]' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  reason === r.value ? 'border-[#9C6F0A] bg-teal-50 text-[#0D6575]' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
-                <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${reason === r.value ? 'border-[#1565C0] bg-[#1565C0]' : 'border-slate-300'}`}>
+                <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${reason === r.value ? 'border-[#9C6F0A] bg-[#9C6F0A]' : 'border-slate-300'}`}>
                   {reason === r.value && <span className="h-2 w-2 rounded-full bg-white" />}
                 </span>
                 {r.label}

@@ -136,12 +136,12 @@ export function JobsPage({ jobs, savedJobs, onToggleSave, onChange }: JobsPagePr
               type="checkbox"
               checked={showOnlySaved}
               onChange={(e) => setShowOnlySaved(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-[#1565C0]"
+              className="h-4 w-4 rounded border-slate-300 text-[#9C6F0A]"
             />
             <Heart className={`h-4 w-4 ${showOnlySaved ? 'fill-rose-500 text-rose-500' : ''}`} /> Solo guardadas ({savedJobs.length})
           </label>
           {hasFilters && (
-            <button onClick={() => { setQuery(''); setMuni(''); setCategory(''); setContract(''); setSalaryMin(''); setShowOnlySaved(false); }} className="inline-flex items-center gap-1 text-xs font-medium text-[#1565C0] hover:underline">
+            <button onClick={() => { setQuery(''); setMuni(''); setCategory(''); setContract(''); setSalaryMin(''); setShowOnlySaved(false); }} className="inline-flex items-center gap-1 text-xs font-medium text-[#9C6F0A] hover:underline">
               <X className="h-3.5 w-3.5" /> Limpiar
             </button>
           )}

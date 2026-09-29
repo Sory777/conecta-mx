@@ -111,7 +111,7 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
                 {ev.category && (
-                  <span className="absolute left-3 top-3 badge bg-[#1565C0] text-white shadow">
+                  <span className="absolute left-3 top-3 badge bg-[#9C6F0A] text-white shadow">
                     {ev.category}
                   </span>
                 )}
@@ -133,8 +133,8 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
               </div>
               <div className="space-y-1.5 p-3">
                 <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <Calendar className="h-3.5 w-3.5 text-[#1565C0]" /> {fmtDate(ev.date)}
-                  {ev.time && <><span className="text-slate-300">·</span><Clock className="h-3.5 w-3.5 text-[#1565C0]" /> {ev.time}</>}
+                  <Calendar className="h-3.5 w-3.5 text-[#9C6F0A]" /> {fmtDate(ev.date)}
+                  {ev.time && <><span className="text-slate-300">·</span><Clock className="h-3.5 w-3.5 text-[#9C6F0A]" /> {ev.time}</>}
                 </div>
                 {ev.location && (
                   <p className="flex items-start gap-1.5 text-xs text-slate-500">
@@ -178,7 +178,7 @@ export function EventsCarousel({ events, canManage, onDelete, onAdd }: EventsCar
               key={i}
               onClick={() => goTo(i)}
               className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? 'w-7 bg-[#1565C0]' : 'w-2 bg-slate-300 hover:bg-slate-400'
+                i === active ? 'w-7 bg-[#9C6F0A]' : 'w-2 bg-slate-300 hover:bg-slate-400'
               }`}
               aria-label={`Ir a ${i + 1}`}
             />

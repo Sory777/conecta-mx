@@ -19,12 +19,12 @@ export function Footer({ onNavigate }: FooterProps) {
           <div>
             <h3 className="text-sm font-bold text-slate-700">Explorar</h3>
             <ul className="mt-2 space-y-1.5 text-sm text-slate-500">
-              <li><button onClick={() => onNavigate('directory')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><Store className="h-4 w-4" /> Directorio</button></li>
-              <li><button onClick={() => onNavigate('jobs')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><Briefcase className="h-4 w-4" /> Bolsa de Empleo</button></li>
-              <li><button onClick={() => onNavigate('events')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><Calendar className="h-4 w-4" /> Eventos</button></li>
-              <li><button onClick={() => onNavigate('qr')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><QrCode className="h-4 w-4" /> Códigos QR</button></li>
-              <li><button onClick={() => onNavigate('plans')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><Shield className="h-4 w-4" /> Planes</button></li>
-              <li><button onClick={() => onNavigate('faq')} className="inline-flex items-center gap-1.5 hover:text-[#1565C0]"><HelpCircle className="h-4 w-4" /> Preguntas frecuentes</button></li>
+              <li><button onClick={() => onNavigate('directory')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Store className="h-4 w-4" /> Directorio</button></li>
+              <li><button onClick={() => onNavigate('jobs')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Briefcase className="h-4 w-4" /> Bolsa de Empleo</button></li>
+              <li><button onClick={() => onNavigate('events')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Calendar className="h-4 w-4" /> Eventos</button></li>
+              <li><button onClick={() => onNavigate('qr')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><QrCode className="h-4 w-4" /> Códigos QR</button></li>
+              <li><button onClick={() => onNavigate('plans')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Shield className="h-4 w-4" /> Planes</button></li>
+              <li><button onClick={() => onNavigate('faq')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><HelpCircle className="h-4 w-4" /> Preguntas frecuentes</button></li>
             </ul>
           </div>
           <div>
@@ -32,15 +32,15 @@ export function Footer({ onNavigate }: FooterProps) {
             <ul className="mt-2 space-y-1.5 text-sm text-slate-500">
               <li>contacto@conectamx.app</li>
               <li>México</li>
-              <li><button onClick={() => onNavigate('register')} className="text-[#1565C0] hover:underline">Registra tu negocio</button></li>
+              <li><button onClick={() => onNavigate('register')} className="text-[#9C6F0A] hover:underline">Registra tu negocio</button></li>
             </ul>
           </div>
         </div>
         <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-slate-100 pt-4 text-xs text-slate-400 sm:flex-row">
           <p>© {new Date().getFullYear()} Conecta MX. Todos los derechos reservados.</p>
           <div className="flex items-center gap-3">
-            <button onClick={() => onNavigate('terms')} className="hover:text-[#1565C0] hover:underline">Términos y condiciones</button>
-            <button onClick={() => onNavigate('privacy')} className="hover:text-[#1565C0] hover:underline">Aviso de privacidad</button>
+            <button onClick={() => onNavigate('terms')} className="hover:text-[#9C6F0A] hover:underline">Términos y condiciones</button>
+            <button onClick={() => onNavigate('privacy')} className="hover:text-[#9C6F0A] hover:underline">Aviso de privacidad</button>
           </div>
           <p className="inline-flex items-center gap-1">Hecho con <Heart className="h-3 w-3 fill-rose-500 text-rose-500" /> en México</p>
         </div>

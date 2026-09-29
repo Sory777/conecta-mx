@@ -142,7 +142,7 @@ function TermsContent() {
       </Section>
 
       <Section title="11. Contacto">
-        <p>Dudas o reportes: <a className="text-[#1565C0] hover:underline" href="mailto:contacto@conectamx.app">contacto@conectamx.app</a></p>
+        <p>Dudas o reportes: <a className="text-[#9C6F0A] hover:underline" href="mailto:contacto@conectamx.app">contacto@conectamx.app</a></p>
       </Section>
     </>
   );
@@ -189,7 +189,7 @@ function PrivacyContent() {
         <p>
           Tienes derecho a Acceder, Rectificar, Cancelar u Oponerte (derechos ARCO) al tratamiento de tus datos
           personales, así como a revocar tu consentimiento en cualquier momento. Para ejercerlos, escribe a{' '}
-          <a className="text-[#1565C0] hover:underline" href="mailto:contacto@conectamx.app">contacto@conectamx.app</a>{' '}
+          <a className="text-[#9C6F0A] hover:underline" href="mailto:contacto@conectamx.app">contacto@conectamx.app</a>{' '}
           indicando tu nombre, el negocio o cuenta relacionada, y el derecho que deseas ejercer.
         </p>
       </Section>

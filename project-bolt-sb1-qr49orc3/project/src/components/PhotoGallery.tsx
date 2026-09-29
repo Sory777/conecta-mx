@@ -68,7 +68,7 @@ export function PhotoGallery({ photos, limit, onChange }: PhotoGalleryProps) {
             type="button"
             onClick={pick}
             disabled={busy}
-            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition hover:border-[#1565C0] hover:text-[#1565C0]"
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition hover:border-[#9C6F0A] hover:text-[#9C6F0A]"
           >
             {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
             <span className="text-xs font-medium">{busy ? 'Subiendo...' : 'Agregar'}</span>

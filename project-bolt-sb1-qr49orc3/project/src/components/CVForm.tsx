@@ -40,8 +40,8 @@ export function CVForm({ job, onSubmit }: CVFormProps) {
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <div className="rounded-xl bg-[#1565C0]/5 px-3 py-2.5 text-xs text-slate-600">
-        <FileText className="mr-1 inline h-3.5 w-3.5 text-[#1565C0]" />
+      <div className="rounded-xl bg-[#9C6F0A]/5 px-3 py-2.5 text-xs text-slate-600">
+        <FileText className="mr-1 inline h-3.5 w-3.5 text-[#9C6F0A]" />
         {job ? (
           <>Postulando para <strong>{job.title}</strong> en {job.companyName}</>
         ) : (

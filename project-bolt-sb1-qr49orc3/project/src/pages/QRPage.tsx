@@ -156,7 +156,7 @@ export function QRPage({ onTrack }: QRPageProps) {
       {/* Direct link share */}
       <div className="card p-5">
         <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-700">
-          <Share2 className="h-4 w-4 text-[#1565C0]" /> Enlace directo
+          <Share2 className="h-4 w-4 text-[#9C6F0A]" /> Enlace directo
         </div>
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2">
           <input
@@ -192,7 +192,7 @@ export function QRPage({ onTrack }: QRPageProps) {
       {/* QR code */}
       <div className="card mt-4 flex flex-col items-center gap-4 p-6">
         <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-          <Globe className="h-4 w-4 text-[#1565C0]" /> Código QR general
+          <Globe className="h-4 w-4 text-[#9C6F0A]" /> Código QR general
         </div>
         <QRBox
           value={publicUrl}

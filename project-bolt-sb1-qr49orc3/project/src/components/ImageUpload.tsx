@@ -65,7 +65,7 @@ export function ImageUpload({ value, onChange, folder = 'businesses', label = 'I
           type="button"
           onClick={pick}
           disabled={busy}
-          className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-slate-400 transition hover:border-[#1565C0] hover:text-[#1565C0] ${aspect}`}
+          className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-slate-400 transition hover:border-[#9C6F0A] hover:text-[#9C6F0A] ${aspect}`}
         >
           {busy ? <Loader2 className="h-7 w-7 animate-spin" /> : <ImagePlus className="h-7 w-7" />}
           <span className="text-sm font-medium">{busy ? 'Subiendo...' : 'Toca para subir una foto'}</span>

@@ -159,14 +159,14 @@ export function DirectoryPage({ onOpenBusiness, initialQuery = '', initialMuni =
             <div className="flex rounded-lg border border-slate-200 p-0.5">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`rounded-md p-2 ${viewMode === 'grid' ? 'bg-[#0D47A1] text-white' : 'text-slate-400'}`}
+                className={`rounded-md p-2 ${viewMode === 'grid' ? 'bg-[#0D6575] text-white' : 'text-slate-400'}`}
                 aria-label="Vista cuadrícula"
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`rounded-md p-2 ${viewMode === 'list' ? 'bg-[#0D47A1] text-white' : 'text-slate-400'}`}
+                className={`rounded-md p-2 ${viewMode === 'list' ? 'bg-[#0D6575] text-white' : 'text-slate-400'}`}
                 aria-label="Vista lista"
               >
                 <List className="h-4 w-4" />
@@ -199,7 +199,7 @@ export function DirectoryPage({ onOpenBusiness, initialQuery = '', initialMuni =
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <span className="text-xs text-slate-400">Búsqueda inteligente:</span>
             {smartCategories.map((c) => (
-              <span key={c} className="chip bg-blue-50 text-xs text-blue-700">{c}</span>
+              <span key={c} className="chip bg-teal-50 text-xs text-teal-700">{c}</span>
             ))}
           </div>
         )}
@@ -209,7 +209,7 @@ export function DirectoryPage({ onOpenBusiness, initialQuery = '', initialMuni =
       <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1">
         <button
           onClick={() => setCategory('')}
-          className={`chip whitespace-nowrap ${!category ? 'bg-[#0D47A1] text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
+          className={`chip whitespace-nowrap ${!category ? 'bg-[#0D6575] text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
         >
           Todas
         </button>
@@ -219,7 +219,7 @@ export function DirectoryPage({ onOpenBusiness, initialQuery = '', initialMuni =
             <button
               key={c.name}
               onClick={() => setCategory(c.name)}
-              className={`chip whitespace-nowrap ${category === c.name ? 'bg-[#0D47A1] text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
+              className={`chip whitespace-nowrap ${category === c.name ? 'bg-[#0D6575] text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
             >
               <Icon className="h-3.5 w-3.5" /> {c.name}
             </button>
@@ -265,7 +265,7 @@ export function DirectoryPage({ onOpenBusiness, initialQuery = '', initialMuni =
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="truncate text-sm font-bold text-slate-800">{b.name}</p>
-                        {b.verified && <span className="shrink-0 text-xs text-[#1565C0]">✓</span>}
+                        {b.verified && <span className="shrink-0 text-xs text-[#9C6F0A]">✓</span>}
                       </div>
                       <p className="truncate text-xs text-slate-500">{b.category} · {b.municipality}</p>
                       <div className="mt-1 flex items-center gap-2">
@@ -280,7 +280,7 @@ export function DirectoryPage({ onOpenBusiness, initialQuery = '', initialMuni =
                     <button onClick={() => toggleFavorite(b.id)} className="rounded-lg p-2 text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Favorito">
                       <Heart className={`h-4 w-4 ${favorites.has(b.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
                     </button>
-                    <button onClick={() => shareBusiness(b)} className="rounded-lg p-2 text-slate-300 hover:bg-blue-50 hover:text-[#1565C0]" aria-label="Compartir">
+                    <button onClick={() => shareBusiness(b)} className="rounded-lg p-2 text-slate-300 hover:bg-teal-50 hover:text-[#9C6F0A]" aria-label="Compartir">
                       <Share2 className="h-4 w-4" />
                     </button>
                     <button onClick={() => copyLink(b)} className="rounded-lg p-2 text-slate-300 hover:bg-slate-100 hover:text-slate-600" aria-label="Copiar enlace">

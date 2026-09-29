@@ -20,9 +20,9 @@ export function Logo({ size = 48, showText = false, className = '' }: LogoProps)
       >
         <defs>
           <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1E88E5" />
-            <stop offset="55%" stopColor="#1565C0" />
-            <stop offset="100%" stopColor="#0D47A1" />
+            <stop offset="0%" stopColor="#D4AF37" />
+            <stop offset="55%" stopColor="#9C6F0A" />
+            <stop offset="100%" stopColor="#0D6575" />
           </linearGradient>
         </defs>
 
@@ -34,20 +34,20 @@ export function Logo({ size = 48, showText = false, className = '' }: LogoProps)
           fill={`url(#${gradId})`}
         />
 
-        {/* Back-left person (light blue) */}
-        <g fill="#42A5F5">
+        {/* Back-left person (light teal) */}
+        <g fill="#5FA8B3">
           <circle cx="36" cy="38.2" r="2.4" />
           <path d="M 32.8 43.5 A 3.2 3.2 0 0 1 39.2 43.5 Z" />
         </g>
 
-        {/* Back-right person (light blue) */}
-        <g fill="#42A5F5">
+        {/* Back-right person (light teal) */}
+        <g fill="#5FA8B3">
           <circle cx="64" cy="38.2" r="2.4" />
           <path d="M 60.8 43.5 A 3.2 3.2 0 0 1 67.2 43.5 Z" />
         </g>
 
         {/* Center-top person (medium blue, slightly larger) */}
-        <g fill="#1E88E5">
+        <g fill="#D4AF37">
           <circle cx="50" cy="31.5" r="3.2" />
           <path d="M 45.8 37.5 A 4.2 4.2 0 0 1 54.2 37.5 Z" />
         </g>
@@ -65,7 +65,7 @@ export function Logo({ size = 48, showText = false, className = '' }: LogoProps)
 
       {showText && (
         <div className="leading-none">
-          <div className="text-[13px] font-extrabold tracking-tight text-[#0D47A1]">CONECTA</div>
+          <div className="text-[13px] font-extrabold tracking-tight text-[#0D6575]">CONECTA</div>
           <div
             className="text-[15px] font-black tracking-widest"
             style={{

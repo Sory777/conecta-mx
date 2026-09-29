@@ -80,7 +80,7 @@ export function AuthPage({ mode, onSuccess, onSwitch }: AuthPageProps) {
         <div className="mb-5 grid gap-3 sm:grid-cols-3">
           {benefits.map((b) => (
             <div key={b.title} className="card p-3 text-center">
-              <b.icon className="mx-auto h-5 w-5 text-[#1565C0]" />
+              <b.icon className="mx-auto h-5 w-5 text-[#9C6F0A]" />
               <p className="mt-1.5 text-xs font-bold text-slate-700">{b.title}</p>
               <p className="mt-0.5 text-[11px] leading-tight text-slate-500">{b.desc}</p>
             </div>
@@ -125,7 +125,7 @@ export function AuthPage({ mode, onSuccess, onSwitch }: AuthPageProps) {
 
       <p className="mt-4 text-center text-sm text-slate-500">
         {mode === 'login' ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-        <button onClick={onSwitch} className="font-bold text-[#1565C0] hover:underline">
+        <button onClick={onSwitch} className="font-bold text-[#9C6F0A] hover:underline">
           {mode === 'login' ? 'Regístrate gratis' : 'Inicia sesión'}
         </button>
       </p>

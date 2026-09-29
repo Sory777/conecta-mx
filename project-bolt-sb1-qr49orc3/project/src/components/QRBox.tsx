@@ -20,7 +20,7 @@ export function QRBox({ value, size = 200, filename = 'mng-qr.png', label, onDow
     QRCode.toCanvas(
       canvasRef.current,
       value,
-      { width: size, margin: 2, color: { dark: '#0D47A1', light: '#ffffff' } },
+      { width: size, margin: 2, color: { dark: '#0D6575', light: '#ffffff' } },
       (err) => {
         if (err) console.error(err);
         else if (canvasRef.current) setDataUrl(canvasRef.current.toDataURL('image/png'));
