@@ -75,13 +75,19 @@ export function HomePage({ totalBusinesses, municipalityCounts, jobsCount, event
           src="/brand/uriangato-shield.png"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute -right-16 -top-10 h-[130%] max-w-none opacity-[0.12] sm:-right-8 sm:h-[115%]"
+          className="pointer-events-none absolute -right-10 -top-16 h-[150%] max-w-none opacity-[0.35] sm:right-0 sm:h-[135%]"
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A1F22]/40" />
         <div className="relative mx-auto max-w-5xl px-4 py-12 sm:py-16 text-center">
-          <div className="flex justify-center">
-            <Logo size={88} />
+          <img
+            src="/brand/uriangato-shield-sm.png"
+            alt="Escudo del H. Ayuntamiento de Uriangato"
+            className="mx-auto h-20 w-auto drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] sm:h-24"
+          />
+          <div className="mt-3 flex justify-center">
+            <Logo size={72} />
           </div>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">{APP_NAME}</h1>
+          <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">{APP_NAME}</h1>
           <p className="mt-1 text-sm font-medium text-white/70 sm:text-base">{APP_TAGLINE}</p>
           <p className="mt-2 text-base text-white/85 sm:text-lg">La plataforma que ayuda a los negocios de México a conseguir más clientes</p>
 
