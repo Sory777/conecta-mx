@@ -21,7 +21,7 @@ export class FollowCamera {
   }
 
   update(target: THREE.Vector3, dt: number) {
-    const inCave = regionOf(target.x, target.z) === 'cave';
+    const inCave = regionOf(target.x, target.z) !== 'outdoor';
     const dist = inCave ? Math.min(this.distance, 3.6) : this.distance;
     const focus = target.clone().add(new THREE.Vector3(0, 1.55, 0));
     const offset = new THREE.Vector3(Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), Math.cos(this.yaw) * Math.cos(this.pitch)).multiplyScalar(dist);

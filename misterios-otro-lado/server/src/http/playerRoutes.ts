@@ -86,7 +86,7 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
   app.post('/api/characters', async (req) => {
     const u = requireUser(req);
     const b = parse(
-      z.object({ name: z.string().max(40), appearance: z.object({ skin: color, hair: color, coat: color, pants: color }) }),
+      z.object({ name: z.string().max(40), appearance: z.object({ skin: color, hair: color, coat: color, pants: color, hairStyle: z.enum(['short', 'long', 'bun', 'bald']).optional(), beard: z.boolean().optional() }) }),
       req.body,
     );
     const c = s.accounts.createCharacter(u.id, b.name, b.appearance);

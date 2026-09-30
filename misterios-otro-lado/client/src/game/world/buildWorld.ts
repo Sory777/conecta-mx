@@ -9,6 +9,7 @@ import {
   CASA_MORALES,
   CAVE,
   CAVE_MOUTH,
+  MINE_INT,
   CHAPEL,
   type Collider,
   casaMoralesWalls,
@@ -371,14 +372,9 @@ export function buildWorld(quality: Quality): WorldBuild {
     const hole = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), std({ color: '#000' }));
     hole.position.set(0, 1.5, -1.95);
     g.add(hole);
-    for (let i = 0; i < 5; i++) {
-      const plank = box(3.3, 0.22, 0.06, woodMid, 0, 0.4 + i * 0.6, -1.6, 1);
-      plank.rotation.z = (i % 2 ? 1 : -1) * 0.08;
-      g.add(plank);
-    }
     const sign = new THREE.Mesh(
       new THREE.PlaneGeometry(1.8, 0.9),
-      std({ map: T.signTexture([{ text: 'PELIGRO', size: 70, color: '#c9412f' }, { text: 'NO PASAR', size: 46, color: '#e8dcc0' }, { text: 'Episodio 2 · próximamente', size: 26, color: '#9fb3c0', font: 'italic 400' }], '#2a2118') }),
+      std({ map: T.signTexture([{ text: 'PELIGRO', size: 70, color: '#c9412f' }, { text: 'NO PASAR', size: 46, color: '#e8dcc0' }, { text: 'Derrumbe · 14 marzo 1994', size: 26, color: '#9fb3c0', font: 'italic 400' }], '#2a2118') }),
     );
     sign.position.set(0, 1.6, -1.52);
     g.add(sign);
@@ -528,6 +524,7 @@ export function buildWorld(quality: Quality): WorldBuild {
 
   // ------------------------------------------------------------------ túnel subterráneo
   buildCave(group, rockMat, woodMid, caveGlowMat);
+  buildMine(group, rockMat, woodMid, woodDark, iron, lampGlassMat);
 
   const setSponsor = (slot: string, c: SponsorCampaign | null) => {
     const mesh = sponsorMeshes.get(slot);
@@ -909,5 +906,101 @@ function buildCave(group: THREE.Group, rockMat: THREE.Material, woodMid: THREE.M
   msg.position.set(CAVE.maxX - 0.2, 1.8, -95);
   msg.rotation.y = -Math.PI / 2;
   g.add(msg);
+  group.add(g);
+}
+
+function buildMine(group: THREE.Group, rockMat: THREE.Material, woodMid: THREE.Material, woodDark: THREE.Material, iron: THREE.Material, lampGlass: THREE.Material) {
+  const g = new THREE.Group();
+  const M = MINE_INT;
+  const t = M.tunnel;
+  const dark = new THREE.MeshStandardMaterial({ map: T.rock(), color: '#3f3a34', roughness: 1, side: THREE.DoubleSide });
+  const coal = new THREE.MeshStandardMaterial({ color: '#111111', roughness: 0.6, metalness: 0.2 });
+  // Farolillos de la mina: brillan siempre (no dependen de la hora del día)
+  const mineLamp = new THREE.MeshStandardMaterial({ color: '#2a2418', emissive: new THREE.Color('#ffb35a'), emissiveIntensity: 1.6 });
+  void lampGlass;
+  // Suelo y techo de toda la región
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(M.maxX - M.minX + 4, M.maxZ - M.minZ + 4, 30, 24).rotateX(-Math.PI / 2), dark);
+  const fp = floor.geometry.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < fp.count; i++) fp.setY(i, Math.sin(fp.getX(i) * 0.8) * Math.cos(fp.getZ(i) * 0.7) * 0.05);
+  floor.geometry.computeVertexNormals();
+  floor.position.set((M.minX + M.maxX) / 2, M.floorY, (M.minZ + M.maxZ) / 2);
+  floor.receiveShadow = true;
+  g.add(floor);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(M.maxX - M.minX + 4, M.maxZ - M.minZ + 4).rotateX(Math.PI / 2), dark);
+  ceil.position.set((M.minX + M.maxX) / 2, M.ceilingY, (M.minZ + M.maxZ) / 2);
+  g.add(ceil);
+  // Paredes de la galería (roca irregular) y de la cámara
+  const wall = (x1: number, z1: number, x2: number, z2: number, n: number) => {
+    for (let i = 0; i <= n; i++) {
+      const k = i / n;
+      const r = new THREE.Mesh(new THREE.DodecahedronGeometry(1.3 + (i % 3) * 0.35, 0), rockMat);
+      r.position.set(x1 + (x2 - x1) * k, 1.6 + (i % 2) * 0.6, z1 + (z2 - z1) * k);
+      r.rotation.set(i, i * 1.7, i * 2.3);
+      r.scale.y = 1.5;
+      g.add(r);
+    }
+  };
+  wall(t.minX, t.minZ - 0.6, t.maxX, t.minZ - 0.6, 18);
+  wall(t.minX, t.maxZ + 0.6, t.maxX, t.maxZ + 0.6, 18);
+  wall(t.minX - 0.6, t.minZ, t.minX - 0.6, t.maxZ, 5);
+  const c = M.chamber;
+  wall(c.minX, c.minZ - 0.6, c.maxX, c.minZ - 0.6, 10);
+  wall(c.minX, c.maxZ + 0.6, c.maxX, c.maxZ + 0.6, 10);
+  wall(c.maxX + 0.6, c.minZ, c.maxX + 0.6, c.maxZ, 20);
+  wall(c.minX + 0.6, c.minZ, c.minX + 0.6, t.minZ - 0.5, 8);
+  wall(c.minX + 0.6, t.maxZ + 0.5, c.minX + 0.6, c.maxZ, 8);
+  // Entibado: marcos de madera cada 4 m
+  for (let x = t.minX + 3; x < t.maxX - 1; x += 4) {
+    const skew = Math.sin(x) * 0.05;
+    for (const z of [t.minZ + 0.4, t.maxZ - 0.4]) {
+      const post = box(0.28, M.ceilingY, 0.28, woodDark, x, M.ceilingY / 2, z, 1);
+      post.rotation.z = skew;
+      g.add(post);
+    }
+    g.add(box(0.3, 0.3, t.maxZ - t.minZ, woodDark, x, M.ceilingY - 0.3, (t.minZ + t.maxZ) / 2, 1));
+  }
+  // Rieles y durmientes
+  for (const dz of [-0.55, 0.55]) g.add(box(t.maxX - t.minX, 0.08, 0.08, iron, (t.minX + t.maxX) / 2, 0.08, -20 + dz, 2));
+  for (let x = t.minX + 0.5; x < t.maxX; x += 0.9) g.add(box(0.2, 0.06, 1.6, woodMid, x, 0.03, -20, 1));
+  // Derrumbes (coinciden con colisionadores compartidos)
+  for (const [x, z, n] of [[160, -23, 6], [174.5, -16.8, 5]] as [number, number, number][]) {
+    for (let i = 0; i < n; i++) {
+      const r = new THREE.Mesh(new THREE.DodecahedronGeometry(0.35 + (i % 3) * 0.2, 0), rockMat);
+      r.position.set(x + Math.sin(i * 2.1) * 0.8, 0.25 + (i % 2) * 0.3, z + Math.cos(i * 1.7) * 0.6);
+      r.rotation.set(i, i * 2, i);
+      g.add(r);
+    }
+    const beam = box(3, 0.25, 0.25, woodDark, x, 0.5, z, 1);
+    beam.rotation.set(0.2, 0.7, 0.5);
+    g.add(beam);
+  }
+  // Farolillos colgados (algunos todavía encendidos)
+  for (const [x, z] of [[156, -16.2], [171, -24], [185, -6], [197, -26]] as [number, number][]) {
+    const l = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.22, 6), mineLamp);
+    l.position.set(x, 2.6, z);
+    g.add(l);
+  }
+  // Cámara: pilares, cajas de dinamita vacías, carbón, herramientas
+  for (const [x, z, r] of [[190, -21, 1.4], [192, -31, 1.2]] as [number, number, number][]) {
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.85, r, M.ceilingY, 8, 3), rockMat);
+    col.position.set(x, M.ceilingY / 2, z);
+    col.castShadow = true;
+    g.add(col);
+  }
+  for (let i = 0; i < 5; i++) g.add(box(0.7, 0.45, 0.45, woodMid, 186 + i * 0.8, 0.23 + (i % 2) * 0.45, -38.5 + (i % 2) * 0.1, 1));
+  const pile = new THREE.Mesh(new THREE.ConeGeometry(1.4, 0.9, 9), coal);
+  pile.position.set(198, 0.45, -3);
+  g.add(pile);
+  const pick = box(0.05, 0.9, 0.05, woodMid, 187, 0.5, -3, 1);
+  pick.rotation.z = 0.9;
+  g.add(pick);
+  // Dibujo infantil en la pared
+  const drawing = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.6, 1.0),
+    new THREE.MeshStandardMaterial({ map: T.signTexture([{ text: 'L  +  T', size: 60, color: '#e8e1cf', font: '400' }, { text: 'aquí esperamos', size: 34, color: '#cfc6b0', font: 'italic 400' }], '#3b3630', 256, 160), roughness: 1 }),
+  );
+  drawing.position.set(M.maxX - 0.3, 1.7, -12);
+  drawing.rotation.y = -Math.PI / 2;
+  g.add(drawing);
   group.add(g);
 }

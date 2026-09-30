@@ -55,6 +55,8 @@ export class AccountService {
       hair: appearance.hair,
       coat: appearance.coat,
       pants: appearance.pants,
+      hairStyle: appearance.hairStyle ?? 'short',
+      beard: !!appearance.beard,
       hat: null,
       outfit: null,
       lantern: this.inventory.owns(userId, 'linterna_basica') ? 'linterna_basica' : null,

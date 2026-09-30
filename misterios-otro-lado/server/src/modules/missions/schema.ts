@@ -46,6 +46,8 @@ const AppearanceSchema = z.strictObject({
   hat: z.string().nullable().optional(),
   outfit: z.string().nullable().optional(),
   lantern: z.string().nullable().optional(),
+  hairStyle: z.enum(['short', 'long', 'bun', 'bald']).optional(),
+  beard: z.boolean().optional(),
 });
 
 export const EpisodeSchema = z

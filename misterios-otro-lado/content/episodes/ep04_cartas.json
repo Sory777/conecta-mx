@@ -1,0 +1,189 @@
+{
+  "id": "ep04_cartas",
+  "version": 1,
+  "order": 4,
+  "enabled": true,
+  "repeatable": true,
+  "title": "Las cartas sin remitente",
+  "synopsis": "Cada noche aparece una carta en el buzón de la plaza, sin sello ni remitente. La hermana Inés las guarda sin abrir. Hasta hoy.",
+  "seasonId": null,
+  "prerequisites": ["ep01_casa_abandonada"],
+  "availability": { "startsAt": null, "endsAt": null },
+  "location": { "label": "Pueblo de San Bartolo", "p": [0, 0, 0] },
+  "start": {
+    "target": "hermana_ines",
+    "objective": "Habla con la hermana Inés frente a la Capilla de las Ánimas.",
+    "hint": "La capilla está al oeste de la plaza."
+  },
+  "npcs": [
+    {
+      "id": "hermana_ines",
+      "name": "Hermana Inés",
+      "p": [-30.5, 0, -4.5],
+      "rotY": -1.2,
+      "appearance": { "skin": "#d9b596", "hair": "#2a2522", "coat": "#1e2029", "pants": "#1e2029", "hairStyle": "bun", "outfit": "abrigo_nocturno" }
+    }
+  ],
+  "clues": [
+    {
+      "id": "carta_buzon",
+      "title": "La carta del buzón",
+      "text": "Papel húmedo, letra temblorosa: «Donde duermen los que esperan hay una piedra sin nombre. Bajo ella está lo que abre mi caja. Nadie debe leer mis cartas antes de que la campana calle. — E.»",
+      "shareable": true
+    },
+    {
+      "id": "lapida_sin_nombre",
+      "title": "La lápida sin nombre",
+      "text": "Una lápida sin nombre, sólo las iniciales E.M. y los años 1961 – 1994. Hay flores frescas… y la tierra está removida.",
+      "shareable": true
+    },
+    {
+      "id": "cartas_elena",
+      "title": "Las cartas guardadas",
+      "text": "Un fajo de cartas atadas con cinta. Todas terminan igual: «Mis hijos están a salvo bajo la montaña. Cuando la campana calle, volveremos. Cuida la capilla, Inés. — Tu amiga, E.»",
+      "shareable": true
+    }
+  ],
+  "entities": [
+    {
+      "id": "buzon_plaza",
+      "kind": "inspect",
+      "label": "Buzón oxidado",
+      "model": "mailbox",
+      "p": [8.8, 0, -8.6],
+      "rotY": 0.8,
+      "radius": 2.2,
+      "highlightWhen": [{ "stage": "s_buzon" }]
+    },
+    {
+      "id": "tumba_sin_nombre",
+      "kind": "inspect",
+      "label": "Lápida sin nombre",
+      "model": "grave",
+      "p": [-52.5, 0, -8],
+      "rotY": 1.5708,
+      "radius": 2.3,
+      "highlightWhen": [{ "stage": "s_tumba" }]
+    },
+    {
+      "id": "caja_tienda",
+      "kind": "inspect",
+      "label": "Caja de correspondencia",
+      "model": "crate",
+      "p": [27.6, 0, -8],
+      "rotY": 0.3,
+      "radius": 2.3,
+      "highlightWhen": [{ "stage": "s_caja" }]
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "quien_escribe",
+      "entityId": "hermana_ines",
+      "title": "¿Quién escribe las cartas?",
+      "prompt": "La hermana Inés te mira fijamente: «Si de verdad has leído las cartas, dime su nombre completo. El de quien las escribe.»",
+      "inputHint": "Nombre y apellido",
+      "answers": ["Elena Morales", "Elena"],
+      "maxAttemptsPerMinute": 5,
+      "requires": [{ "stage": "s_ines" }],
+      "onSolve": [
+        { "message": "Inés cierra los ojos. «Elena… Siempre supe que estaba viva.»" },
+        { "complete": true }
+      ],
+      "coop": true
+    }
+  ],
+  "stages": [
+    { "id": "s_buzon", "title": "El buzón", "objective": "Revisa el buzón oxidado de la plaza.", "hint": "Está en el borde de la plaza, hacia el sureste.", "marker": "buzon_plaza" },
+    { "id": "s_tumba", "title": "Donde duermen los que esperan", "objective": "Encuentra la piedra sin nombre en el cementerio de la capilla.", "hint": "El cementerio está detrás de la capilla, hacia el oeste. La lápida está apartada de las demás.", "marker": "tumba_sin_nombre" },
+    { "id": "s_caja", "title": "La caja", "objective": "Abre la caja de correspondencia junto a la Tienda del Pueblo.", "hint": "Está en el costado este de la tienda.", "marker": "caja_tienda" },
+    { "id": "s_ines", "title": "El nombre", "objective": "Vuelve con la hermana Inés y dile quién escribe las cartas.", "hint": "Relee tus pistas: las iniciales, los años… y lo que sabes de la familia Morales.", "marker": "hermana_ines" }
+  ],
+  "interactions": [
+    {
+      "target": "hermana_ines",
+      "whenStatus": "available",
+      "do": [
+        { "start": true },
+        {
+          "dialogue": [
+            { "speaker": "Hermana Inés", "text": "Así que tú eres quien abrió la casa de los Morales. Desde entonces, cada noche aparece una carta en el buzón de la plaza." },
+            { "speaker": "Hermana Inés", "text": "No tienen sello ni remitente. Yo… no me atrevo a abrirlas. Pero tú ya has visto demasiado como para tener miedo." },
+            { "speaker": "Hermana Inés", "text": "Revisa el buzón. Y si encuentras algo, vuelve conmigo." }
+          ]
+        },
+        { "setStage": "s_buzon" }
+      ]
+    },
+    {
+      "target": "hermana_ines",
+      "when": [{ "stage": "s_ines" }],
+      "do": [{ "openPuzzle": "quien_escribe" }]
+    },
+    {
+      "target": "hermana_ines",
+      "whenStatus": "active",
+      "do": [{ "dialogue": [{ "speaker": "Hermana Inés", "text": "Sigue la pista de las cartas. Yo rezaré para que la campana no vuelva a sonar." }] }]
+    },
+    {
+      "target": "hermana_ines",
+      "whenStatus": "completed",
+      "do": [{ "dialogue": [{ "speaker": "Hermana Inés", "text": "Guardaré las cartas en la capilla. Si Elena vuelve, aquí estará su amiga." }] }]
+    },
+    {
+      "target": "buzon_plaza",
+      "when": [{ "stage": "s_buzon" }],
+      "coop": true,
+      "do": [
+        { "message": "El buzón está vacío… salvo por un sobre húmedo pegado al fondo." },
+        { "giveClue": "carta_buzon" },
+        { "setStage": "s_tumba" }
+      ]
+    },
+    {
+      "target": "buzon_plaza",
+      "whenStatus": "any",
+      "do": [{ "message": "Un buzón oxidado. La ranura está limpia, como si alguien lo usara a menudo." }]
+    },
+    {
+      "target": "tumba_sin_nombre",
+      "when": [{ "stage": "s_tumba" }],
+      "coop": true,
+      "do": [
+        { "message": "Bajo la piedra, entre la tierra removida, brilla una llave pequeña de latón." },
+        { "giveClue": "lapida_sin_nombre" },
+        { "giveItem": "llave_buzon" },
+        { "setStage": "s_caja" }
+      ]
+    },
+    {
+      "target": "tumba_sin_nombre",
+      "whenStatus": "any",
+      "do": [{ "message": "Una lápida sin nombre. Sólo las iniciales E.M." }]
+    },
+    {
+      "target": "caja_tienda",
+      "when": [{ "stage": "s_caja" }, { "hasItem": "llave_buzon" }],
+      "coop": true,
+      "do": [
+        { "message": "La llave encaja. Dentro hay decenas de cartas atadas con una cinta… y una libreta de cuero." },
+        { "takeItem": "llave_buzon" },
+        { "giveClue": "cartas_elena" },
+        { "setStage": "s_ines" }
+      ]
+    },
+    {
+      "target": "caja_tienda",
+      "whenStatus": "any",
+      "do": [{ "message": "Una caja metálica con candado. Tiene grabadas las iniciales E.M." }]
+    }
+  ],
+  "rewards": {
+    "coins": 220,
+    "rp": 100,
+    "xp": 350,
+    "seasonXp": 300,
+    "items": [{ "itemId": "libreta_cuero", "qty": 1 }],
+    "dropTable": "episode_complete"
+  }
+}

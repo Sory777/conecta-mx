@@ -10,6 +10,7 @@ export class EntityVisual {
   private beacon: THREE.Mesh;
   private door: THREE.Group | null = null;
   private doorAngle = 0;
+  private gate: THREE.Group | null = null;
   view: EntityView;
   private t = Math.random() * 10;
 
@@ -138,6 +139,123 @@ export class EntityVisual {
         this.model.add(knot);
         break;
       }
+      case 'toolbox': {
+        const red = new THREE.MeshStandardMaterial({ color: '#6b2a22', metalness: 0.6, roughness: 0.55 });
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.4), red);
+        b.position.y = 0.2;
+        const lid = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.06, 0.42), red);
+        lid.position.set(0, 0.43, -0.12);
+        lid.rotation.x = -0.6;
+        const handle = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.015, 6, 12, Math.PI), brass);
+        handle.position.set(0, 0.45, 0);
+        this.model.add(b, lid, handle);
+        break;
+      }
+      case 'mine_boards': {
+        for (let i = 0; i < 5; i++) {
+          const plank = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.22, 0.06), woodMat);
+          plank.position.set(0, 0.4 + i * 0.6, 0);
+          plank.rotation.z = (i % 2 ? 1 : -1) * 0.08;
+          this.model.add(plank);
+        }
+        break;
+      }
+      case 'mine_cart': {
+        const ironM = new THREE.MeshStandardMaterial({ color: '#3a3430', metalness: 0.7, roughness: 0.6 });
+        const tub = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.55, 0.7, 4, 1, true), ironM);
+        (tub.material as THREE.Material).side = THREE.DoubleSide;
+        tub.rotation.y = Math.PI / 4;
+        tub.scale.set(1.3, 1, 0.8);
+        tub.position.y = 0.75;
+        const coalM = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.35, 7), new THREE.MeshStandardMaterial({ color: '#141414', roughness: 0.7 }));
+        coalM.position.y = 0.9;
+        this.model.add(tub, coalM);
+        for (const [x, z] of [[-0.5, -0.35], [0.5, -0.35], [-0.5, 0.35], [0.5, 0.35]]) {
+          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.08, 12), ironM);
+          w.rotation.x = Math.PI / 2;
+          w.position.set(x, 0.18, z);
+          this.model.add(w);
+        }
+        this.model.rotation.z = 0.12;
+        break;
+      }
+      case 'lever_panel': {
+        const panel = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 0.15), new THREE.MeshStandardMaterial({ color: '#2d2a26', metalness: 0.6, roughness: 0.6 }));
+        panel.position.y = 1.1;
+        this.model.add(panel);
+        for (let i = 0; i < 3; i++) {
+          const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.45, 6), brass);
+          lever.position.set(-0.35 + i * 0.35, 1.3, 0.12);
+          lever.rotation.x = 0.5;
+          const knob = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), new THREE.MeshStandardMaterial({ color: '#7a1f1a' }));
+          knob.position.set(-0.35 + i * 0.35, 1.5, 0.22);
+          this.model.add(lever, knob);
+        }
+        break;
+      }
+      case 'gate': {
+        const [, d] = v.blockSize ?? [0.4, 9];
+        const bars = new THREE.Group();
+        const ironM = new THREE.MeshStandardMaterial({ color: '#2b2622', metalness: 0.8, roughness: 0.5 });
+        for (let z = -d / 2 + 0.2; z <= d / 2 - 0.2; z += 0.45) {
+          const bar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 3.8, 0.08), ironM);
+          bar.position.set(0, 1.9, z);
+          bars.add(bar);
+        }
+        for (const y of [0.4, 1.9, 3.5]) {
+          const rail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, d), ironM);
+          rail.position.y = y;
+          bars.add(rail);
+        }
+        this.model.add(bars);
+        this.gate = bars;
+        break;
+      }
+      case 'notebook': {
+        const bag = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.45, 0.2), new THREE.MeshStandardMaterial({ color: '#2f4a6b', roughness: 0.9 }));
+        bag.position.y = 0.24;
+        bag.rotation.set(0.3, 0.5, 0);
+        const book = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 0.3), new THREE.MeshStandardMaterial({ color: '#c9b98f' }));
+        book.position.set(0.35, 0.02, 0.1);
+        this.model.add(bag, book);
+        break;
+      }
+      case 'mailbox': {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1, 8), new THREE.MeshStandardMaterial({ color: '#1f1f1f', metalness: 0.6 }));
+        post.position.y = 0.55;
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.55, 0.35), new THREE.MeshStandardMaterial({ color: '#6b2f24', metalness: 0.5, roughness: 0.6 }));
+        body.position.y = 1.35;
+        const slot = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.03, 0.02), new THREE.MeshStandardMaterial({ color: '#050505' }));
+        slot.position.set(0, 1.45, -0.18);
+        this.model.add(post, body, slot);
+        break;
+      }
+      case 'grave': {
+        const stoneM = new THREE.MeshStandardMaterial({ color: '#77746c', roughness: 1 });
+        const stone = new THREE.Mesh(new THREE.CapsuleGeometry(0.32, 0.45, 2, 10), stoneM);
+        stone.scale.set(1, 1, 0.3);
+        stone.position.y = 0.45;
+        stone.rotation.z = 0.08;
+        const mound = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#3a2e22', roughness: 1 }));
+        mound.scale.set(0.8, 0.25, 1.4);
+        mound.position.z = 0.9;
+        const flowers = new THREE.Group();
+        for (let i = 0; i < 5; i++) {
+          const f = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 4), new THREE.MeshStandardMaterial({ color: i % 2 ? '#e8dcc0' : '#b83a3a', emissive: '#220000' }));
+          f.position.set(-0.15 + i * 0.07, 0.2, 0.5);
+          flowers.add(f);
+        }
+        this.model.add(stone, mound, flowers);
+        break;
+      }
+      case 'crate': {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: '#4a4a44', metalness: 0.6, roughness: 0.5 }));
+        b.position.y = 0.25;
+        const lock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.05), brass);
+        lock.position.set(0, 0.35, -0.27);
+        this.model.add(b, lock);
+        break;
+      }
       default:
         break;
     }
@@ -165,6 +283,10 @@ export class EntityVisual {
       (this.wisp.material as THREE.SpriteMaterial).opacity = 0.55 + night * 0.4;
     }
     if (this.beacon.visible) (this.beacon.material as THREE.MeshBasicMaterial).opacity = 0.04 + night * 0.05 + Math.sin(this.t * 1.5) * 0.015;
+    if (this.gate) {
+      const targetY = this.view.blocking ? 0 : 3.4;
+      this.gate.position.y += (targetY - this.gate.position.y) * Math.min(1, dt * 1.5);
+    }
     if (this.door) {
       const target = this.view.blocking ? 0 : -1.75;
       this.doorAngle += (target - this.doorAngle) * Math.min(1, dt * 2);

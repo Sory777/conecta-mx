@@ -1,4 +1,5 @@
 import { formatClock, RARITY_COLOR } from '../../../shared/constants';
+import { regionOf } from '../../../shared/world';
 import type { DialogueLine, PuzzlePrompt, RewardSummary } from '../../../shared/protocol';
 import type { Game, GameUi } from '../game/Game';
 import { store } from '../state';
@@ -239,8 +240,9 @@ export class Hud implements GameUi {
       const dx = m.marker[0] - g.pos.x;
       const dz = m.marker[2] - g.pos.z;
       const dist = Math.hypot(dx, dz);
-      const markerInCave = m.marker[0] > 140;
-      if (markerInCave !== g.inCave) this.distEl.textContent = markerInCave ? 'Bajo tierra' : 'En la superficie';
+      const markerRegion = regionOf(m.marker[0], m.marker[2]);
+      const myRegion = regionOf(g.pos.x, g.pos.z);
+      if (markerRegion !== myRegion) this.distEl.textContent = markerRegion !== 'outdoor' ? 'Bajo tierra' : 'En la superficie';
       else this.distEl.textContent = dist < 3 ? 'Aquí' : `a ${Math.round(dist)} m`;
       const bearing = Math.atan2(-dx, -dz) - g.follow.yaw;
       this.arrow.style.transform = `rotate(${(-bearing - Math.PI / 2) * (180 / Math.PI)}deg)`;

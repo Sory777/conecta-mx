@@ -30,7 +30,7 @@
 
 | Capa | Tecnología | Motivo |
 |---|---|---|
-| Cliente 3D | TypeScript + Three.js r186 + Vite | WebGL en Android y PC; sin instalar; tipos compartidos con el servidor |
+| Cliente 3D | TypeScript + Three.js r186 + Vite (personajes procedurales articulados o modelos .glb con AnimationMixer) | WebGL en Android y PC; sin instalar; tipos compartidos con el servidor |
 | Servidor | Node.js 22 + TypeScript (tsx) + Fastify (REST) + `ws` (tiempo real) | Un solo lenguaje, rápido de iterar, excelente para E/S concurrente |
 | Validación | zod | Esquemas estrictos para API y contenido |
 | Base de datos | SQLite (`node:sqlite`, WAL) | Cero configuración para el MVP; SQL portable a PostgreSQL |
@@ -140,6 +140,14 @@ Añadir un misterio = escribir un JSON (o subirlo desde el panel admin). El vali
 ### Episodio 1 — «Los desaparecidos de la casa abandonada»
 
 Don Aurelio (plaza) → pozo viejo (fotografía con fecha y pista del ángel) → ángel del jardín (llave) → puerta del estudio (usar llave) → diario de Lucía (cómo se formó el código) → candado de la trampilla (acertijo: día+mes de la foto = `1403`) → túnel subterráneo (colgante y carta) → regreso con Don Aurelio. Cooperativo, con pistas compartibles y recompensas.
+
+### Episodio 2 — «La mina donde nadie quiere entrar»
+
+Requiere el Ep. 1. Rosa Villalobos → caja del capataz (barreta + registro de turnos) → tablas de la entrada (teletransporte a la región `mine`) → vagoneta (mapa de Tomás) → acertijo de tres palancas → compuerta (colisión dinámica que se levanta) → mochila con el cuaderno de Tomás → pozo del ascensor → Rosa. La región `mine` (`shared/world.ts → MINE_INT`) es subterránea como el túnel: sólo se entra/sale por teletransporte del servidor.
+
+### Episodio 4 — «Las cartas sin remitente»
+
+Requiere el Ep. 1. Hermana Inés → buzón de la plaza → lápida sin nombre → caja de correspondencia (usa la llave) → acertijo con NPC como objetivo («¿quién escribe las cartas?»), resuelto cruzando pistas de varios episodios.
 
 ### Episodio 3 (temporada) — «La campana que suena a medianoche»
 

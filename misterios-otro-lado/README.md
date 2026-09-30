@@ -13,17 +13,18 @@ Documentación: [ARCHITECTURE.md](ARCHITECTURE.md) · [ECONOMY.md](ECONOMY.md) �
 
 | Área | Estado en el MVP |
 |---|---|
-| **Mundo 3D** | San Bartolo del Monte: plaza con fuente, 8 edificios, capilla con campanario y cementerio, pozo, bosque instanciado (~1,000 árboles), caminos, la **Casa Morales** (estudio con puerta cerrada, techo derrumbado, jardín con ángel), mina tapiada (Ep. 2 próximamente) y túnel subterráneo |
+| **Mundo 3D** | San Bartolo del Monte: plaza con fuente, 8 edificios, capilla con campanario y cementerio, pozo, bosque instanciado (~1,000 árboles), caminos, la **Casa Morales** (estudio con puerta cerrada, techo derrumbado, jardín con ángel), mina (con **interior completo**: galería entibada, rieles, derrumbes, compuerta y cámara del nivel 3) y túnel subterráneo |
 | **Ambiente** | Día/noche compartido (1 día = 24 min), niebla, lluvia, tormenta con relámpagos y truenos, linterna (3 tipos), farolas dinámicas, ventanas encendidas de noche, polvo en suspensión, audio 100% procedural (viento, grillos, lluvia, pasos por superficie, goteo), **música dinámica** que se tensa cerca del objetivo, eventos inesperados (campana lejana, susurros, silueta en la niebla). Sin gore |
 | **Controles** | PC: WASD/flechas, Mayús, ratón (arrastrar), rueda, E, F, J, I, M, P, B, V, Enter, Esc. Móvil: joystick virtual, arrastre de cámara, botones Investigar/Linterna/Chat. Gamepad: sticks, A/B/X/Y, LB/RB |
-| **Misterios** | Motor dirigido por datos. **Ep. 1 completo** (7 etapas, 3 pistas, llave, puerta, acertijo, túnel, recompensas) + **Ep. 3 de temporada** (sólo de noche) |
+| **Misterios** | Motor dirigido por datos. **4 episodios conectados**: Ep. 1 «Los desaparecidos de la casa abandonada» (7 etapas), Ep. 2 «La mina donde nadie quiere entrar» (6 etapas, acertijo de palancas), Ep. 3 «La campana que suena a medianoche» (temporada, sólo de noche) y Ep. 4 «Las cartas sin remitente» (4 etapas, cementerio y buzón). 4 NPC: Don Aurelio, Rosa Villalobos, Hermana Inés |
+| **Personajes** | Humanos procedurales de proporciones realistas: esqueleto articulado (codos, rodillas, cadera, columna), rostro esculpido (nariz, cejas, pómulos, mentón, labios), ojos con iris y parpadeo, 4 peinados y barba, gabardina con solapas y faldón, camisa y corbata, manos con dedos, botas de cuero, telas con relieve (normal maps), animación de caminar/correr/reposo con respiración. Soporte opcional de modelos **.glb profesionales** con animaciones (ver «Personajes realistas con modelos .glb») |
 | **Multijugador** | WebSocket autoritativo, shards de 40, sincronización 10 Hz con radio de interés e interpolación, validación de velocidad, grupos (4), invitaciones, cooperación, pistas compartidas, chat de mundo/grupo, amigos, bloquear, reportar |
 | **Cuentas** | Registro, login, recuperación, verificación de correo, perfil, estadísticas, un personaje por cuenta (esquema preparado para varios) |
 | **Economía** | Monedas, gemas (sandbox), puntos de recompensa con topes diarios/semanales y presupuesto global, canje con requisitos y revisión manual, rarezas y botín, tienda, pase de temporada gratis/premium, eventos, marketplace (monedas, desactivado), referidos por actividad legítima |
 | **Monetización** | Anuncios recompensados/opcionales (sandbox con verificación en servidor, topes, espera, configuración remota, estadísticas), tienda, pase, patrocinios en carteles del mundo |
 | **Seguridad** | scrypt, sesiones con hash, roles, zod, CSP, rate limiting, libro mayor idempotente, antifraude con puntuación y retención automática, auditoría |
 | **Admin** | Resumen y analíticas (DAU/WAU/MAU, retención, embudo, salud económica), jugadores (estado, fraude, saldo, rol), reportes, sospechas, canjes, transacciones, economía, tienda, misterios (subir JSON), temporadas y eventos, publicidad, patrocinios, marketplace, auditoría |
-| **Pruebas** | 21 pruebas Vitest (economía + integración HTTP/WebSocket con dos jugadores resolviendo el Ep. 1 en cooperación) + E2E con navegador real (Playwright) |
+| **Pruebas** | 24 pruebas Vitest (economía + integración HTTP/WebSocket con dos jugadores resolviendo el Ep. 1 en cooperación + recorridos completos del Ep. 2 y Ep. 4) + E2E con navegador real (Playwright) |
 
 ## Requisitos
 
@@ -75,7 +76,7 @@ npm run create-admin -- <usuario_o_correo> moderator   # rol moderador
 ### Pruebas
 
 ```bash
-npm test            # 21 pruebas del servidor (economía, antifraude, multijugador, misterios)
+npm test            # 24 pruebas del servidor (economía, antifraude, multijugador, misterios)
 npm run typecheck   # TypeScript estricto en servidor y cliente
 npm run build && npm run e2e   # E2E con navegador: 2 jugadores (escritorio + móvil táctil)
 ```
@@ -131,7 +132,10 @@ shared/ (protocolo, constantes, trazado del mundo)   content/ (episodios, objeto
 5. Hablen con **Don Aurelio** (junto a la fuente). Vayan juntos al **pozo viejo** (este): cuando uno encuentra la fotografía, el compañero cercano recibe la pista y el avance.
 6. Prueben el chat (**Enter**), compartir pistas desde el diario (**J → Pistas**), bloquear y reportar.
 
-Solución del Episodio 1 (spoiler): pozo → ángel del jardín → puerta del estudio → diario → código **1403** en la trampilla → caja en el túnel → salida → Don Aurelio.
+Soluciones (spoiler):
+- **Ep. 1**: Don Aurelio → pozo → ángel del jardín → puerta del estudio → diario → código **1403** en la trampilla → caja en el túnel → salida → Don Aurelio.
+- **Ep. 2** (requiere Ep. 1): Rosa (camino de la mina) → caja del capataz (barreta) → tablas de la entrada → vagoneta (mapa de Tomás) → palancas **2-1-3** → mochila en la cámara → pozo del ascensor → Rosa. Recompensa: casco de minero.
+- **Ep. 4** (requiere Ep. 1): Hermana Inés (capilla) → buzón de la plaza → lápida sin nombre en el cementerio → caja junto a la tienda → responder **Elena Morales**.
 
 ## Cómo probar las recompensas
 
@@ -167,10 +171,25 @@ No se simulan integraciones que no existen. Para producción:
 | **Premios** (Tremendous / Tango Card / PayPal Payouts) + **KYC** | Canjes de valor real | Contratos y claves API del proveedor; proveedor de KYC | Nuevo servicio de pagos de premios; hoy la aprobación no mueve dinero |
 | **Play Integrity API** | Detectar clientes modificados | Google Cloud + Play Console | Antifraude (verificación del token en servidor) |
 
+## Personajes realistas con modelos .glb
+
+El personaje por defecto se genera por código (sin archivos ni licencias). Para usar un **modelo humano profesional** (Mixamo, Ready Player Me, MakeHuman —CC0—, escaneo o arte propio):
+
+1. Exporta el modelo en **.glb** con esqueleto y animaciones de reposo, caminar y correr.
+2. Cópialo a `client/public/models/` (p. ej. `investigador.glb`).
+3. Crea `client/public/models/manifest.json`:
+   ```json
+   { "character": { "url": "/models/investigador.glb", "height": 1.78, "rotateY": 3.1416,
+                    "clips": { "idle": "Idle", "walk": "Walk", "run": "Run" }, "tint": ["coat", "jacket"] } }
+   ```
+4. `npm run build`. Si el archivo falta o falla, el juego vuelve al personaje procedural.
+
+⚠️ Revisa la licencia: Mixamo permite usar sus personajes en juegos, pero **no** redistribuir el archivo suelto en un repositorio público. MakeHuman exporta modelos CC0.
+
 ## Qué queda pendiente
 
-- Arte definitivo (modelos riggeados, texturas PBR, música compuesta) — hoy todo es procedural.
-- Episodio 2 y más NPC; tutorial guiado.
+- Arte definitivo (modelos .glb riggeados con licencia, texturas PBR, música compuesta) — hoy personajes y escenario son procedurales.
+- Más episodios y NPC; tutorial guiado.
 - Cliente nativo Unity; integraciones reales de pagos, anuncios, correo y premios (tabla anterior).
 - PostgreSQL + Redis y despliegue multi-nodo; colisiones autoritativas en servidor.
 - Aspectos legales antes de lanzar (privacidad, menores, programa de recompensas, impuestos, KYC).

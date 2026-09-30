@@ -22,7 +22,11 @@ Prioridad permanente: **que el juego sea divertido**. La economía complementa l
 
 ## Fase 2 — Contenido y pulido (1–2 meses)
 
-- [ ] Episodio 2 «La mina donde nadie quiere entrar» (nueva zona interior, tren de mina, acertijo cooperativo que requiere 2 jugadores simultáneos)
+- [x] Episodio 2 «La mina donde nadie quiere entrar» (interior de la mina, acertijo de palancas, NPC Rosa)
+- [x] Episodio 4 «Las cartas sin remitente» (NPC Hermana Inés, cementerio, buzón)
+- [x] Personajes humanos realistas procedurales + soporte de modelos .glb con animaciones
+- [ ] Acertijo cooperativo que requiera 2 jugadores simultáneos (p. ej. dos palancas a la vez en la mina)
+- [ ] Episodio 5: la salida secreta detrás de la capilla (continúa la pista del cuaderno de Tomás)
 - [ ] Arte: modelos humanos riggeados con animaciones, texturas PBR, props; música compuesta
 - [ ] Tutorial guiado y primeros 5 minutos optimizados (retención D1)
 - [ ] Más NPC y diálogos ramificados; logros

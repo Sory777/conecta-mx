@@ -1,5 +1,6 @@
 import './styles.css';
 import { Game } from './game/Game';
+import { loadCharacterModel } from './game/gltfCharacter';
 import type { SponsorCampaign } from './game/world/buildWorld';
 import { api, ApiError, session } from './net/api';
 import { store, type Profile, type PublicConfig } from './state';
@@ -34,6 +35,7 @@ async function boot() {
   // Se deja un fotograma para que se pinte la pantalla de carga antes de construir el mundo.
   await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 30)));
   const s = store.settings;
+  await loadCharacterModel();
   const game = new Game(canvas, s.quality);
   game.audio.volumes = { master: s.master, music: s.music, sfx: s.sfx, ambient: s.ambient };
   game.input.sensitivity = s.sensitivity;

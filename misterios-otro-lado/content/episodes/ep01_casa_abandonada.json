@@ -1,6 +1,6 @@
 {
   "id": "ep01_casa_abandonada",
-  "version": 1,
+  "version": 2,
   "order": 1,
   "enabled": true,
   "repeatable": true,
@@ -21,7 +21,7 @@
       "name": "Don Aurelio",
       "p": [4.5, 0, 5.5],
       "rotY": 0.686,
-      "appearance": { "skin": "#c49a74", "hair": "#d9d6cf", "coat": "#3f3a30", "pants": "#26241f", "hat": "gorro_lana" }
+      "appearance": { "skin": "#c49a74", "hair": "#d9d6cf", "coat": "#3f3a30", "pants": "#26241f", "hat": "gorro_lana", "hairStyle": "short", "beard": true }
     }
   ],
   "clues": [

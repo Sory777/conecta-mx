@@ -184,7 +184,7 @@ export class Panels {
             ),
           );
         }
-        body.append(h('p', { class: 'small muted center' }, 'Nuevos episodios llegarán con cada temporada. Próximamente: «La mina donde nadie quiere entrar».'));
+        body.append(h('p', { class: 'small muted center' }, 'Nuevos episodios llegarán con cada temporada. Algunos misterios sólo se desbloquean al resolver otros.'));
       } else {
         if (!store.missions.clues.length) body.append(h('p', { class: 'muted' }, 'Aún no has encontrado pistas. Investiga los lugares marcados con un destello.'));
         for (const c of [...store.missions.clues].reverse()) {

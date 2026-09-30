@@ -1,5 +1,5 @@
 import { GAME_NAME } from '../../../shared/constants';
-import type { Appearance } from '../../../shared/protocol';
+import { HAIR_STYLES, type Appearance } from '../../../shared/protocol';
 import type { Game } from '../game/Game';
 import { api, ApiError, session } from '../net/api';
 import { store } from '../state';
@@ -193,7 +193,7 @@ export function authScreen(root: HTMLElement, game: Game): Promise<void> {
 /** Creación de personaje con vista previa 3D. */
 export function characterScreen(root: HTMLElement, game: Game): Promise<void> {
   return new Promise((resolve) => {
-    const app: Appearance = { skin: SKIN[2], hair: HAIR[1], coat: COAT[0], pants: PANTS[0] };
+    const app: Appearance = { skin: SKIN[2], hair: HAIR[1], coat: COAT[0], pants: PANTS[0], hairStyle: 'short', beard: false };
     game.showPreview(app);
     const err = h('div', { class: 'error-text' });
     const name = h('input', { class: 'input', placeholder: 'Nombre de tu investigador', maxlength: 20 });
@@ -219,6 +219,19 @@ export function characterScreen(root: HTMLElement, game: Game): Promise<void> {
       };
       draw();
       return h('div', { class: 'col', style: 'gap:4px' }, h('span', { class: 'muted small' }, label), wrap);
+    };
+    const styleRow = () => {
+      const wrap = h('div', { class: 'row', style: 'flex-wrap:wrap;gap:6px' });
+      const labels: Record<string, string> = { short: 'Corto', long: 'Largo', bun: 'Recogido', bald: 'Rapado' };
+      const draw = () => {
+        clear(wrap);
+        for (const st of HAIR_STYLES) {
+          wrap.append(h('button', { type: 'button', class: `btn small ${app.hairStyle === st ? 'primary' : 'ghost'}`, onclick: () => ((app.hairStyle = st), game.showPreview(app), draw()) }, labels[st]));
+        }
+        wrap.append(h('button', { type: 'button', class: `btn small ${app.beard ? 'primary' : 'ghost'}`, onclick: () => ((app.beard = !app.beard), game.showPreview(app), draw()) }, app.beard ? 'Con barba' : 'Sin barba'));
+      };
+      draw();
+      return h('div', { class: 'col', style: 'gap:4px' }, h('span', { class: 'muted small' }, 'Peinado'), wrap);
     };
     const btn = h('button', { class: 'btn primary block', type: 'submit' }, 'Comenzar la investigación');
     clear(root);
@@ -248,6 +261,7 @@ export function characterScreen(root: HTMLElement, game: Game): Promise<void> {
           name,
           row('Piel', 'skin', SKIN),
           row('Cabello', 'hair', HAIR),
+          styleRow(),
           row('Abrigo', 'coat', COAT),
           row('Pantalón', 'pants', PANTS),
           err,

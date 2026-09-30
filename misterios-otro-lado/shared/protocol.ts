@@ -14,7 +14,13 @@ export interface Appearance {
   hat?: string | null;
   outfit?: string | null;
   lantern?: string | null;
+  /** Peinado: corto, largo, recogido o calvo */
+  hairStyle?: HairStyle;
+  beard?: boolean;
 }
+
+export type HairStyle = 'short' | 'long' | 'bun' | 'bald';
+export const HAIR_STYLES: HairStyle[] = ['short', 'long', 'bun', 'bald'];
 
 export interface PublicPlayer {
   id: string; // characterId

@@ -1,5 +1,5 @@
 import type { Vec3 } from '../../../shared/protocol';
-import { BELL_TOWER, BOUNDS, CASA_MORALES, CAVE, CHAPEL, FOUNTAIN, HILL, MINE, PATHS, PLAZA, TOWN_BUILDINGS, WELL, generateTrees } from '../../../shared/world';
+import { BELL_TOWER, BOUNDS, CASA_MORALES, CAVE, CHAPEL, MINE_INT, regionOf, FOUNTAIN, HILL, MINE, PATHS, PLAZA, TOWN_BUILDINGS, WELL, generateTrees } from '../../../shared/world';
 
 // Mapa 2D generado a partir del mismo trazado que usan el render 3D y el servidor.
 
@@ -87,7 +87,7 @@ export const MAP_LABELS: { t: string; x: number; z: number }[] = [
   { t: 'Capilla', x: CHAPEL.x, z: CHAPEL.z - 11 },
   { t: 'Pozo viejo', x: WELL.x, z: WELL.z - 4 },
   { t: 'Casa Morales', x: CASA_MORALES.x, z: CASA_MORALES.z - 9 },
-  { t: 'Mina (cerrada)', x: MINE.x, z: MINE.z + 7 },
+  { t: 'Mina abandonada', x: MINE.x, z: MINE.z + 7 },
   { t: 'Carretera', x: 4, z: 70 },
 ];
 
@@ -124,10 +124,17 @@ export function drawMap(canvas: HTMLCanvasElement, m: MapMarkers, opts: { round?
     ctx.font = `${12 * dpr}px Georgia, serif`;
     ctx.textAlign = 'center';
     ctx.fillText('Bajo tierra', cw / 2, ch / 2 - 6 * dpr);
-    const k = (cw * 0.7) / (CAVE.maxX - CAVE.minX);
+    const R = regionOf(m.me.x, m.me.z) === 'mine' ? MINE_INT : CAVE;
+    const k = (cw * 0.7) / (R.maxX - R.minX);
     const ox = cw * 0.15;
     const oy = ch / 2;
-    const [x, y] = [ox + (m.me.x - CAVE.minX) * k, oy + (m.me.z - (CAVE.minZ + CAVE.maxZ) / 2) * k];
+    const [x, y] = [ox + (m.me.x - R.minX) * k, oy + (m.me.z - (R.minZ + R.maxZ) / 2) * k];
+    if (m.objective && regionOf(m.objective[0], m.objective[2]) === regionOf(m.me.x, m.me.z)) {
+      ctx.fillStyle = '#ffd27a';
+      ctx.beginPath();
+      ctx.arc(ox + (m.objective[0] - R.minX) * k, oy + (m.objective[2] - (R.minZ + R.maxZ) / 2) * k, 4 * dpr, 0, Math.PI * 2);
+      ctx.fill();
+    }
     arrow(ctx, x, y, m.me.rot, 7 * dpr);
     ctx.restore();
     return;

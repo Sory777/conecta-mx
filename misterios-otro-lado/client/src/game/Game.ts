@@ -6,7 +6,8 @@ import { GameSocket } from '../net/socket';
 import { store } from '../state';
 import { AudioEngine } from './audio';
 import { FollowCamera } from './camera';
-import { Character } from './character';
+import { Character, type CharacterLike } from './character';
+import { createCharacter } from './gltfCharacter';
 import { CollisionGrid } from './collision';
 import { EntityVisual } from './entities';
 import { Input } from './input';
@@ -29,7 +30,7 @@ export interface GameUi {
 }
 
 interface Remote {
-  char: Character;
+  char: CharacterLike;
   userId: string;
   samples: { t: number; p: Vec3; r: number; a: AnimState }[];
   speed: number;
@@ -63,14 +64,14 @@ export class Game {
   ui: GameUi | null = null;
 
   mode: 'attract' | 'preview' | 'play' = 'attract';
-  me: Character | null = null;
+  me: CharacterLike | null = null;
   myCharId: string | null = null;
   pos = new THREE.Vector3(SPAWN.x, 0, SPAWN.z);
   rotY = 0;
   private speed = 0;
   private anim: AnimState = 'idle';
   private remotes = new Map<string, Remote>();
-  private npcs = new Map<string, Character>();
+  private npcs = new Map<string, CharacterLike>();
   private entities = new Map<string, EntityVisual>();
   private flashlight: THREE.SpotLight;
   flashlightOn = false;
@@ -157,7 +158,7 @@ export class Game {
   }
 
   get inCave() {
-    return regionOf(this.pos.x, this.pos.z) === 'cave';
+    return regionOf(this.pos.x, this.pos.z) !== 'outdoor';
   }
 
   get zone() {
@@ -190,10 +191,17 @@ export class Game {
 
   // ------------------------------------------------------------------ modos
 
+  private previewLight: THREE.PointLight | null = null;
+
   showPreview(appearance: Appearance) {
     this.mode = 'preview';
+    if (!this.previewLight) {
+      this.previewLight = new THREE.PointLight('#ffe2c0', 6, 6, 1.5);
+      this.previewLight.position.set(2.0, 2.0, 1.6);
+      this.scene.add(this.previewLight);
+    }
     if (!this.me) {
-      this.me = new Character(appearance);
+      this.me = createCharacter(appearance);
       this.scene.add(this.me.root);
     } else this.me.apply(appearance);
     this.pos.set(3, 0, 3);
@@ -203,6 +211,10 @@ export class Game {
 
   enterWorld() {
     this.mode = 'play';
+    if (this.previewLight) {
+      this.scene.remove(this.previewLight);
+      this.previewLight = null;
+    }
     this.socket.connect();
   }
 
@@ -234,7 +246,7 @@ export class Game {
         this.env.weather = m.world.weather;
         this.myCharId = m.you.id;
         if (!this.me) {
-          this.me = new Character(m.you.appearance);
+          this.me = createCharacter(m.you.appearance);
           this.scene.add(this.me.root);
         } else this.me.apply(m.you.appearance);
         this.me.setName(m.you.name);
@@ -376,7 +388,7 @@ export class Game {
 
   private addRemote(p: import('../../../shared/protocol').PublicPlayer) {
     if (p.id === this.myCharId || this.remotes.has(p.id)) return;
-    const char = new Character(p.appearance, p.name);
+    const char = createCharacter(p.appearance, p.name);
     char.root.position.set(p.p[0], p.p[1], p.p[2]);
     char.root.rotation.y = p.r;
     this.scene.add(char.root);
@@ -427,7 +439,7 @@ export class Game {
     for (const n of payload.npcs) {
       let c = this.npcs.get(n.id);
       if (!c) {
-        c = new Character(n.appearance, n.name, 'Vecino de San Bartolo');
+        c = createCharacter(n.appearance, n.name, 'Vecino de San Bartolo');
         c.root.position.set(n.p[0], heightAt(n.p[0], n.p[2]), n.p[2]);
         c.root.rotation.y = n.rotY;
         this.scene.add(c.root);
@@ -477,11 +489,11 @@ export class Game {
       this.follow.update(this.pos, dt);
     } else if (this.mode === 'preview') {
       this.attractT += dt;
-      const target = new THREE.Vector3(3, 1.1, 3);
-      this.camera.position.set(3 + Math.sin(this.attractT * 0.25) * 0.4 - 2.2, 1.7, 3 - 2.4);
+      const target = new THREE.Vector3(3, 1.25, 3);
+      this.camera.position.set(3 + Math.sin(this.attractT * 0.25) * 0.25 - 1.3, 1.6, 3 - 1.5);
       this.camera.lookAt(target);
       this.me?.update(dt, 0);
-      if (this.me) this.me.root.rotation.y += dt * 0.35;
+      if (this.me) this.me.root.rotation.y = Math.PI * 0.75 + Math.sin(this.attractT * 0.4) * 0.9;
     } else {
       this.attractT += dt * 0.04;
       const r = 26;
@@ -540,6 +552,7 @@ export class Game {
     this.pos.y = heightAt(this.pos.x, this.pos.z);
     this.anim = this.speed < 0.2 ? 'idle' : run && this.speed > MOVE.walkSpeed + 0.3 ? 'run' : 'walk';
     this.me.anim = this.anim;
+    this.me.holding = this.flashlightOn;
     this.me.root.position.copy(this.pos);
     this.me.root.rotation.y = this.rotY;
     this.me.update(dt, this.speed);

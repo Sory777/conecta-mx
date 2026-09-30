@@ -1,0 +1,311 @@
+{
+  "id": "ep02_mina",
+  "version": 1,
+  "order": 2,
+  "enabled": true,
+  "repeatable": true,
+  "title": "La mina donde nadie quiere entrar",
+  "synopsis": "La carta de Lucía decía que la familia huyó hacia la vieja mina. Desde el derrumbe de 1994 nadie ha cruzado sus tablas… salvo quien sigue dejando flores frescas en la entrada.",
+  "seasonId": null,
+  "prerequisites": ["ep01_casa_abandonada"],
+  "availability": { "startsAt": null, "endsAt": null },
+  "location": { "label": "Mina abandonada", "p": [-84, 0, -62] },
+  "start": {
+    "target": "rosa_minera",
+    "objective": "Habla con Rosa, la antigua minera, junto al camino de la mina.",
+    "hint": "Toma el camino que sale al oeste desde la colina. Rosa espera cerca de la entrada tapiada."
+  },
+  "npcs": [
+    {
+      "id": "rosa_minera",
+      "name": "Rosa Villalobos",
+      "p": [-72, 0, -55],
+      "rotY": 2.2,
+      "appearance": { "skin": "#b98865", "hair": "#bdbab3", "coat": "#4b3a2e", "pants": "#2b2622", "hairStyle": "bun", "hat": null }
+    }
+  ],
+  "clues": [
+    {
+      "id": "registro_turnos",
+      "title": "Registro de turnos",
+      "text": "Libro de la caseta del capataz. Última línea, 14/03/1994: «M. Morales — entrada 23:40». Nunca firmó la salida. Al margen, con otra letra: «Las palancas de la compuerta no se tocan en orden. Pregúntale al niño».",
+      "shareable": true
+    },
+    {
+      "id": "mapa_galerias",
+      "title": "Mapa dibujado por Tomás",
+      "text": "Un dibujo infantil de la galería, con una compuerta de tres palancas numeradas I, II y III. Debajo, en letra de niño: «Papá me enseñó: primero la del medio, luego la de la izquierda y al final la de la derecha».",
+      "shareable": true
+    },
+    {
+      "id": "cuaderno_tomas",
+      "title": "Cuaderno de Tomás",
+      "text": "«Día 3 en la mina. Mamá dice que no podemos volver al pueblo mientras suene la campana. Encontramos otra salida detrás de la capilla, pero da miedo. Lucía dejó su colgante en el túnel de casa para que alguien sepa que estamos vivos.»",
+      "shareable": true
+    }
+  ],
+  "entities": [
+    {
+      "id": "caja_capataz",
+      "kind": "inspect",
+      "label": "Caja de herramientas del capataz",
+      "model": "toolbox",
+      "p": [-90.5, 0, -56.5],
+      "rotY": 0.4,
+      "radius": 2.4,
+      "highlightWhen": [{ "stage": "s_caja" }]
+    },
+    {
+      "id": "tablas_mina",
+      "kind": "door",
+      "label": "Entrada tapiada de la mina",
+      "model": "mine_boards",
+      "p": [-84, 0, -61.6],
+      "radius": 2.8,
+      "visibleWhen": [],
+      "highlightWhen": [{ "stage": "s_tablas" }]
+    },
+    {
+      "id": "salida_galeria",
+      "kind": "exit",
+      "label": "Salir de la mina",
+      "model": "tunnel_exit",
+      "p": [151.8, 0, -20],
+      "radius": 2.6
+    },
+    {
+      "id": "vagoneta",
+      "kind": "inspect",
+      "label": "Vagoneta volcada",
+      "model": "mine_cart",
+      "p": [168, 0, -17.2],
+      "rotY": 0.25,
+      "radius": 2.6,
+      "highlightWhen": [{ "stage": "s_vagoneta" }]
+    },
+    {
+      "id": "panel_palancas",
+      "kind": "puzzle",
+      "label": "Palancas de la compuerta",
+      "model": "lever_panel",
+      "p": [180.4, 0, -23.6],
+      "rotY": 0,
+      "radius": 2.4,
+      "highlightWhen": [{ "stage": "s_compuerta" }]
+    },
+    {
+      "id": "compuerta",
+      "kind": "door",
+      "label": "Compuerta de hierro",
+      "model": "gate",
+      "p": [182, 0, -20],
+      "rotY": 0,
+      "radius": 2.6,
+      "blockSize": [0.4, 9],
+      "blockingWhen": [{ "notFlag": "gate_open" }]
+    },
+    {
+      "id": "cuaderno",
+      "kind": "pickup",
+      "label": "Mochila infantil",
+      "model": "notebook",
+      "p": [195.5, 0, -9],
+      "radius": 2.3,
+      "visibleWhen": [{ "notFlag": "cuaderno_tomado" }],
+      "highlightWhen": [{ "stage": "s_cuaderno" }]
+    },
+    {
+      "id": "pozo_ascensor",
+      "kind": "exit",
+      "label": "Pozo del ascensor (salida)",
+      "model": "tunnel_exit",
+      "p": [196.5, 0, -35],
+      "radius": 2.6,
+      "highlightWhen": [{ "stage": "s_regreso" }]
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "palancas_compuerta",
+      "entityId": "panel_palancas",
+      "title": "Las tres palancas",
+      "prompt": "Tres palancas oxidadas marcadas I, II y III controlan la compuerta. Si se accionan en el orden equivocado, el mecanismo se bloquea. Escribe el orden (por ejemplo: 3-2-1).",
+      "inputHint": "Orden (ej. 3-2-1)",
+      "answers": ["2-1-3", "213", "ii-i-iii"],
+      "maxAttemptsPerMinute": 5,
+      "requires": [{ "stage": "s_compuerta" }],
+      "onSolve": [
+        { "message": "Las palancas crujen una tras otra. Con un estruendo metálico, la compuerta se eleva." },
+        { "setFlag": "gate_open" },
+        { "setStage": "s_cuaderno" }
+      ],
+      "coop": true
+    }
+  ],
+  "stages": [
+    { "id": "s_caja", "title": "La caseta del capataz", "objective": "Registra la caja de herramientas del capataz, junto a la entrada de la mina.", "hint": "Está a la izquierda de la entrada tapiada, junto a unas rocas.", "marker": "caja_capataz" },
+    { "id": "s_tablas", "title": "La entrada tapiada", "objective": "Usa la barreta para arrancar las tablas de la entrada y entra a la mina.", "hint": "Acércate a las tablas y pulsa Investigar. Lleva tu linterna.", "marker": "tablas_mina" },
+    { "id": "s_vagoneta", "title": "La galería", "objective": "Sigue los rieles y revisa la vagoneta volcada.", "hint": "La galería avanza hacia el este. Cuidado con los derrumbes.", "marker": "vagoneta" },
+    { "id": "s_compuerta", "title": "La compuerta", "objective": "Acciona las palancas de la compuerta en el orden correcto.", "hint": "El dibujo de Tomás explica el orden de las palancas.", "marker": "panel_palancas" },
+    { "id": "s_cuaderno", "title": "La cámara del nivel 3", "objective": "Busca en la cámara lo que dejaron los Morales.", "hint": "Algo pequeño, al fondo a la izquierda de la cámara.", "marker": "cuaderno" },
+    { "id": "s_regreso", "title": "De vuelta a la superficie", "objective": "Sube por el pozo del ascensor y cuéntale a Rosa lo que encontraste.", "hint": "El pozo está al fondo de la cámara. Rosa espera junto al camino.", "marker": "pozo_ascensor" }
+  ],
+  "interactions": [
+    {
+      "target": "rosa_minera",
+      "whenStatus": "available",
+      "do": [
+        { "start": true },
+        {
+          "dialogue": [
+            { "speaker": "Rosa Villalobos", "text": "¿La carta de Lucía? … Entonces es verdad. Aquella noche vi luces bajando hacia la mina, y al día siguiente se derrumbó la galería." },
+            { "speaker": "Rosa Villalobos", "text": "Yo trabajé treinta años ahí dentro. El capataz guardaba las herramientas en una caja junto a la entrada. Si vas a entrar, necesitarás algo para arrancar esas tablas." },
+            { "speaker": "Rosa Villalobos", "text": "Y lleva luz. Ahí abajo, la oscuridad escucha." }
+          ]
+        },
+        { "setStage": "s_caja" }
+      ]
+    },
+    {
+      "target": "rosa_minera",
+      "when": [{ "stage": "s_regreso" }],
+      "coop": true,
+      "do": [
+        {
+          "dialogue": [
+            { "speaker": "Rosa Villalobos", "text": "¿Tres días ahí abajo…? Y una salida detrás de la capilla. Por eso Inés cierra la capilla con candado cada noche." },
+            { "speaker": "Rosa Villalobos", "text": "Quédate este casco. Si alguien va a seguir bajando a los túneles de este pueblo, que sea con la cabeza protegida." }
+          ]
+        },
+        { "complete": true }
+      ]
+    },
+    {
+      "target": "rosa_minera",
+      "whenStatus": "active",
+      "do": [{ "dialogue": [{ "speaker": "Rosa Villalobos", "text": "No te quedes mucho tiempo ahí dentro. Las vigas crujen aunque nadie las toque." }] }]
+    },
+    {
+      "target": "rosa_minera",
+      "whenStatus": "completed",
+      "do": [{ "dialogue": [{ "speaker": "Rosa Villalobos", "text": "Dicen que la hermana Inés recibe cartas sin remitente. Quizás deberías preguntarle." }] }]
+    },
+    {
+      "target": "rosa_minera",
+      "whenStatus": "any",
+      "do": [{ "dialogue": [{ "speaker": "Rosa Villalobos", "text": "Esa mina se tragó a mucha gente. Primero resuelve lo de la casa de la colina y luego hablamos." }] }]
+    },
+    {
+      "target": "caja_capataz",
+      "when": [{ "stage": "s_caja" }],
+      "coop": true,
+      "do": [
+        { "message": "La caja cede con un chasquido. Dentro hay herramientas cubiertas de óxido, una barreta y el libro de turnos del capataz." },
+        { "giveItem": "barreta" },
+        { "giveClue": "registro_turnos" },
+        { "setStage": "s_tablas" }
+      ]
+    },
+    {
+      "target": "caja_capataz",
+      "whenStatus": "any",
+      "do": [{ "message": "Una caja metálica con la palabra CAPATAZ pintada a mano." }]
+    },
+    {
+      "target": "tablas_mina",
+      "whenStatus": "any",
+      "when": [{ "flag": "boards_removed" }],
+      "do": [
+        { "message": "Te agachas y entras en la galería…" },
+        { "teleport": [153.5, 0, -20], "rotY": -1.5708 }
+      ]
+    },
+    {
+      "target": "tablas_mina",
+      "when": [{ "stage": "s_tablas" }, { "hasItem": "barreta" }],
+      "coop": true,
+      "do": [
+        { "message": "Haces palanca con la barreta. Las tablas se quiebran y un aire helado sale de la oscuridad." },
+        { "setFlag": "boards_removed" },
+        { "setStage": "s_vagoneta" },
+        { "teleport": [153.5, 0, -20], "rotY": -1.5708 }
+      ]
+    },
+    {
+      "target": "tablas_mina",
+      "whenStatus": "any",
+      "do": [{ "message": "Tablas clavadas con fuerza. Necesitarías algo para hacer palanca." }]
+    },
+    {
+      "target": "salida_galeria",
+      "whenStatus": "any",
+      "do": [
+        { "message": "Sales a la luz entre las tablas rotas." },
+        { "teleport": [-84, 0, -59], "rotY": 3.1416 }
+      ]
+    },
+    {
+      "target": "vagoneta",
+      "when": [{ "stage": "s_vagoneta" }],
+      "coop": true,
+      "do": [
+        { "message": "Entre el carbón de la vagoneta hay una hoja doblada, protegida en una bolsa de plástico." },
+        { "giveClue": "mapa_galerias" },
+        { "setStage": "s_compuerta" }
+      ]
+    },
+    {
+      "target": "vagoneta",
+      "whenStatus": "any",
+      "do": [{ "message": "Una vagoneta volcada. Las ruedas todavía giran si las empujas." }]
+    },
+    {
+      "target": "panel_palancas",
+      "when": [{ "stage": "s_compuerta" }],
+      "do": [{ "openPuzzle": "palancas_compuerta" }]
+    },
+    {
+      "target": "panel_palancas",
+      "whenStatus": "any",
+      "do": [{ "message": "Tres palancas oxidadas: I, II y III." }]
+    },
+    {
+      "target": "compuerta",
+      "whenStatus": "any",
+      "when": [{ "notFlag": "gate_open" }],
+      "do": [{ "message": "Una compuerta de hierro bloquea el paso. A un lado hay un panel con palancas." }]
+    },
+    {
+      "target": "compuerta",
+      "whenStatus": "any",
+      "do": [{ "message": "La compuerta está abierta." }]
+    },
+    {
+      "target": "cuaderno",
+      "when": [{ "notFlag": "cuaderno_tomado" }],
+      "do": [
+        { "message": "Una mochila infantil. Dentro hay un cuaderno escolar y una brújula de latón." },
+        { "giveClue": "cuaderno_tomas" },
+        { "giveItem": "brujula_tomas" },
+        { "setFlag": "cuaderno_tomado" },
+        { "setStage": "s_regreso" }
+      ]
+    },
+    {
+      "target": "pozo_ascensor",
+      "whenStatus": "any",
+      "do": [
+        { "message": "Subes por la escalerilla del pozo del ascensor y sales entre las rocas, junto al camino." },
+        { "teleport": [-74.5, 0, -57.5], "rotY": 0.8 }
+      ]
+    }
+  ],
+  "rewards": {
+    "coins": 300,
+    "rp": 150,
+    "xp": 500,
+    "seasonXp": 400,
+    "items": [{ "itemId": "casco_minero", "qty": 1 }],
+    "dropTable": "episode_complete"
+  }
+}

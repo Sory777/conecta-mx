@@ -39,6 +39,24 @@ export const ANGEL = { x: 5, z: -65 };
 export const MINE = { x: -84, z: -62 };
 export const CAVE_MOUTH = { x: 7, z: -93 };
 
+/**
+ * Interior de la mina (Episodio 2). Región subterránea separada, sólo accesible por teletransporte.
+ * Galería principal (este-oeste) que termina en una cámara amplia, separada por una compuerta.
+ */
+export const MINE_INT = {
+  minX: 150,
+  maxX: 200,
+  minZ: -40,
+  maxZ: 0,
+  floorY: 0,
+  ceilingY: 4.2,
+  tunnel: { minX: 150, maxX: 182, minZ: -24.5, maxZ: -15.5 },
+  chamber: { minX: 182, maxX: 200, minZ: -40, maxZ: 0 },
+};
+
+/** Regiones subterráneas: el cliente las oscurece y el servidor sólo permite cambiar de región por teletransporte. */
+export const UNDERGROUND: Region[] = ['cave', 'mine'];
+
 /** Casa Morales: 16 x 12 m, puerta principal al sur (hacia el pueblo). */
 export const CASA_MORALES = {
   x: 0,
@@ -118,17 +136,20 @@ export function smoothstep(a: number, b: number, x: number) {
   return t * t * (3 - 2 * t);
 }
 
-export type Region = 'outdoor' | 'cave';
+export type Region = 'outdoor' | 'cave' | 'mine';
 
 export function regionOf(x: number, z: number): Region | null {
   if (x >= CAVE.minX && x <= CAVE.maxX && z >= CAVE.minZ && z <= CAVE.maxZ) return 'cave';
+  if (x >= MINE_INT.minX && x <= MINE_INT.maxX && z >= MINE_INT.minZ && z <= MINE_INT.maxZ) return 'mine';
   if (x >= BOUNDS.minX && x <= BOUNDS.maxX && z >= BOUNDS.minZ && z <= BOUNDS.maxZ) return 'outdoor';
   return null;
 }
 
 /** Altura del terreno (determinista). */
 export function heightAt(x: number, z: number): number {
-  if (regionOf(x, z) === 'cave') return CAVE.floorY;
+  const reg = regionOf(x, z);
+  if (reg === 'cave') return CAVE.floorY;
+  if (reg === 'mine') return MINE_INT.floorY;
   const dh = Math.hypot(x - HILL.x, z - HILL.z);
   const hill = HILL.h * (1 - smoothstep(HILL.flat, HILL.edge, dh));
   const r = Math.hypot(x, z);
@@ -203,6 +224,15 @@ export function staticColliders(): Collider[] {
   // Mina tapiada
   out.push(box(MINE.x - 5, MINE.x + 5, MINE.z - 6, MINE.z - 1.5, 'mina'));
   out.push({ type: 'circle', x: CAVE_MOUTH.x, z: CAVE_MOUTH.z - 1.5, r: 2.2, id: 'boca_tunel' });
+  // Interior de la mina: roca maciza a ambos lados de la galería, derrumbes, vagoneta y pilares
+  const t = MINE_INT.tunnel;
+  out.push(box(MINE_INT.minX, t.maxX, MINE_INT.minZ, t.minZ, 'mina_roca_sur'));
+  out.push(box(MINE_INT.minX, t.maxX, t.maxZ, MINE_INT.maxZ, 'mina_roca_norte'));
+  out.push({ type: 'circle', x: 160, z: -23, r: 1.3, id: 'derrumbe_1' });
+  out.push({ type: 'circle', x: 174.5, z: -16.8, r: 1.1, id: 'derrumbe_2' });
+  out.push({ type: 'circle', x: 168, z: -16.7, r: 0.9, id: 'vagoneta' });
+  out.push({ type: 'circle', x: 190, z: -21, r: 1.4, id: 'pilar_mina_1' });
+  out.push({ type: 'circle', x: 192, z: -31, r: 1.2, id: 'pilar_mina_2' });
   // Pilares de roca dentro del túnel
   out.push({ type: 'circle', x: 165, z: -88, r: 1.6 });
   out.push({ type: 'circle', x: 170, z: -104, r: 1.8 });
@@ -245,7 +275,7 @@ export function generateTrees(seed = 1337, attempts = 2600): Tree[] {
     if (Math.hypot(x - HILL.x, z - HILL.z) < 17) continue;
     if (Math.hypot(x - MINE.x, z - MINE.z) < 11) continue;
     if (Math.hypot(x - WELL.x, z - WELL.z) < 6) continue;
-    if (x > CHAPEL.x - 12 && x < CHAPEL.x + 12 && z > CHAPEL.z - 14 && z < BELL_TOWER.z + 8) continue;
+    if (x > CHAPEL.x - 18 && x < CHAPEL.x + 12 && z > CHAPEL.z - 14 && z < BELL_TOWER.z + 8) continue;
     let blocked = false;
     for (const c of blockers) {
       if (c.type === 'box') {
@@ -307,6 +337,9 @@ export function resolveCollisions(x: number, z: number, radius: number, collider
   if (reg === 'cave') {
     x = clamp(x, CAVE.minX + 1, CAVE.maxX - 1);
     z = clamp(z, CAVE.minZ + 1, CAVE.maxZ - 1);
+  } else if (reg === 'mine') {
+    x = clamp(x, MINE_INT.minX + 1, MINE_INT.maxX - 1);
+    z = clamp(z, MINE_INT.minZ + 1, MINE_INT.maxZ - 1);
   } else {
     x = clamp(x, BOUNDS.minX + 1, BOUNDS.maxX - 1);
     z = clamp(z, BOUNDS.minZ + 1, BOUNDS.maxZ - 1);
@@ -318,6 +351,7 @@ export function resolveCollisions(x: number, z: number, radius: number, collider
 
 export function zoneAt(x: number, z: number): string {
   if (regionOf(x, z) === 'cave') return 'Túnel bajo la Casa Morales';
+  if (regionOf(x, z) === 'mine') return x > MINE_INT.chamber.minX ? 'Mina — cámara del nivel 3' : 'Mina — galería principal';
   const c = CASA_MORALES;
   if (x > c.minX && x < c.maxX && z > c.minZ && z < c.maxZ) {
     const s = c.study;
