@@ -3,6 +3,7 @@ import { regionOf } from '../../../shared/world';
 import type { DialogueLine, PuzzlePrompt, RewardSummary } from '../../../shared/protocol';
 import type { Game, GameUi } from '../game/Game';
 import { store } from '../state';
+import { tg } from '../telegram';
 import { add, clear, fmt, h, isTouch } from './dom';
 import { drawMap } from './map';
 import { Panels, type PanelName } from './panels';
@@ -164,6 +165,7 @@ export class Hud implements GameUi {
   }
 
   discovery(kind: string, text: string) {
+    tg.haptic('light');
     const d = h('div', { class: 'discovery' }, h('div', { class: 'k' }, kind), h('div', { class: 'v' }, text));
     this.root.append(d);
     setTimeout(() => d.remove(), 3300);
@@ -272,6 +274,7 @@ export class Hud implements GameUi {
       h('span', { class: 'pill coins', title: 'Monedas (se ganan jugando)' }, h('span', { class: 'ic' }, '🪙'), fmt(w.coins)),
       h('span', { class: 'pill gems', title: 'Gemas (moneda premium)' }, h('span', { class: 'ic' }, '💎'), fmt(w.gems)),
       store.config?.rewardPointsEnabled ? h('span', { class: 'pill rp', title: 'Puntos de recompensa' }, h('span', { class: 'ic' }, '✦'), fmt(w.rp)) : null,
+      (store.profile?.vipUntil ?? 0) > Date.now() ? h('span', { class: 'pill', style: 'color:#f0d9a4;border-color:var(--gold)', title: 'VIP activo' }, '👑 VIP') : null,
     );
   }
 

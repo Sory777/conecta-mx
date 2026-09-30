@@ -3,6 +3,7 @@ import { HAIR_STYLES, type Appearance } from '../../../shared/protocol';
 import type { Game } from '../game/Game';
 import { api, ApiError, session } from '../net/api';
 import { store } from '../state';
+import { tg } from '../telegram';
 import { clear, h } from './dom';
 
 const SKIN = ['#f1d3b8', '#e0b894', '#c69c7b', '#a57655', '#7d5438', '#5a3a26'];
@@ -10,9 +11,23 @@ const HAIR = ['#1b1512', '#3b2a1f', '#6b4a2e', '#a67c4e', '#d9c9a8', '#8a8a8a', 
 const COAT = ['#3d3a33', '#4a4a42', '#2f3a44', '#4b3a2e', '#5a2f2f', '#2f4034', '#6b6254'];
 const PANTS = ['#1f1f1f', '#2a2a2a', '#2b3440', '#3a3026', '#44403a'];
 
-export function loading(root: HTMLElement, text = 'Cargando…') {
+export function loading(root: HTMLElement, text = 'Cargando…', sponsor?: { headline: string; subline: string; sponsor: string; bg: string; fg: string }) {
   clear(root);
-  root.append(h('div', { class: 'loading' }, h('div', { class: 'title' }, GAME_NAME), h('div', { class: 'muted' }, text), h('div', { class: 'bar' }, h('div'))));
+  root.append(
+    h(
+      'div',
+      { class: 'loading' },
+      h('div', { class: 'title' }, GAME_NAME),
+      h('div', { class: 'muted' }, text),
+      h('div', { class: 'bar' }, h('div')),
+      sponsor
+        ? h('div', { style: `margin-top:24px;padding:12px 18px;border-radius:10px;background:${sponsor.bg};color:${sponsor.fg};text-align:center;max-width:320px` },
+            h('div', { class: 'small', style: 'opacity:.7;letter-spacing:.1em;text-transform:uppercase' }, 'Patrocinado por ', sponsor.sponsor),
+            h('div', { style: 'font-size:18px;margin-top:4px' }, sponsor.headline),
+            sponsor.subline ? h('div', { class: 'small', style: 'opacity:.85' }, sponsor.subline) : null)
+        : null,
+    ),
+  );
 }
 
 function header() {
@@ -196,7 +211,7 @@ export function characterScreen(root: HTMLElement, game: Game): Promise<void> {
     const app: Appearance = { skin: SKIN[2], hair: HAIR[1], coat: COAT[0], pants: PANTS[0], hairStyle: 'short', beard: false };
     game.showPreview(app);
     const err = h('div', { class: 'error-text' });
-    const name = h('input', { class: 'input', placeholder: 'Nombre de tu investigador', maxlength: 20 });
+    const name = h('input', { class: 'input', placeholder: 'Nombre de tu investigador', maxlength: 20, value: (tg.firstName ?? '').replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ._-]/g, '').slice(0, 20) });
     const row = (label: string, key: keyof Appearance, colors: string[]) => {
       const wrap = h('div', { class: 'swatches' });
       const draw = () => {

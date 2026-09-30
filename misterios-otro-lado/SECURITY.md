@@ -81,6 +81,7 @@ Cada señal suma gravedad al `fraud_score`. Al superar `antifraud.holdThreshold`
 
 - `Content-Security-Policy` estricta en el cliente compilado (`script-src 'self'`, sin `unsafe-eval`, `frame-ancestors 'none'`, `object-src 'none'`).
 - `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, `Cache-Control: no-store` en la API.
+- **Telegram y anuncios**: si hay `TELEGRAM_BOT_TOKEN`, `frame-ancestors` permite sólo los dominios de Telegram (y se omite `X-Frame-Options`). Si hay una red de anuncios real habilitada, la CSP se relaja a `https:` para scripts/frames de esa red (necesario para sus SDK). En modo sólo-sandbox la CSP sigue siendo estricta.
 - **Producción**: servir detrás de HTTPS/WSS (Caddy, Nginx o el balanceador del proveedor) con HSTS y `TRUST_PROXY=true`.
 
 ## 8. Secretos
@@ -88,7 +89,15 @@ Cada señal suma gravedad al `fraud_score`. Al superar `antifraud.holdThreshold`
 - El cliente **no contiene secretos**. Todo secreto vive en variables de entorno del servidor (ver `.env.example`).
 - `.env`, la base de datos y el secreto de desarrollo (`data/.dev-server-secret`, permisos 600) están en `.gitignore`.
 - En producción `SERVER_SECRET` es obligatorio (el servidor no arranca sin él).
+- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` y `ADS_CALLBACK_SECRET` sólo viven en el servidor.
 - Integraciones futuras (Google Play, App Store, Stripe, AdMob SSV, correo) deben configurarse sólo en el servidor.
+
+## 8.1 Telegram, Stars y anuncios
+
+- **initData**: el login de Telegram verifica la firma HMAC-SHA256 (clave derivada de `WebAppData` + token del bot) y la antigüedad (`TELEGRAM_INITDATA_MAX_AGE_SEC`). Nunca se confía en `initDataUnsafe`.
+- **Webhook**: si `TELEGRAM_UPDATES=webhook`, se exige el header `x-telegram-bot-api-secret-token`.
+- **Stars**: el cliente nunca otorga compras. Sólo `successful_payment` recibido del bot (con `telegram_payment_charge_id`) entrega la oferta; `pre_checkout_query` revalida precio, usuario y oferta. La entrega es idempotente (`purchases UNIQUE(provider, provider_ref)` + clave del libro mayor). Reembolsos vía `refundStarPayment` revierten lo entregado.
+- **Anuncios**: el servidor elige la red y emite un token de un solo uso. Las redes con callback servidor-a-servidor (URL firmada por red con HMAC de `ADS_CALLBACK_SECRET`) son las únicas que pueden pagar puntos de recompensa; las no verificables sólo pagan monedas y exigen tiempo mínimo. Repetir la confirmación no paga dos veces.
 
 ## 9. Moderación y seguridad de jugadores
 

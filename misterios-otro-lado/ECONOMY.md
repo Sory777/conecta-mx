@@ -9,13 +9,13 @@
 | Concepto | Código | Cómo se obtiene | Para qué sirve | ¿Valor monetario? |
 |---|---|---|---|---|
 | **Monedas** | `coins` | Jugando: misterios, anuncios opcionales, referidos, pase de temporada | Tienda (cosméticos, herramientas, vehículos, decoración) y marketplace | **No.** Nunca se convierten a dinero. |
-| **Gemas** | `gems` | Compra con dinero real (hoy: **sandbox**, sin cobro) | Artículos premium y pase premium | **No reembolsables ni canjeables** por dinero. |
+| **Gemas** | `gems` | Compra con dinero real mediante **ofertas** (sandbox sin cobro, o **Telegram Stars** si `TELEGRAM_STARS_ENABLED=true`) | Artículos premium y pase premium | **No reembolsables ni canjeables** por dinero. |
 | **Puntos de recompensa** | `rp` | Sólo por actividad validada en servidor (primera vez que se resuelve un misterio, eventos, logros, cooperación, algunos anuncios recompensados, referidos legítimos) | Canje por recompensas de valor real **cuando el programa esté activo** | Potencialmente sí → por eso está fuertemente limitado |
 
 Reglas duras (garantizadas en código y base de datos):
 
 - La tienda **no acepta RP**: `store_products.price_currency CHECK IN ('coins','gems')`.
-- Las gemas se compran con dinero real sólo a través de un `PaymentProvider` con verificación en servidor; el MVP sólo tiene `SandboxPaymentProvider` (marca todo como `sandbox=1`).
+- Las gemas se compran con dinero real sólo a través de un `PaymentProvider` con verificación en servidor; hoy existen el sandbox (marca todo como `sandbox=1`) y Telegram Stars (verificado por el bot). Los paquetes se definen como ofertas en `content/store.json` (`offers`) y se editan en el panel admin; ver [MONETIZATION.md](MONETIZATION.md). El VIP da +10% de monedas en misiones, 10 gemas diarias y quita interstitials: nunca da puntos de recompensa extra.
 - El marketplace entre jugadores sólo admite **monedas** (`marketplace_listings.currency CHECK = 'coins'`). Dinero real entre jugadores: **no soportado**.
 - Todo movimiento pasa por el libro mayor (`transactions` + `ledger_entries` + `item_ledger`) con clave de idempotencia única.
 

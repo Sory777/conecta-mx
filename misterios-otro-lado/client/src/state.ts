@@ -5,6 +5,8 @@ export interface Profile {
   character: { id: string; name: string; appearance: import('../../shared/protocol').Appearance } | null;
   wallet: WalletView;
   stats: { missionsCompleted: number; cluesFound: number; itemsOwned: number; playSeconds: number; friends: number };
+  vipUntil?: number | null;
+  telegramLinked?: boolean;
 }
 
 export interface PublicConfig {
@@ -15,6 +17,8 @@ export interface PublicConfig {
   rewardPointsEnabled: boolean;
   realRedemptions: boolean;
   mailSandbox: boolean;
+  telegram?: { enabled: boolean; botUsername: string | null; appShortName: string | null; stars: boolean };
+  interstitialAfterMission?: 'off' | 'optional' | 'auto';
 }
 
 export interface Settings {
@@ -58,6 +62,7 @@ class Store {
   config: PublicConfig | null = null;
   settings: Settings = loadSettings();
   inventoryDirty = true;
+  sponsors: { id: string; slot: string; sponsor: string; headline: string; subline: string; bg: string; fg: string; link: string | null }[] = [];
   private subs = new Map<Key, Set<() => void>>();
 
   on(k: Key, fn: () => void) {

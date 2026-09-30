@@ -6,9 +6,10 @@ import { add, clear, dateTime, fmt, h, money } from '../ui/dom';
 // este cliente sólo presenta datos. No contiene secretos.
 
 const root = document.getElementById('admin')!;
-type Section = 'stats' | 'players' | 'reports' | 'suspicious' | 'redemptions' | 'transactions' | 'economy' | 'store' | 'missions' | 'seasons' | 'ads' | 'sponsors' | 'market' | 'audit';
+type Section = 'monetization' | 'stats' | 'players' | 'reports' | 'suspicious' | 'redemptions' | 'transactions' | 'economy' | 'store' | 'missions' | 'seasons' | 'ads' | 'sponsors' | 'market' | 'audit';
 const SECTIONS: [Section, string, 'moderator' | 'admin'][] = [
   ['stats', 'Resumen y analíticas', 'moderator'],
+  ['monetization', '💰 Monetización', 'admin'],
   ['players', 'Jugadores', 'moderator'],
   ['reports', 'Reportes', 'moderator'],
   ['suspicious', 'Actividad sospechosa', 'moderator'],
@@ -135,7 +136,7 @@ function go(s: Section) {
   document.querySelectorAll('.admin-nav button[data-s]').forEach((b) => b.classList.toggle('active', (b as HTMLElement).dataset.s === s));
   clear(main);
   main.append(h('p', { class: 'muted' }, 'Cargando…'));
-  const fn = { stats, players, reports, suspicious, redemptions, transactions, economy, store: storeSection, missions, seasons, ads, sponsors, market, audit }[s];
+  const fn = { monetization, stats, players, reports, suspicious, redemptions, transactions, economy, store: storeSection, missions, seasons, ads, sponsors, market, audit }[s];
   fn().catch((e) => {
     clear(main);
     main.append(h('p', { class: 'error-text' }, (e as Error).message));
@@ -450,11 +451,11 @@ async function sponsors() {
   const d = await api<any>('GET', '/api/admin/sponsors');
   clear(main);
   const ta = h('textarea', { style: 'min-height:220px' });
-  ta.value = JSON.stringify({ sponsorName: 'Panadería La Esperanza', slotId: 'plaza_billboard', headline: 'Pan de muerto', subline: 'Recién horneado cada noche', bgColor: '#2b1d14', fgColor: '#f3e2c0', startsAt: new Date().toISOString(), endsAt: new Date(Date.now() + 30 * 864e5).toISOString(), active: true }, null, 2);
+  ta.value = JSON.stringify({ sponsorName: 'Panadería La Esperanza', slotId: 'plaza_billboard', headline: 'Pan de muerto', subline: 'Recién horneado cada noche', bgColor: '#2b1d14', fgColor: '#f3e2c0', startsAt: new Date().toISOString(), endsAt: new Date(Date.now() + 30 * 864e5).toISOString(), active: true, linkUrl: 'https://ejemplo.com', contractValueCents: 5000 }, null, 2);
   main.append(
     h('h2', null, 'Patrocinios'),
-    h('p', { class: 'small muted' }, 'Espacios disponibles: plaza_billboard (cartel de la plaza), shop_sign (fachada de la tienda). Todo contenido patrocinado se rotula como «Patrocinado». Las impresiones provienen del cliente (métrica de baja confianza).'),
-    table(d.campaigns, [['sponsor_name', 'Patrocinador'], ['slot_id', 'Espacio'], ['headline', 'Titular'], ['starts_at', 'Inicio', (r) => dateTime(r.starts_at)], ['ends_at', 'Fin', (r) => dateTime(r.ends_at)], ['active', 'Activa'], ['impressions', 'Impresiones']]),
+    h('p', { class: 'small muted' }, 'Espacios: plaza_billboard (cartel de la plaza), shop_sign (fachada de la tienda), loading_screen (pantalla de carga), journal_banner (banner en el diario, con enlace clicable). Todo se rotula «Patrocinado». Impresiones y clics se cuentan una vez por jugador y día. contractValueCents = lo que cobras por la campaña (para el panel de ingresos).'),
+    table(d.campaigns, [['sponsor_name', 'Patrocinador'], ['slot_id', 'Espacio'], ['headline', 'Titular'], ['starts_at', 'Inicio', (r) => dateTime(r.starts_at)], ['ends_at', 'Fin', (r) => dateTime(r.ends_at)], ['active', 'Activa'], ['impressions', 'Impresiones'], ['clicks', 'Clics'], ['contract_value_cents', 'Contrato', (r) => money(r.contract_value_cents ?? 0)]]),
     h('h3', null, 'Nueva campaña'),
     ta,
     h('button', { class: 'btn primary', style: 'margin-top:8px', onclick: () => run(() => api('POST', '/api/admin/sponsors', JSON.parse(ta.value)), 'Campaña guardada').then(() => go('sponsors')) }, 'Guardar campaña'),
@@ -475,3 +476,121 @@ async function audit() {
 }
 
 void start();
+
+// ------------------------------------------------------------------ monetización
+async function monetization() {
+  const days = Number(sessionStorage.getItem('mon.days') ?? 30);
+  const d = await api<any>('GET', `/api/admin/monetization?days=${days}`);
+  clear(main);
+  const stat = (k: string, v: string) => h('div', { class: 'stat' }, h('div', { class: 'v' }, v), h('div', { class: 'k' }, k));
+  const daysSel = h('select', { class: 'input', style: 'max-width:140px' }, ...[7, 30, 90].map((n) => h('option', { value: n, selected: n === days }, `${n} días`)));
+  daysSel.addEventListener('change', () => (sessionStorage.setItem('mon.days', daysSel.value), go('monetization')));
+  add(
+    main,
+    h('div', { class: 'toolbar' }, h('h2', { style: 'margin:0' }, 'Monetización'), h('span', { class: 'grow' }), daysSel),
+    h('div', { class: 'stat-grid' },
+      stat('Ingreso total', money(d.totalCents)),
+      stat('ARPDAU', money(Math.round(d.arpdauCents * 100) / 100)),
+      stat('DAU medio', String(d.dauAvg)),
+      stat('Compradores', String(d.payers)),
+      stat('Conversión a pago', d.payerConversionPct === null ? '—' : `${d.payerConversionPct}%`),
+      stat('Compras sandbox (no cuentan)', money(d.sandboxIapCents)),
+    ),
+    h('h3', null, 'Ingresos por fuente'),
+    table(d.sources, [['source', 'Fuente'], ['cents', 'Ingreso', (r) => money(r.cents)], ['pct', '%', (r) => (d.totalCents ? `${Math.round((r.cents / d.totalCents) * 100)}%` : '—')]]),
+    h('h3', null, '¿Qué anuncios pagan más?'),
+    h('p', { class: 'small muted' }, 'Ordenado por ingreso por cada 1,000 solicitudes (combina eCPM, tasa de relleno y de finalización). El eCPM es «real» cuando registras abajo lo que la red te reporta; si no, es la estimación que configuraste.'),
+    h('div', { class: 'toolbar' },
+      h('span', { class: 'badge' }, `Mejor recompensado: ${d.bestByFormat.rewarded ?? 'sin datos reales'}`),
+      h('span', { class: 'badge' }, `Mejor intersticial: ${d.bestByFormat.interstitial ?? 'sin datos reales'}`)),
+    table(d.ranking, [
+      ['name', 'Red'], ['format', 'Formato'], ['requests', 'Solicitudes'], ['fillRate', 'Relleno %'], ['completionRate', 'Completados %'], ['verified', 'Verificados'],
+      ['ecpmCents', 'eCPM', (r) => `${money(Math.round(r.ecpmCents))} (${r.ecpmSource})`],
+      ['revenueCents', 'Ingreso', (r) => `${money(r.revenueCents)} (${r.revenueSource})`],
+      ['revenuePer1000RequestsCents', 'Por 1000 solicitudes', (r) => (r.revenuePer1000RequestsCents === null ? '—' : money(r.revenuePer1000RequestsCents))],
+    ]),
+    h('h3', null, 'Ventas por producto'),
+    table(d.bySku, [['sku', 'Producto'], ['provider', 'Canal'], ['purchases', 'Ventas'], ['stars', 'Stars'], ['usd_cents', 'USD', (r) => money(r.usd_cents ?? 0)]]),
+    h('h3', null, 'Patrocinios'),
+    table(d.sponsors, [['sponsor_name', 'Patrocinador'], ['slot_id', 'Espacio'], ['impressions', 'Impresiones únicas'], ['clicks', 'Clics'], ['ctr', 'CTR %'], ['contract_value_cents', 'Contrato', (r) => money(r.contract_value_cents)]]),
+  );
+
+  // Registrar ingresos reales
+  const netOpts = () => h('select', { class: 'input', style: 'max-width:160px' }, ...d.networks.map((n: any) => h('option', { value: n.id }, n.name)));
+  const net = netOpts();
+  const fmtSel = h('select', { class: 'input', style: 'max-width:140px' }, h('option', { value: 'rewarded' }, 'Recompensado'), h('option', { value: 'interstitial' }, 'Intersticial'));
+  const day = h('input', { class: 'input', type: 'date', style: 'max-width:160px', value: new Date(Date.now() - 864e5).toISOString().slice(0, 10) });
+  const imp = h('input', { class: 'input', type: 'number', placeholder: 'Impresiones', style: 'max-width:140px' });
+  const usd = h('input', { class: 'input', type: 'number', step: '0.01', placeholder: 'Ingreso USD', style: 'max-width:140px' });
+  const csv = h('textarea', { style: 'min-height:90px', placeholder: 'day,networkId,format,impressions,revenueUsd\n2026-10-01,adsgram,rewarded,1200,3.10' });
+  main.append(
+    h('h3', null, 'Registrar ingresos reportados por las redes'),
+    h('p', { class: 'small muted' }, 'Copia los datos del panel de cada red (impresiones e ingreso por día y formato). Con esto se calcula el eCPM real y la mediación envía más tráfico a la red que más paga.'),
+    h('div', { class: 'toolbar' }, day, net, fmtSel, imp, usd, h('button', {
+      class: 'btn primary',
+      onclick: () => run(() => api('POST', '/api/admin/revenue-reports', { day: day.value, networkId: net.value, format: fmtSel.value, impressions: Number(imp.value), revenueCents: Math.round(Number(usd.value) * 100) }), 'Guardado').then(() => go('monetization')),
+    }, 'Guardar')),
+    csv,
+    h('button', { class: 'btn', style: 'margin-top:6px', onclick: () => run(() => api<any>('POST', '/api/admin/revenue-reports/import', { csv: csv.value }), 'Importado').then((r) => r && toast(`Importadas ${r.imported} filas${r.errors.length ? `; ${r.errors.length} con error` : ''}`)).then(() => go('monetization')) }, 'Importar CSV'),
+    table(d.reports, [['day', 'Día'], ['network_id', 'Red'], ['format', 'Formato'], ['impressions', 'Impresiones'], ['revenue_cents', 'Ingreso', (r) => money(r.revenue_cents)]]),
+  );
+
+  // Redes de anuncios
+  main.append(
+    h('h3', null, 'Redes de anuncios (mediación)'),
+    h('div', { class: 'notice-box', style: 'margin-bottom:10px' },
+      d.callbackSecretConfigured ? 'Para las redes con verificación en servidor, copia su «URL de recompensa» en el panel de la red.' : '⚠ Define ADS_CALLBACK_SECRET en el servidor para generar las URLs de recompensa verificadas.'),
+  );
+  for (const n of d.networks) {
+    const f = {
+      enabled: h('input', { type: 'checkbox', checked: n.enabled }),
+      env: h('select', { class: 'input' }, ...['any', 'telegram', 'web'].map((e) => h('option', { value: e, selected: n.env === e }, e))),
+      weight: h('input', { class: 'input', type: 'number', value: n.weight }),
+      verified: h('input', { type: 'checkbox', checked: n.serverVerified }),
+      config: h('textarea', { style: 'min-height:60px' }),
+      ecpmR: h('input', { class: 'input', type: 'number', value: n.estEcpm.rewarded ?? 0 }),
+      ecpmI: h('input', { class: 'input', type: 'number', value: n.estEcpm.interstitial ?? 0 }),
+    };
+    f.config.value = JSON.stringify(n.config, null, 2);
+    main.append(
+      h('div', { class: 'card', style: 'margin-bottom:10px' },
+        h('div', { class: 'row' }, h('b', { class: 'grow' }, `${n.name} (${n.kind})`), h('label', { class: 'check' }, f.enabled, 'Activa')),
+        h('div', { style: 'display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px' },
+          h('label', { class: 'field' }, 'Entorno', f.env), h('label', { class: 'field' }, 'Peso', f.weight),
+          h('label', { class: 'field' }, 'eCPM estimado recompensado (¢)', f.ecpmR), h('label', { class: 'field' }, 'eCPM estimado intersticial (¢)', f.ecpmI),
+          h('label', { class: 'check' }, f.verified, 'Verificación en servidor')),
+        h('label', { class: 'field' }, 'Configuración pública (IDs de bloque/zona)', f.config),
+        n.callbackUrl ? h('div', { class: 'small' }, 'URL de recompensa: ', h('code', { style: 'word-break:break-all' }, n.callbackUrl)) : null,
+        h('button', {
+          class: 'btn small',
+          onclick: () => {
+            let config: unknown;
+            try {
+              config = JSON.parse(f.config.value || '{}');
+            } catch {
+              return toast('JSON inválido', false);
+            }
+            void run(() => api<any>('PUT', `/api/admin/ad-networks/${n.id}`, {
+              name: n.name, enabled: f.enabled.checked, env: f.env.value, formats: n.formats, config, weight: Number(f.weight.value),
+              estEcpm: { rewarded: Number(f.ecpmR.value), interstitial: Number(f.ecpmI.value) }, serverVerified: f.verified.checked,
+            }), 'Red actualizada').then((r) => r?.warning && toast(r.warning, false));
+          },
+        }, 'Guardar')),
+    );
+  }
+
+  // Ofertas
+  const offerTa = h('textarea', { style: 'min-height:180px' });
+  offerTa.value = JSON.stringify({ sku: 'nueva_oferta', kind: 'gems', label: 'Nombre', description: '', gems: 100, vipDays: 0, items: [], priceCents: 99, priceStars: 50, oncePerUser: false, active: true, sort: 10 }, null, 2);
+  const tgInfo = d.telegram;
+  main.append(
+    h('h3', null, 'Ofertas de pago (Stars / web)'),
+    table(d.offers, [['sku', 'SKU'], ['kind', 'Tipo'], ['label', 'Nombre'], ['gems', 'Gemas'], ['vip_days', 'Días VIP'], ['price_cents', 'USD', (r) => money(r.price_cents)], ['price_stars', 'Stars'], ['once_per_user', 'Única'], ['active', 'Activa']]),
+    offerTa,
+    h('button', { class: 'btn primary', style: 'margin-top:6px', onclick: () => run(() => api('POST', '/api/admin/offers', JSON.parse(offerTa.value)), 'Oferta guardada').then(() => go('monetization')) }, 'Guardar oferta'),
+    h('h3', null, 'Telegram'),
+    h('p', { class: 'small' }, tgInfo.enabled
+      ? `Bot @${tgInfo.botUsername ?? '¿?'} · Mini App: ${tgInfo.appShortName ?? '—'} · actualizaciones: ${tgInfo.updates} · Stars: ${tgInfo.stars ? 'activas' : 'desactivadas'} · cuentas vinculadas: ${tgInfo.linkedAccounts} · URL: ${tgInfo.webAppUrl ?? '—'}`
+      : 'Telegram no está configurado (falta TELEGRAM_BOT_TOKEN). Ver MONETIZATION.md.'),
+  );
+}

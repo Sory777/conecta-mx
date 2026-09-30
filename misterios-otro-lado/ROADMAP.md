@@ -19,6 +19,8 @@ Prioridad permanente: **que el juego sea divertido**. La economía complementa l
 - [x] Antifraude, auditoría, rate limiting, roles
 - [x] Panel administrativo y analíticas (incluida salud económica)
 - [x] Pruebas automáticas (unitarias, integración multijugador, E2E con navegador)
+- [x] **Telegram Mini App**: login con initData verificado, bot (/start, botón de menú, referidos por `startapp`), pagos con **Telegram Stars** (desactivados por defecto), compartir invitación
+- [x] **Monetización**: ofertas (pack de inicio, VIP 30 días, gemas, propina), mediación de anuncios (Adsgram, Monetag, AdSense H5, sandbox) por eCPM real, callbacks S2S firmados, interstitial opcional tras misión, patrocinios con clics/CTR, panel de ingresos con ranking de redes e importación CSV (ver MONETIZATION.md)
 
 ## Fase 2 — Contenido y pulido (1–2 meses)
 

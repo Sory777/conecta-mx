@@ -5,7 +5,7 @@ Este directorio contiene el **MVP 1 jugable**: cliente 3D (WebGL, Android y PC),
 
 > ⚠️ **Modo sandbox activo por defecto.** Compras de gemas, anuncios y canjes de puntos son **simulados** y están rotulados como tales. No se cobra ni se paga dinero real. Ver [Modo sandbox](#modo-sandbox).
 
-Documentación: [ARCHITECTURE.md](ARCHITECTURE.md) · [ECONOMY.md](ECONOMY.md) · [SECURITY.md](SECURITY.md) · [ROADMAP.md](ROADMAP.md)
+Documentación: [ARCHITECTURE.md](ARCHITECTURE.md) · [ECONOMY.md](ECONOMY.md) · [SECURITY.md](SECURITY.md) · [ROADMAP.md](ROADMAP.md) · [MONETIZATION.md](MONETIZATION.md)
 
 ---
 
@@ -21,10 +21,11 @@ Documentación: [ARCHITECTURE.md](ARCHITECTURE.md) · [ECONOMY.md](ECONOMY.md) �
 | **Multijugador** | WebSocket autoritativo, shards de 40, sincronización 10 Hz con radio de interés e interpolación, validación de velocidad, grupos (4), invitaciones, cooperación, pistas compartidas, chat de mundo/grupo, amigos, bloquear, reportar |
 | **Cuentas** | Registro, login, recuperación, verificación de correo, perfil, estadísticas, un personaje por cuenta (esquema preparado para varios) |
 | **Economía** | Monedas, gemas (sandbox), puntos de recompensa con topes diarios/semanales y presupuesto global, canje con requisitos y revisión manual, rarezas y botín, tienda, pase de temporada gratis/premium, eventos, marketplace (monedas, desactivado), referidos por actividad legítima |
-| **Monetización** | Anuncios recompensados/opcionales (sandbox con verificación en servidor, topes, espera, configuración remota, estadísticas), tienda, pase, patrocinios en carteles del mundo |
+| **Monetización** | Mediación de anuncios (Adsgram, Monetag, AdSense H5, sandbox) que elige la red por **eCPM real**, recompensados + interstitial opcional tras misión, callbacks S2S firmados; ofertas (pack de inicio, **VIP 30 días**, gemas, propina) con **Telegram Stars**; tienda, pase, patrocinios (carteles, pantalla de carga, diario) con clics/CTR; panel «💰 Monetización» con ranking de qué anuncios pagan más. Ver [MONETIZATION.md](MONETIZATION.md) |
+| **Telegram** | Mini App con login automático (initData verificado), bot con /start y botón de menú, referidos por `startapp`, botón Atrás, háptica, compartir |
 | **Seguridad** | scrypt, sesiones con hash, roles, zod, CSP, rate limiting, libro mayor idempotente, antifraude con puntuación y retención automática, auditoría |
 | **Admin** | Resumen y analíticas (DAU/WAU/MAU, retención, embudo, salud económica), jugadores (estado, fraude, saldo, rol), reportes, sospechas, canjes, transacciones, economía, tienda, misterios (subir JSON), temporadas y eventos, publicidad, patrocinios, marketplace, auditoría |
-| **Pruebas** | 24 pruebas Vitest (economía + integración HTTP/WebSocket con dos jugadores resolviendo el Ep. 1 en cooperación + recorridos completos del Ep. 2 y Ep. 4) + E2E con navegador real (Playwright) |
+| **Pruebas** | 33 pruebas Vitest (monetización, Telegram, economía + integración HTTP/WebSocket con dos jugadores resolviendo el Ep. 1 en cooperación + recorridos completos del Ep. 2 y Ep. 4) + E2E con navegador real (Playwright) |
 
 ## Requisitos
 
@@ -76,7 +77,7 @@ npm run create-admin -- <usuario_o_correo> moderator   # rol moderador
 ### Pruebas
 
 ```bash
-npm test            # 24 pruebas del servidor (economía, antifraude, multijugador, misterios)
+npm test            # 33 pruebas del servidor (economía, antifraude, multijugador, misterios)
 npm run typecheck   # TypeScript estricto en servidor y cliente
 npm run build && npm run e2e   # E2E con navegador: 2 jugadores (escritorio + móvil táctil)
 ```

@@ -4,6 +4,8 @@ import type { Game } from '../game/Game';
 import { api, idem, session } from '../net/api';
 import { store } from '../state';
 import { add, clear, dateTime, fmt, h, money } from './dom';
+import { type AdNetworkInfo, type AdResult, showAd } from '../ads/adapters';
+import { tg } from '../telegram';
 import type { Hud } from './hud';
 import { drawMap } from './map';
 
@@ -50,11 +52,26 @@ export class Panels {
     private onLogout: () => void,
   ) {}
 
+  private async refreshProfile() {
+    try {
+      store.profile = await api('GET', '/api/me');
+      store.emit('wallet');
+    } catch {
+      /* ignorar */
+    }
+  }
+
+  private isVip() {
+    return (store.profile?.vipUntil ?? 0) > Date.now();
+  }
+
   isOpen() {
     return !!this.backdrop;
   }
 
   close() {
+    tg.offBack(this.onBack);
+    tg.backButton(false);
     this.backdrop?.remove();
     this.backdrop = null;
     this.body = null;
@@ -95,8 +112,11 @@ export class Panels {
     this.backdrop = bd;
     this.body = body;
     this.game.paused = true;
+    tg.backButton(true, this.onBack);
     return body;
   }
+
+  private onBack = () => this.close();
 
   open(name: PanelName) {
     const keepTab = this.current === name;
@@ -184,6 +204,8 @@ export class Panels {
             ),
           );
         }
+        const sp = store.sponsors.find((c) => c.slot === 'journal_banner');
+        if (sp) body.append(sponsorBanner(sp));
         body.append(h('p', { class: 'small muted center' }, 'Nuevos episodios llegarán con cada temporada. Algunos misterios sólo se desbloquean al resolver otros.'));
       } else {
         if (!store.missions.clues.length) body.append(h('p', { class: 'muted' }, 'Aún no has encontrado pistas. Investiga los lugares marcados con un destello.'));
@@ -380,11 +402,12 @@ export class Panels {
         }
       });
     const renderInvite = () =>
-      this.load(body, () => api<{ code: string; rules: string; stats: Record<string, number>; enabled: boolean }>('GET', '/api/referrals'), (r) => {
-        const link = `${location.origin}/?ref=${r.code}`;
+      this.load(body, () => api<{ code: string; rules: string; stats: Record<string, number>; enabled: boolean; telegramLink: string | null }>('GET', '/api/referrals'), (r) => {
+        const link = r.telegramLink ?? `${location.origin}/?ref=${r.code}`;
         body.append(
-          h('p', null, 'Tu código de invitación:'),
+          h('p', null, 'Tu enlace de invitación:'),
           h('div', { class: 'row' }, h('input', { class: 'input', value: link, readonly: true }), h('button', { class: 'btn', onclick: () => navigator.clipboard?.writeText(link).then(() => this.hud.toast('success', 'Enlace copiado.')) }, 'Copiar')),
+          h('button', { class: 'btn primary block', style: 'margin-top:8px', onclick: () => tg.share(link, '🔍 Ayúdame a resolver un misterio en San Bartolo del Monte') }, tg.active ? 'Compartir en Telegram' : 'Compartir'),
           h('p', { class: 'small muted', style: 'line-height:1.5' }, r.rules),
           h('p', { class: 'small' }, `Pendientes: ${r.stats.pending ?? 0} · Recompensados: ${r.stats.rewarded ?? 0} · Rechazados: ${r.stats.rejected ?? 0}`),
         );
@@ -447,8 +470,8 @@ export class Panels {
 
   // ------------------------------------------------------------------ tienda
   private shop() {
-    const tab = this.tab.shop ?? 'coins';
-    const body = this.shell(TITLES.shop, [['coins', 'Monedas'], ['gems', 'Gemas'], ['free', 'Gratis (anuncios)'], ['market', 'Mercado']], 'shop');
+    const tab = this.tab.shop ?? 'offers';
+    const body = this.shell(TITLES.shop, [['offers', 'Ofertas'], ['coins', 'Monedas'], ['gems', 'Premium'], ['free', 'Gratis (anuncios)'], ['market', 'Mercado']], 'shop');
     const productCard = (p: any) =>
       h(
         'div',
@@ -465,6 +488,7 @@ export class Panels {
             try {
               await api('POST', '/api/store/buy', { sku: p.sku, idempotencyKey: idem() });
               this.game.audio.success();
+              tg.haptic('success');
               this.hud.toast('success', `Compraste: ${p.name}`);
               this.open('shop');
             } catch (err) {
@@ -474,46 +498,94 @@ export class Panels {
           },
         }, p.owned ? 'Ya lo tienes' : `${p.priceCurrency === 'coins' ? '🪙' : '💎'} ${fmt(p.price)}`),
       );
-    if (tab === 'coins' || tab === 'gems') {
+    if (tab === 'offers') {
+      this.load(body, () => api<any>('GET', `/api/offers?env=${tg.active ? 'telegram' : 'web'}`), (d) => {
+        const vip = d.vipUntil && d.vipUntil > Date.now();
+        add(
+          body,
+          vip
+            ? h('div', { class: 'card', style: 'border-color:var(--gold);margin-bottom:10px' },
+                h('div', { class: 'row' }, h('span', { class: 'name grow' }, '👑 Eres VIP'), h('span', { class: 'small muted' }, `hasta el ${new Date(d.vipUntil).toLocaleDateString('es-MX')}`)),
+                h('div', { class: 'desc' }, `Sin anuncios intersticiales · +${d.vipPerks.coinBonusPct}% monedas en misterios · cofre diario de ${d.vipPerks.dailyGems} gemas`),
+                h('button', {
+                  class: 'btn small primary',
+                  onclick: async () => {
+                    try {
+                      const r = await api<{ gems: number }>('POST', '/api/vip/daily');
+                      tg.haptic('success');
+                      this.hud.toast('success', `Cofre VIP: +${r.gems} gemas`);
+                    } catch (e) {
+                      this.hud.toast('warn', (e as Error).message);
+                    }
+                  },
+                }, 'Abrir cofre diario'))
+            : null,
+          !d.channels.stars && d.channels.sandbox
+            ? h('div', { class: 'notice-box', style: 'margin-bottom:10px' }, 'MODO SANDBOX: estas compras son simuladas y no cobran dinero. Dentro de Telegram (con Stars activado) se paga con Telegram Stars.')
+            : null,
+        );
+        const grid = h('div', { class: 'cards' });
+        for (const o of d.offers) {
+          const icon = { gems: '💎', vip: '👑', bundle: '🎁', tip: '❤️' }[o.kind as string] ?? '🛒';
+          const buy = async (btn: HTMLButtonElement) => {
+            btn.disabled = true;
+            try {
+              if (d.channels.stars) {
+                const inv = await api<{ invoiceLink: string; intentId: string }>('POST', '/api/offers/stars', { sku: o.sku });
+                const status = await tg.openInvoice(inv.invoiceLink);
+                if (status === 'paid') {
+                  tg.haptic('success');
+                  this.hud.toast('success', 'Pago recibido. Entregando tu compra…');
+                  // La entrega la confirma Telegram al servidor; esperamos a que se refleje.
+                  for (let i = 0; i < 10; i++) {
+                    const st = await api<{ status: string }>('GET', `/api/offers/intent/${inv.intentId}`);
+                    if (st.status === 'paid') break;
+                    await new Promise((r) => setTimeout(r, 1000));
+                  }
+                  await this.refreshProfile();
+                  this.open('shop');
+                } else if (status === 'failed') this.hud.toast('warn', 'El pago no se completó.');
+              } else if (d.channels.sandbox) {
+                await api('POST', '/api/offers/sandbox', { sku: o.sku });
+                this.game.audio.success();
+                await this.refreshProfile();
+                this.open('shop');
+              } else this.hud.toast('warn', 'No hay un método de pago disponible en esta plataforma.');
+            } catch (e) {
+              this.hud.toast('warn', (e as Error).message);
+            }
+            btn.disabled = false;
+          };
+          const price = d.channels.stars ? `⭐ ${fmt(o.priceStars)}` : `${money(o.priceCents)}${d.channels.sandbox ? ' · sandbox' : ''}`;
+          const btn = h('button', { class: 'btn small primary', disabled: o.owned }, o.owned ? 'Comprado' : price);
+          btn.addEventListener('click', () => void buy(btn));
+          grid.append(
+            h('div', { class: 'card', style: o.kind === 'vip' || o.kind === 'bundle' ? 'border-color:var(--gold)' : '' },
+              h('span', { class: 'name' }, `${icon} ${o.label}`),
+              o.oncePerUser ? h('span', { class: 'badge' }, 'Oferta única') : null,
+              h('div', { class: 'desc' }, o.description),
+              o.items.length ? h('div', { class: 'small' }, 'Incluye: ', o.items.map((i: any) => i.name).join(', ')) : null,
+              btn),
+          );
+        }
+        body.append(grid, h('p', { class: 'small muted' }, 'Las gemas y los beneficios son contenido digital del juego, sin valor monetario. Las compras se verifican en el servidor.'));
+      });
+    } else if (tab === 'coins' || tab === 'gems') {
       this.load(body, () => api<any>('GET', '/api/store'), (d) => {
         const list = d.products.filter((p: any) => p.priceCurrency === (tab === 'coins' ? 'coins' : 'gems'));
-        if (tab === 'gems') {
-          body.append(
-            h('div', { class: 'notice-box' }, d.paymentsSandbox ? 'MODO SANDBOX: las compras de gemas son simuladas y NO cobran dinero. En producción se integrará Google Play Billing / App Store / Stripe con verificación de recibos en el servidor.' : 'Las compras se verifican en el servidor.'),
-            h('h4', null, 'Paquetes de gemas'),
-          );
-          const packs = h('div', { class: 'cards' });
-          for (const g of d.gemPacks) {
-            packs.append(
-              h('div', { class: 'card' }, h('span', { class: 'name' }, `💎 ${g.gems} gemas`), h('div', { class: 'desc' }, g.label), d.paymentsSandbox ? h('span', { class: 'badge sandbox' }, 'Sandbox') : null, h('button', {
-                class: 'btn small primary',
-                disabled: !d.paymentsAvailable,
-                onclick: async () => {
-                  try {
-                    const r = await api<{ gems: number; sandbox: boolean }>('POST', '/api/store/gems', { sku: g.sku });
-                    this.hud.toast('success', `+${r.gems} gemas${r.sandbox ? ' (sandbox, sin cobro)' : ''}`);
-                  } catch (e) {
-                    this.hud.toast('warn', (e as Error).message);
-                  }
-                },
-              }, `${money(g.priceCents, g.currency)}${d.paymentsSandbox ? ' · simulado' : ''}`)),
-            );
-          }
-          body.append(packs, h('h4', null, 'Artículos premium'));
-          if (d.seasonPass) {
-            body.append(h('div', { class: 'card', style: 'margin-bottom:8px' }, h('span', { class: 'name' }, `Pase premium — ${d.seasonPass.name}`), h('div', { class: 'desc' }, 'Desbloquea la ruta premium del pase de temporada.'), h('button', { class: 'btn small', onclick: () => this.open('season') }, `Ver pase (💎 ${d.seasonPass.priceGems})`)));
-          }
+        if (tab === 'gems' && d.seasonPass) {
+          body.append(h('div', { class: 'card', style: 'margin-bottom:8px' }, h('span', { class: 'name' }, `Pase premium — ${d.seasonPass.name}`), h('div', { class: 'desc' }, 'Desbloquea la ruta premium del pase de temporada.'), h('button', { class: 'btn small', onclick: () => this.open('season') }, `Ver pase (💎 ${d.seasonPass.priceGems})`)));
         }
         const grid = h('div', { class: 'cards' });
         list.forEach((p: any) => grid.append(productCard(p)));
-        body.append(grid, h('p', { class: 'small muted' }, 'Las monedas se ganan jugando. Los puntos de recompensa nunca se usan en la tienda.'));
+        body.append(grid, h('p', { class: 'small muted' }, tab === 'gems' ? '¿Te faltan gemas? Mira la pestaña «Ofertas».' : 'Las monedas se ganan jugando. Los puntos de recompensa nunca se usan en la tienda.'));
       });
     } else if (tab === 'free') {
       this.load(body, () => api<any>('GET', '/api/ads'), (d) => {
         body.append(h('p', { class: 'small muted' }, 'Los anuncios son siempre opcionales. Hay un límite diario y un tiempo de espera entre anuncios.'));
         for (const p of d.placements.filter((x: any) => x.type === 'rewarded')) {
           body.append(
-            h('div', { class: 'card' }, h('div', { class: 'row' }, h('span', { class: 'name grow' }, p.name), p.sandbox ? h('span', { class: 'badge sandbox' }, 'Sandbox') : null), h('div', { class: 'desc' }, `Recompensa: 🪙 ${p.rewardCoins}${p.rewardRp ? ` + ✦ ${p.rewardRp}` : ''} · Vistos hoy: ${p.usedToday}/${p.dailyCap}${p.cooldownLeftSec ? ` · Disponible en ${p.cooldownLeftSec} s` : ''}`), h('button', { class: 'btn small primary', disabled: !p.available, onclick: () => this.watchAd(p.id, p.minWatchSec) }, p.available ? 'Ver anuncio' : 'No disponible')),
+            h('div', { class: 'card' }, h('div', { class: 'row' }, h('span', { class: 'name grow' }, p.name)), h('div', { class: 'desc' }, `Recompensa: 🪙 ${p.rewardCoins}${p.rewardRp ? ` + ✦ hasta ${p.rewardRp}` : ''} · Vistos hoy: ${p.usedToday}/${p.dailyCap}${p.cooldownLeftSec ? ` · Disponible en ${p.cooldownLeftSec} s` : ''}`), h('button', { class: 'btn small primary', disabled: !p.available, onclick: () => this.watchAd(p.id) }, p.available ? 'Ver anuncio' : 'No disponible')),
           );
         }
       });
@@ -546,47 +618,66 @@ export class Panels {
     }
   }
 
-  /** Anuncio recompensado: flujo con verificación en servidor (sandbox en el MVP). */
-  private async watchAd(placementId: string, minWatch: number) {
-    let start: { token: string; minWatchSec: number; sandbox: boolean };
+  /** Anuncio de prueba (sandbox): cuenta atrás visible y rotulada. */
+  private sandboxAd(secs: number): Promise<AdResult> {
+    return new Promise((resolve) => {
+      const count = h('div', { class: 'muted' }, `${secs}`);
+      const close = h('button', { class: 'btn', disabled: true }, 'Cerrar');
+      const skip = h('button', { class: 'btn ghost small' }, 'Saltar (sin recompensa)');
+      const overlay = h(
+        'div',
+        { class: 'ad-overlay' },
+        h('span', { class: 'badge sandbox' }, 'Anuncio de prueba (sandbox)'),
+        h('div', { class: 'ad-box' }, h('div', { class: 'serif', style: 'font-size:22px;color:#f0d9a4' }, 'Espacio publicitario'), h('div', { class: 'small muted' }, 'Aquí se mostrará un anuncio real de la red elegida por la mediación.'), count),
+        h('div', { class: 'row' }, skip, close),
+      );
+      this.root.append(overlay);
+      let left = secs;
+      const iv = setInterval(() => {
+        left--;
+        count.textContent = left > 0 ? `${left}` : 'Listo';
+        if (left <= 0) {
+          clearInterval(iv);
+          close.removeAttribute('disabled');
+        }
+      }, 1000);
+      close.addEventListener('click', () => (overlay.remove(), resolve('completed')));
+      skip.addEventListener('click', () => (clearInterval(iv), overlay.remove(), resolve('closed')));
+    });
+  }
+
+  /** Anuncio con mediación: el servidor elige la red; la recompensa la valida el servidor. */
+  async watchAd(placementId: string) {
+    let start: { token: string; format: 'rewarded' | 'interstitial'; minWatchSec: number; sandbox: boolean; network: AdNetworkInfo };
     try {
-      start = await api('POST', '/api/ads/start', { placementId });
+      start = await api('POST', '/api/ads/start', { placementId, env: tg.active ? 'telegram' : 'web' });
     } catch (e) {
       this.hud.toast('warn', (e as Error).message);
       return;
     }
-    const secs = Math.max(minWatch, start.minWatchSec);
-    const count = h('div', { class: 'muted' }, `${secs}`);
-    const close = h('button', { class: 'btn', disabled: true }, 'Cerrar');
-    const overlay = h(
-      'div',
-      { class: 'ad-overlay' },
-      h('span', { class: 'badge sandbox' }, 'Anuncio de prueba (sandbox)'),
-      h('div', { class: 'ad-box' }, h('div', { class: 'serif', style: 'font-size:22px;color:#f0d9a4' }, 'Espacio publicitario'), h('div', { class: 'small muted' }, 'Aquí se mostrará un anuncio real de la red configurada (p. ej. AdMob).'), count),
-      close,
-    );
-    this.root.append(overlay);
+    const wasPaused = this.game.paused;
     this.game.paused = true;
-    let left = secs;
-    const iv = setInterval(() => {
-      left--;
-      count.textContent = left > 0 ? `${left}` : 'Listo';
-      if (left <= 0) {
-        clearInterval(iv);
-        close.removeAttribute('disabled');
+    this.game.audio.volumes.master = 0;
+    this.game.audio.applyVolumes();
+    const result = await showAd(start.network, start.format, start.token, { sandboxUi: () => this.sandboxAd(Math.max(1, start.minWatchSec)), testMode: !!store.config?.sandbox });
+    this.game.audio.volumes.master = store.settings.master;
+    this.game.audio.applyVolumes();
+    this.game.paused = wasPaused || !!this.backdrop;
+    try {
+      let r = await api<{ status: string; coins: number; rp: number; note: string | null }>('POST', '/api/ads/complete', { token: start.token, result });
+      for (let i = 0; r.status === 'pending' && i < 12; i++) {
+        await new Promise((res) => setTimeout(res, 1000));
+        r = { ...r, ...(await api<{ status: string; coins: number; rp: number }>('GET', `/api/ads/status/${start.token}`)) };
       }
-    }, 1000);
-    close.addEventListener('click', async () => {
-      overlay.remove();
-      this.game.paused = !!this.backdrop;
-      try {
-        const r = await api<{ coins: number; rp: number; note: string | null }>('POST', '/api/ads/complete', { token: start.token });
+      if (r.status === 'completed' && (r.coins || r.rp)) {
+        tg.haptic('success');
         this.hud.toast('success', `¡Gracias! +${r.coins} monedas${r.rp ? ` y +${r.rp} puntos` : ''}.${r.note ? ' ' + r.note : ''}`);
-      } catch (e) {
-        this.hud.toast('warn', (e as Error).message);
-      }
-      if (this.current === 'shop') this.open('shop');
-    });
+      } else if (r.status === 'pending') this.hud.toast('info', 'La red aún no confirma el anuncio; la recompensa llegará al verificarse.');
+      else if (r.note) this.hud.toast('info', r.note);
+    } catch (e) {
+      this.hud.toast('warn', (e as Error).message);
+    }
+    if (this.current === 'shop') this.open('shop');
   }
 
   // ------------------------------------------------------------------ temporada
@@ -801,9 +892,18 @@ export class Panels {
       ...r.items.map((i) => h('div', { class: `card rarity-${i.rarity}`, style: 'margin-bottom:6px' }, h('span', { class: 'name' }, `Hallazgo: ${i.name}`), rarityBadge(i.rarity))),
       ...r.notes.map((n) => h('p', { class: 'small muted' }, n)),
       h('div', { class: 'row', style: 'margin-top:12px' },
-        h('button', { class: 'btn ghost', onclick: () => (this.close(), this.watchAd('optional_after_mission', 5)) }, 'Ver anuncio opcional (+10 🪙)'),
+        store.config?.interstitialAfterMission === 'optional' && !this.isVip()
+          ? h('button', { class: 'btn ghost', onclick: () => (this.close(), void this.watchAd('optional_after_mission')) }, 'Ver anuncio opcional (+10 🪙)')
+          : null,
         h('span', { class: 'grow' }),
-        h('button', { class: 'btn primary', onclick: () => this.close() }, 'Continuar'),
+        h('button', {
+          class: 'btn primary',
+          onclick: () => {
+            this.close();
+            // Pausa natural: intersticial automático sólo si el admin lo activó y el jugador no es VIP.
+            if (store.config?.interstitialAfterMission === 'auto' && !this.isVip()) void this.watchAd('optional_after_mission');
+          },
+        }, 'Continuar'),
       ),
     );
   }
@@ -814,4 +914,23 @@ export class Panels {
     this.root.append(bd);
     this.game.paused = true;
   }
+}
+
+/** Banner patrocinado (rotulado) con conteo de impresiones y clics en el servidor. */
+export function sponsorBanner(c: { id: string; sponsor: string; headline: string; subline: string; bg: string; fg: string; link: string | null }) {
+  void api('POST', `/api/sponsors/${c.id}/event`, { type: 'impression' }).catch(() => undefined);
+  const el = h(
+    'div',
+    { class: 'card', style: `background:${c.bg};color:${c.fg};border-color:transparent;margin:10px 0;cursor:${c.link ? 'pointer' : 'default'}` },
+    h('div', { class: 'row' }, h('span', { class: 'name grow', style: `color:${c.fg}` }, c.headline), h('span', { class: 'badge', style: `color:${c.fg};border-color:${c.fg}55` }, 'Patrocinado')),
+    c.subline ? h('div', { class: 'small', style: `color:${c.fg};opacity:.85` }, c.subline) : null,
+    h('div', { class: 'small', style: `color:${c.fg};opacity:.6` }, c.sponsor),
+  );
+  if (c.link) {
+    el.addEventListener('click', () => {
+      void api('POST', `/api/sponsors/${c.id}/event`, { type: 'click' }).catch(() => undefined);
+      tg.openLink(c.link!);
+    });
+  }
+  return el;
 }
