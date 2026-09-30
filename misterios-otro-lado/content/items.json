@@ -1,0 +1,23 @@
+{
+  "items": [
+    { "id": "linterna_basica", "name": "Linterna básica", "description": "Una linterna de mano fiable. Ilumina lo justo.", "rarity": "common", "category": "tool", "stackable": false, "tradeable": false, "equipSlot": "lantern" },
+    { "id": "linterna_potente", "name": "Linterna táctica", "description": "Haz amplio y más alcance. Ideal para túneles.", "rarity": "uncommon", "category": "tool", "stackable": false, "tradeable": true, "equipSlot": "lantern" },
+    { "id": "farol_antiguo", "name": "Farol de la capilla", "description": "Luz cálida y temblorosa. Dicen que ahuyenta a las ánimas.", "rarity": "epic", "category": "tool", "stackable": false, "tradeable": false, "equipSlot": "lantern" },
+    { "id": "lupa", "name": "Lupa de latón", "description": "Herramienta de investigación. (Uso futuro: revela pistas ocultas.)", "rarity": "common", "category": "tool", "stackable": false, "tradeable": true, "equipSlot": null },
+    { "id": "abrigo_detective", "name": "Gabardina de detective", "description": "Gabardina color arena. Clásica.", "rarity": "uncommon", "category": "cosmetic", "stackable": false, "tradeable": true, "equipSlot": "outfit" },
+    { "id": "abrigo_nocturno", "name": "Abrigo de medianoche", "description": "Negro azulado, casi invisible en la niebla.", "rarity": "rare", "category": "cosmetic", "stackable": false, "tradeable": true, "equipSlot": "outfit" },
+    { "id": "sombrero_fedora", "name": "Fedora gris", "description": "Para el investigador con estilo.", "rarity": "rare", "category": "cosmetic", "stackable": false, "tradeable": true, "equipSlot": "hat" },
+    { "id": "gorro_lana", "name": "Gorro de lana", "description": "Abriga en las noches de niebla.", "rarity": "common", "category": "cosmetic", "stackable": false, "tradeable": true, "equipSlot": "hat" },
+    { "id": "insignia_investigador", "name": "Insignia del Otro Lado", "description": "Sólo la portan quienes completaron la Temporada de los Ecos.", "rarity": "legendary", "category": "cosmetic", "stackable": false, "tradeable": false, "equipSlot": "hat" },
+    { "id": "bicicleta_oxidada", "name": "Bicicleta oxidada", "description": "Vehículo. (Conducción disponible en una próxima versión.)", "rarity": "rare", "category": "vehicle", "stackable": false, "tradeable": true, "equipSlot": null },
+    { "id": "calabaza_tallada", "name": "Calabaza tallada", "description": "Decoración de temporada para tu futuro refugio.", "rarity": "uncommon", "category": "decoration", "stackable": true, "tradeable": true, "equipSlot": null },
+    { "id": "fotografia_antigua", "name": "Fotografía antigua", "description": "La familia Morales frente a su casa. Hay algo escrito al reverso.", "rarity": "common", "category": "quest", "stackable": false, "tradeable": false, "equipSlot": null },
+    { "id": "llave_oxidada", "name": "Llave oxidada", "description": "Una llave de hierro con la letra E grabada.", "rarity": "uncommon", "category": "quest", "stackable": false, "tradeable": false, "equipSlot": null },
+    { "id": "colgante_plata", "name": "Colgante de plata de Lucía", "description": "Un colgante con una L grabada. Todavía está tibio.", "rarity": "rare", "category": "collectible", "stackable": false, "tradeable": false, "equipSlot": null },
+    { "id": "boton_antiguo", "name": "Botón de nácar", "description": "Un botón antiguo encontrado entre el polvo.", "rarity": "common", "category": "collectible", "stackable": true, "tradeable": true, "equipSlot": null },
+    { "id": "moneda_1920", "name": "Moneda de 1920", "description": "Una moneda de plata ennegrecida.", "rarity": "uncommon", "category": "collectible", "stackable": true, "tradeable": true, "equipSlot": null },
+    { "id": "medalla_militar", "name": "Medalla sin nombre", "description": "Nadie recuerda a quién perteneció.", "rarity": "rare", "category": "collectible", "stackable": false, "tradeable": true, "equipSlot": null },
+    { "id": "reloj_bolsillo", "name": "Reloj de bolsillo detenido", "description": "Marca siempre las 3:40.", "rarity": "epic", "category": "collectible", "stackable": false, "tradeable": true, "equipSlot": null },
+    { "id": "camafeo_morales", "name": "Camafeo de la familia Morales", "description": "Una pieza única. Su mirada te sigue.", "rarity": "legendary", "category": "collectible", "stackable": false, "tradeable": true, "equipSlot": null }
+  ]
+}

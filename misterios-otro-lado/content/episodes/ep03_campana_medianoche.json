@@ -1,0 +1,121 @@
+{
+  "id": "ep03_campana_medianoche",
+  "version": 1,
+  "order": 3,
+  "enabled": true,
+  "repeatable": false,
+  "title": "La campana que suena a medianoche",
+  "synopsis": "Misterio de temporada. Desde que abriste la trampilla de los Morales, la campana de la capilla vuelve a sonar de noche… sin que nadie tire de la cuerda.",
+  "seasonId": "t1_ecos",
+  "prerequisites": ["ep01_casa_abandonada"],
+  "availability": { "startsAt": "2026-09-01T00:00:00Z", "endsAt": "2026-12-31T23:59:59Z" },
+  "location": { "label": "Capilla de las Ánimas", "p": [-38, 0, -2] },
+  "start": {
+    "target": "aviso_capilla",
+    "objective": "Lee el aviso clavado en la puerta de la Capilla de las Ánimas.",
+    "hint": "La capilla está al oeste de la plaza."
+  },
+  "npcs": [],
+  "clues": [
+    {
+      "id": "aviso_capilla",
+      "title": "Aviso en la capilla",
+      "text": "«Por orden del párroco, la campana permanecerá atada. Si la oyes sonar de noche, no respondas a la voz que pregunta. Sólo los que conocen a los que se fueron pueden callarla.»",
+      "shareable": true
+    },
+    {
+      "id": "eco_campana",
+      "title": "El eco de la campana",
+      "text": "Al tirar de la cuerda, una voz lejana preguntó desde el bosque: «¿Cuántos se fueron aquella noche?»",
+      "shareable": true
+    }
+  ],
+  "entities": [
+    {
+      "id": "aviso_capilla",
+      "kind": "inspect",
+      "label": "Aviso clavado en la puerta",
+      "model": "notice",
+      "p": [-32.6, 0, -9],
+      "rotY": -1.5708,
+      "radius": 2.4,
+      "highlightWhen": [{ "status": "available" }]
+    },
+    {
+      "id": "cuerda_campana",
+      "kind": "puzzle",
+      "label": "Cuerda de la campana",
+      "model": "bell_rope",
+      "p": [-38, 0, 0.2],
+      "radius": 2.6,
+      "highlightWhen": [{ "stageIn": ["s_noche", "s_respuesta"] }]
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "voz_campana",
+      "entityId": "cuerda_campana",
+      "title": "La voz del bosque",
+      "prompt": "La campana vibra sola. Una voz pregunta desde la oscuridad: «¿Cuántos se fueron aquella noche?»",
+      "inputHint": "Un número",
+      "answers": ["4", "cuatro"],
+      "maxAttemptsPerMinute": 5,
+      "requires": [{ "stage": "s_respuesta" }, { "night": true }],
+      "onSolve": [
+        { "message": "La campana calla de golpe. Por un instante, cuatro luces pálidas brillan entre los árboles… y se apagan." },
+        { "complete": true }
+      ],
+      "coop": true
+    }
+  ],
+  "stages": [
+    { "id": "s_noche", "title": "Esperar la noche", "objective": "Tira de la cuerda de la campana cuando sea de noche (18:45 – 05:30).", "hint": "Mira el reloj del mundo en la esquina superior. La torre está junto a la capilla.", "marker": "cuerda_campana" },
+    { "id": "s_respuesta", "title": "Responder a la voz", "objective": "Responde a la voz que pregunta desde el bosque.", "hint": "¿Cuántas personas aparecen en la fotografía de los Morales?", "marker": "cuerda_campana" }
+  ],
+  "interactions": [
+    {
+      "target": "aviso_capilla",
+      "whenStatus": "available",
+      "do": [
+        { "start": true },
+        { "message": "Un papel amarillento, clavado con cuatro clavos oxidados." },
+        { "giveClue": "aviso_capilla" },
+        { "setStage": "s_noche" }
+      ]
+    },
+    {
+      "target": "aviso_capilla",
+      "whenStatus": "any",
+      "do": [{ "message": "«La campana permanecerá atada.» Alguien ha rasgado la esquina del aviso." }]
+    },
+    {
+      "target": "cuerda_campana",
+      "when": [{ "stage": "s_noche" }, { "night": true }],
+      "coop": true,
+      "do": [
+        { "message": "Tiras de la cuerda. La campana suena una sola vez… y el eco no termina." },
+        { "giveClue": "eco_campana" },
+        { "setStage": "s_respuesta" },
+        { "openPuzzle": "voz_campana" }
+      ]
+    },
+    {
+      "target": "cuerda_campana",
+      "when": [{ "stage": "s_respuesta" }, { "night": true }],
+      "do": [{ "openPuzzle": "voz_campana" }]
+    },
+    {
+      "target": "cuerda_campana",
+      "whenStatus": "any",
+      "do": [{ "message": "La cuerda está atada a un clavo. De día, la campana no responde." }]
+    }
+  ],
+  "rewards": {
+    "coins": 200,
+    "rp": 80,
+    "xp": 300,
+    "seasonXp": 500,
+    "items": [{ "itemId": "farol_antiguo", "qty": 1 }],
+    "dropTable": null
+  }
+}

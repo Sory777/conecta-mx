@@ -1,0 +1,21 @@
+{
+  "id": "t1_ecos",
+  "name": "Temporada 1: Ecos de San Bartolo",
+  "description": "Algo despertó bajo el pueblo. Nuevos misterios, cosméticos y el farol de la capilla.",
+  "startsAt": "2026-09-01T00:00:00Z",
+  "endsAt": "2026-12-31T23:59:59Z",
+  "premiumPriceGems": 200,
+  "tiers": [
+    { "tier": 1, "xp": 0,    "free": { "coins": 50 },  "premium": { "items": [{ "itemId": "gorro_lana", "qty": 1 }] } },
+    { "tier": 2, "xp": 200,  "free": { "coins": 75 },  "premium": { "coins": 150 } },
+    { "tier": 3, "xp": 450,  "free": { "items": [{ "itemId": "boton_antiguo", "qty": 2 }] }, "premium": { "items": [{ "itemId": "calabaza_tallada", "qty": 2 }] } },
+    { "tier": 4, "xp": 750,  "free": { "coins": 100 }, "premium": { "items": [{ "itemId": "abrigo_nocturno", "qty": 1 }] } },
+    { "tier": 5, "xp": 1100, "free": { "coins": 150 }, "premium": { "coins": 300 } },
+    { "tier": 6, "xp": 1500, "free": { "items": [{ "itemId": "moneda_1920", "qty": 1 }] }, "premium": { "items": [{ "itemId": "sombrero_fedora", "qty": 1 }] } },
+    { "tier": 7, "xp": 2000, "free": { "coins": 200 }, "premium": { "items": [{ "itemId": "insignia_investigador", "qty": 1 }] } }
+  ],
+  "events": [
+    { "id": "semana_investigador", "name": "Semana del Investigador", "description": "+25% de XP de temporada en todos los misterios.", "type": "multiplier", "startsAt": "2026-09-25T00:00:00Z", "endsAt": "2026-10-15T23:59:59Z", "config": { "seasonXpMult": 1.25 } },
+    { "id": "noche_animas", "name": "Noche de Ánimas", "description": "Niebla permanente y +50% de monedas en misterios.", "type": "multiplier", "startsAt": "2026-10-31T00:00:00Z", "endsAt": "2026-11-03T23:59:59Z", "config": { "coinMult": 1.5, "forceWeather": "fog" } }
+  ]
+}

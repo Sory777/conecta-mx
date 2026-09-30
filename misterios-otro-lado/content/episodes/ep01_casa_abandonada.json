@@ -1,0 +1,300 @@
+{
+  "id": "ep01_casa_abandonada",
+  "version": 1,
+  "order": 1,
+  "enabled": true,
+  "repeatable": true,
+  "title": "Los desaparecidos de la casa abandonada",
+  "synopsis": "Hace treinta años la familia Morales desapareció una noche de tormenta sin dejar rastro. Su casa en la colina sigue cerrada… pero anoche alguien vio una luz en la ventana del estudio.",
+  "seasonId": null,
+  "prerequisites": [],
+  "availability": { "startsAt": null, "endsAt": null },
+  "location": { "label": "Colina de los Morales", "p": [0, 3.5, -78] },
+  "start": {
+    "target": "don_aurelio",
+    "objective": "Habla con Don Aurelio en la plaza del pueblo.",
+    "hint": "Es el anciano sentado junto a la fuente. Acércate y pulsa Interactuar."
+  },
+  "npcs": [
+    {
+      "id": "don_aurelio",
+      "name": "Don Aurelio",
+      "p": [4.5, 0, 5.5],
+      "rotY": 0.686,
+      "appearance": { "skin": "#c49a74", "hair": "#d9d6cf", "coat": "#3f3a30", "pants": "#26241f", "hat": "gorro_lana" }
+    }
+  ],
+  "clues": [
+    {
+      "id": "foto_morales",
+      "title": "Fotografía de los Morales",
+      "text": "Cuatro personas posan frente a la casa de la colina: papá, mamá, Tomás y Lucía. Junto a ellos, el ángel de piedra del jardín. Al reverso, con letra infantil: «14 de marzo de 1994. El ángel guarda lo que abre la puerta del estudio. — L.»",
+      "shareable": true
+    },
+    {
+      "id": "diario_lucia",
+      "title": "Diario de Lucía",
+      "text": "«Papá cerró el sótano con un candado de cuatro números. Dijo que usaría la fecha de la foto: primero el día y luego el mes. Esta noche se oyen golpes bajo el suelo y la campana de la capilla sonó sola.»",
+      "shareable": true
+    },
+    {
+      "id": "carta_lucia",
+      "title": "La carta de Lucía",
+      "text": "«Si alguien encuentra esto: no desaparecimos. Nos fuimos por el túnel, hacia la vieja mina. Algo nos esperaba en el pueblo aquella noche. Papá dijo que la campana no debía volver a sonar. Guarda mi colgante. — Lucía»",
+      "shareable": true
+    }
+  ],
+  "entities": [
+    {
+      "id": "pozo_viejo",
+      "kind": "inspect",
+      "label": "Pozo viejo",
+      "model": "none",
+      "p": [30, 0, -28],
+      "radius": 3.0,
+      "highlightWhen": [{ "stage": "s_pozo" }]
+    },
+    {
+      "id": "angel_jardin",
+      "kind": "inspect",
+      "label": "Ángel de piedra",
+      "model": "none",
+      "p": [5, 3.5, -65],
+      "radius": 2.6,
+      "highlightWhen": [{ "stage": "s_angel" }]
+    },
+    {
+      "id": "puerta_estudio",
+      "kind": "door",
+      "label": "Puerta del estudio",
+      "model": "door",
+      "p": [-4, 3.5, -78],
+      "rotY": 0,
+      "radius": 2.4,
+      "blockSize": [2.0, 0.25],
+      "blockingWhen": [{ "notFlag": "study_unlocked" }],
+      "highlightWhen": [{ "stage": "s_puerta" }]
+    },
+    {
+      "id": "diario_lucia",
+      "kind": "inspect",
+      "label": "Escritorio con un diario",
+      "model": "desk_diary",
+      "p": [-6.6, 3.5, -81.5],
+      "rotY": 1.5708,
+      "radius": 2.2,
+      "highlightWhen": [{ "stage": "s_diario" }]
+    },
+    {
+      "id": "trampilla",
+      "kind": "puzzle",
+      "label": "Trampilla con candado",
+      "model": "hatch",
+      "p": [-3.2, 3.5, -82.2],
+      "radius": 2.0,
+      "highlightWhen": [{ "stage": "s_candado" }]
+    },
+    {
+      "id": "caja_colgante",
+      "kind": "pickup",
+      "label": "Caja de latón",
+      "model": "pendant_box",
+      "p": [181, 0, -97],
+      "radius": 2.2,
+      "visibleWhen": [{ "notFlag": "colgante_tomado" }],
+      "highlightWhen": [{ "stage": "s_tunel" }]
+    },
+    {
+      "id": "salida_tunel",
+      "kind": "exit",
+      "label": "Salida del túnel",
+      "model": "tunnel_exit",
+      "p": [152.5, 0, -95],
+      "radius": 2.6,
+      "highlightWhen": [{ "stage": "s_regreso" }]
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "candado_sotano",
+      "entityId": "trampilla",
+      "title": "Candado del sótano",
+      "prompt": "Un candado de cuatro ruedas numeradas, cubierto de óxido. Alguien grabó «DD-MM» junto a las ruedas.",
+      "inputHint": "4 dígitos",
+      "answers": ["1403"],
+      "maxAttemptsPerMinute": 6,
+      "requires": [{ "stage": "s_candado" }],
+      "onSolve": [
+        { "message": "¡Clic! El candado cede. Bajo la trampilla hay una escalera que se hunde en la oscuridad…" },
+        { "setFlag": "hatch_open" },
+        { "setStage": "s_tunel" },
+        { "teleport": [155.5, 0, -95], "rotY": -1.5708 }
+      ],
+      "coop": true
+    }
+  ],
+  "stages": [
+    { "id": "s_pozo", "title": "El pozo viejo", "objective": "Busca en el pozo viejo, al este del pueblo, donde Lucía dejaba mensajes.", "hint": "Sigue el camino que sale de la plaza hacia el este.", "marker": "pozo_viejo" },
+    { "id": "s_angel", "title": "El ángel del jardín", "objective": "Sube a la Casa Morales y examina el ángel de piedra del jardín.", "hint": "La fotografía dice que el ángel guarda algo. Toma el camino del norte, colina arriba.", "marker": "angel_jardin" },
+    { "id": "s_puerta", "title": "La puerta del estudio", "objective": "Entra en la casa y abre la puerta del estudio con la llave oxidada.", "hint": "El estudio está al fondo a la izquierda al entrar.", "marker": "puerta_estudio" },
+    { "id": "s_diario", "title": "El diario de Lucía", "objective": "Registra el escritorio del estudio.", "hint": "Hay un diario sobre el escritorio.", "marker": "diario_lucia" },
+    { "id": "s_candado", "title": "El candado", "objective": "Abre la trampilla del sótano. Necesitarás un código de 4 dígitos.", "hint": "Relee tus pistas: el diario explica cómo se formó el código y la fotografía tiene la fecha.", "marker": "trampilla" },
+    { "id": "s_tunel", "title": "El túnel", "objective": "Explora el túnel y descubre qué dejaron los Morales.", "hint": "Usa la linterna (tecla F). Al fondo del túnel brilla algo.", "marker": "caja_colgante" },
+    { "id": "s_regreso", "title": "La verdad", "objective": "Sal del túnel y cuéntale a Don Aurelio lo que descubriste.", "hint": "La salida está junto a la escalera por la que bajaste. Don Aurelio sigue en la plaza.", "marker": "don_aurelio" }
+  ],
+  "interactions": [
+    {
+      "target": "don_aurelio",
+      "whenStatus": "available",
+      "do": [
+        { "start": true },
+        {
+          "dialogue": [
+            { "speaker": "Don Aurelio", "text": "Así que tú también viste la luz en la colina… Hacía treinta años que nadie se atrevía a mirar hacia allá." },
+            { "speaker": "Don Aurelio", "text": "Los Morales se esfumaron una noche de tormenta: el padre, la madre, Tomás y la pequeña Lucía. La policía nunca encontró nada." },
+            { "speaker": "Don Aurelio", "text": "Lucía dejaba mensajes escondidos en el pozo viejo, al este del pueblo. Si quieres respuestas, empieza por ahí." }
+          ]
+        },
+        { "setStage": "s_pozo" }
+      ]
+    },
+    {
+      "target": "don_aurelio",
+      "when": [{ "stageIn": ["s_pozo", "s_angel", "s_puerta", "s_diario", "s_candado", "s_tunel"] }],
+      "do": [{ "dialogue": [{ "speaker": "Don Aurelio", "text": "Sigue buscando. Y no dejes que la niebla te confunda: en este pueblo los caminos cambian de noche." }] }]
+    },
+    {
+      "target": "don_aurelio",
+      "when": [{ "stage": "s_regreso" }],
+      "coop": true,
+      "do": [
+        {
+          "dialogue": [
+            { "speaker": "Don Aurelio", "text": "¿El colgante de Lucía…? ¿Y una carta? Entonces no murieron aquella noche… huyeron hacia la mina." },
+            { "speaker": "Don Aurelio", "text": "«La campana no debía volver a sonar»… Y sin embargo, anoche la oí. Gracias, investigador. Esto apenas comienza." }
+          ]
+        },
+        { "complete": true }
+      ]
+    },
+    {
+      "target": "don_aurelio",
+      "whenStatus": "completed",
+      "do": [{ "dialogue": [{ "speaker": "Don Aurelio", "text": "Nadie baja a la vieja mina desde hace décadas. Dicen que está tapiada… pero yo que tú, escucharía la campana de la capilla a medianoche." }] }]
+    },
+    {
+      "target": "pozo_viejo",
+      "when": [{ "stage": "s_pozo" }],
+      "coop": true,
+      "do": [
+        { "message": "Entre las piedras sueltas del brocal encuentras una lata oxidada. Dentro hay una fotografía." },
+        { "giveItem": "fotografia_antigua" },
+        { "giveClue": "foto_morales" },
+        { "setStage": "s_angel" }
+      ]
+    },
+    {
+      "target": "pozo_viejo",
+      "whenStatus": "any",
+      "do": [{ "message": "El agua del fondo está negra y quieta. Por un momento te parece oír un murmullo." }]
+    },
+    {
+      "target": "angel_jardin",
+      "when": [{ "stage": "s_angel" }],
+      "coop": true,
+      "do": [
+        { "message": "Bajo el pedestal del ángel, envuelta en un trapo, hay una llave de hierro con una «E» grabada." },
+        { "giveItem": "llave_oxidada" },
+        { "setStage": "s_puerta" }
+      ]
+    },
+    {
+      "target": "angel_jardin",
+      "whenStatus": "any",
+      "do": [{ "message": "Un ángel de piedra cubierto de líquenes. Sus ojos parecen seguirte." }]
+    },
+    {
+      "target": "puerta_estudio",
+      "when": [{ "notFlag": "study_unlocked" }, { "hasItem": "llave_oxidada" }],
+      "coop": true,
+      "do": [
+        { "message": "La llave gira con un chirrido. La puerta del estudio se abre despacio." },
+        { "takeItem": "llave_oxidada" },
+        { "setFlag": "study_unlocked" },
+        { "setStage": "s_diario" }
+      ]
+    },
+    {
+      "target": "puerta_estudio",
+      "whenStatus": "any",
+      "when": [{ "notFlag": "study_unlocked" }],
+      "do": [{ "message": "Cerrada con llave. En la placa de la cerradura hay una «E» grabada." }]
+    },
+    {
+      "target": "puerta_estudio",
+      "whenStatus": "any",
+      "do": [{ "message": "La puerta del estudio está abierta." }]
+    },
+    {
+      "target": "diario_lucia",
+      "when": [{ "stage": "s_diario" }],
+      "coop": true,
+      "do": [
+        { "message": "Sobre el escritorio hay un diario infantil. Las últimas páginas están escritas con prisa." },
+        { "giveClue": "diario_lucia" },
+        { "setStage": "s_candado" }
+      ]
+    },
+    {
+      "target": "diario_lucia",
+      "whenStatus": "any",
+      "do": [{ "message": "Un escritorio polvoriento. Los cajones están vacíos." }]
+    },
+    {
+      "target": "trampilla",
+      "whenStatus": "any",
+      "when": [{ "flag": "hatch_open" }],
+      "do": [
+        { "message": "Bajas por la escalera hacia el túnel…" },
+        { "teleport": [155.5, 0, -95], "rotY": -1.5708 }
+      ]
+    },
+    {
+      "target": "trampilla",
+      "when": [{ "stage": "s_candado" }],
+      "do": [{ "openPuzzle": "candado_sotano" }]
+    },
+    {
+      "target": "trampilla",
+      "whenStatus": "any",
+      "do": [{ "message": "Una trampilla de madera en el suelo, cerrada con un candado de cuatro números." }]
+    },
+    {
+      "target": "caja_colgante",
+      "when": [{ "notFlag": "colgante_tomado" }],
+      "do": [
+        { "message": "Dentro de la caja hay un colgante de plata y una carta doblada con cuidado." },
+        { "giveItem": "colgante_plata" },
+        { "giveClue": "carta_lucia" },
+        { "setFlag": "colgante_tomado" },
+        { "setStage": "s_regreso" }
+      ]
+    },
+    {
+      "target": "salida_tunel",
+      "whenStatus": "any",
+      "do": [
+        { "message": "Subes por un pasadizo estrecho y sales a la ladera, detrás de la casa." },
+        { "teleport": [7, 3.5, -89.5], "rotY": 3.1416 }
+      ]
+    }
+  ],
+  "rewards": {
+    "coins": 250,
+    "rp": 150,
+    "xp": 400,
+    "seasonXp": 350,
+    "items": [],
+    "dropTable": "episode_complete"
+  }
+}

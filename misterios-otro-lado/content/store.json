@@ -1,0 +1,17 @@
+{
+  "products": [
+    { "sku": "linterna_potente", "name": "Linterna táctica", "description": "Más alcance y un haz más ancho.", "category": "herramientas", "itemId": "linterna_potente", "priceCurrency": "coins", "price": 300 },
+    { "sku": "lupa", "name": "Lupa de latón", "description": "Herramienta de investigación.", "category": "herramientas", "itemId": "lupa", "priceCurrency": "coins", "price": 150 },
+    { "sku": "gorro_lana", "name": "Gorro de lana", "description": "Cosmético.", "category": "ropa", "itemId": "gorro_lana", "priceCurrency": "coins", "price": 120 },
+    { "sku": "abrigo_detective", "name": "Gabardina de detective", "description": "Cosmético.", "category": "ropa", "itemId": "abrigo_detective", "priceCurrency": "coins", "price": 500 },
+    { "sku": "bicicleta_oxidada", "name": "Bicicleta oxidada", "description": "Vehículo (próximamente conducible).", "category": "vehiculos", "itemId": "bicicleta_oxidada", "priceCurrency": "coins", "price": 2000 },
+    { "sku": "calabaza_tallada", "name": "Calabaza tallada", "description": "Decoración de temporada.", "category": "decoracion", "itemId": "calabaza_tallada", "priceCurrency": "coins", "price": 80, "seasonId": "t1_ecos" },
+    { "sku": "sombrero_fedora", "name": "Fedora gris", "description": "Cosmético premium.", "category": "ropa", "itemId": "sombrero_fedora", "priceCurrency": "gems", "price": 60 },
+    { "sku": "abrigo_nocturno", "name": "Abrigo de medianoche", "description": "Cosmético premium.", "category": "ropa", "itemId": "abrigo_nocturno", "priceCurrency": "gems", "price": 90 }
+  ],
+  "gemPacks": [
+    { "sku": "gems_100", "gems": 100, "priceCents": 99, "currency": "USD", "label": "Bolsa de gemas" },
+    { "sku": "gems_550", "gems": 550, "priceCents": 499, "currency": "USD", "label": "Cofre de gemas" },
+    { "sku": "gems_1200", "gems": 1200, "priceCents": 999, "currency": "USD", "label": "Baúl de gemas" }
+  ]
+}
