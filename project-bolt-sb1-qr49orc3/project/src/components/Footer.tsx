@@ -1,5 +1,5 @@
 import { Logo } from './Logo';
-import { Store, Briefcase, QrCode, Shield, Heart, Calendar, HelpCircle } from 'lucide-react';
+import { Store, Briefcase, QrCode, Shield, Heart, Calendar, HelpCircle, Megaphone } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (route: string) => void;
@@ -23,6 +23,7 @@ export function Footer({ onNavigate }: FooterProps) {
               <li><button onClick={() => onNavigate('jobs')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Briefcase className="h-4 w-4" /> Bolsa de Empleo</button></li>
               <li><button onClick={() => onNavigate('events')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Calendar className="h-4 w-4" /> Eventos</button></li>
               <li><button onClick={() => onNavigate('qr')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><QrCode className="h-4 w-4" /> Códigos QR</button></li>
+              <li><button onClick={() => onNavigate('anuncios')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Megaphone className="h-4 w-4" /> Crear anuncios</button></li>
               <li><button onClick={() => onNavigate('plans')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><Shield className="h-4 w-4" /> Planes</button></li>
               <li><button onClick={() => onNavigate('faq')} className="inline-flex items-center gap-1.5 hover:text-[#9C6F0A]"><HelpCircle className="h-4 w-4" /> Preguntas frecuentes</button></li>
             </ul>

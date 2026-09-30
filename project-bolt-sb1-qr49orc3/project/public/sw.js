@@ -54,3 +54,21 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
+// Tapping a post reminder ("¡Es hora de publicar tu anuncio!") opens the
+// post studio, reusing an open tab when there is one.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      for (const win of wins) {
+        if ('focus' in win) {
+          win.navigate(target).catch(() => {});
+          return win.focus();
+        }
+      }
+      return self.clients.openWindow(target);
+    })
+  );
+});

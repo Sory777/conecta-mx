@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -64,6 +64,21 @@ body {
   }
   .chip {
     @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium;
+  }
+
+  /* Post studio (warm café palette: cream, espresso and gold) */
+  .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+  .studio-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0;
+    background: linear-gradient(135deg, #5A3A22 0%, #8B5E34 55%, #B8892B 100%);
+  }
+  .studio-btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-[#E5D8C4] bg-white px-5 py-3 font-semibold text-[#5A3A22] transition-all duration-200 hover:border-[#B8892B] hover:text-[#8B5E34] disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#3A2C22] dark:bg-[#241B15] dark:text-[#E6D5BF];
+  }
+  .studio-input {
+    @apply w-full rounded-xl border-2 border-[#EFE4D3] bg-white px-3 py-2.5 text-base text-[#2A211B] outline-none transition focus:border-[#B8892B] focus:ring-4 focus:ring-[#B8892B]/15 dark:border-[#3A2C22] dark:bg-[#241B15] dark:text-[#F7F1E8];
   }
 }
 

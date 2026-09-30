@@ -21,6 +21,8 @@ import { InstallBanner } from './components/InstallBanner';
 import { AdGate } from './components/AdGate';
 import { LegalPage } from './pages/LegalPage';
 import { FAQPage } from './pages/FAQPage';
+import { PostStudioPage } from './pages/PostStudioPage';
+import { checkDuePosts } from './lib/postScheduler';
 
 type Route =
   | { name: 'home' }
@@ -36,7 +38,8 @@ type Route =
   | { name: 'plans' }
   | { name: 'terms' }
   | { name: 'privacy' }
-  | { name: 'faq' };
+  | { name: 'faq' }
+  | { name: 'anuncios' };
 
 function parseHash(): Route {
   const raw = window.location.hash.replace(/^#\/?/, '');
@@ -77,6 +80,8 @@ function parseHash(): Route {
       return { name: 'privacy' };
     case 'faq':
       return { name: 'faq' };
+    case 'anuncios':
+      return { name: 'anuncios' };
     default:
       return { name: 'home' };
   }
@@ -95,7 +100,7 @@ function setHash(route: Route, params?: Record<string, string>) {
   const map: Record<string, string> = {
     home: '', directory: '/directory', register: '/register', login: '/login', dashboard: '/dashboard',
     jobs: '/jobs', events: '/events', qr: '/qr', admin: '/admin', plans: '/plans',
-    terms: '/terms', privacy: '/privacy', faq: '/faq',
+    terms: '/terms', privacy: '/privacy', faq: '/faq', anuncios: '/anuncios',
   };
   if (route.name === 'business') {
     window.location.hash = `#/business/${route.id}`;
@@ -224,6 +229,19 @@ function AppInner() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
+
+  // Scheduled posts: whatever page is open, alert the owner when one is due.
+  useEffect(() => {
+    const check = () => {
+      checkDuePosts().then((due) => {
+        if (due.length) toast('📣 ¡Es hora de publicar tu anuncio! Ve a "Anuncios".', 'info');
+      }).catch(() => {});
+    };
+    check();
+    const id = window.setInterval(check, 30 * 1000);
+    document.addEventListener('visibilitychange', check);
+    return () => { window.clearInterval(id); document.removeEventListener('visibilitychange', check); };
+  }, [toast]);
 
   useEffect(() => {
     const onHash = () => {
@@ -356,6 +374,7 @@ function AppInner() {
         {route.name === 'terms' && <LegalPage initialTab="terms" />}
         {route.name === 'privacy' && <LegalPage initialTab="privacy" />}
         {route.name === 'faq' && <FAQPage onNavigate={navigate} />}
+        {route.name === 'anuncios' && <PostStudioPage />}
       </main>
       <Footer onNavigate={navigate} />
       <InstallBanner />
