@@ -19,17 +19,29 @@ export interface GameServer {
   stop(): Promise<void>;
 }
 
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "connect-src 'self' ws: wss:",
-  "font-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "frame-ancestors 'none'",
-].join('; ');
+/**
+ * CSP dinámica:
+ *  - Estricta por defecto (sólo recursos propios).
+ *  - Con Telegram: permite el SDK oficial (telegram.org) y que Telegram Web incruste el juego (frame-ancestors).
+ *  - Con una red de anuncios real activa: los SDK de anuncios cargan scripts, iframes e imágenes de muchos
+ *    dominios, así que se relaja a https: (documentado en SECURITY.md). El chat y los textos siguen pintándose
+ *    siempre con textContent.
+ */
+function buildCsp(opts: { telegram: boolean; ads: boolean }) {
+  const script = ["'self'", opts.telegram ? 'https://telegram.org' : '', opts.ads ? "https: 'unsafe-inline'" : ''].filter(Boolean).join(' ');
+  return [
+    "default-src 'self'",
+    `script-src ${script}`,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob:${opts.ads ? ' https:' : ''}`,
+    `connect-src 'self' ws: wss:${opts.ads ? ' https:' : ''}`,
+    `frame-src ${opts.ads ? 'https:' : "'self'"}`,
+    "font-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    `frame-ancestors ${opts.telegram ? "'self' https://web.telegram.org https://*.telegram.org" : "'none'"}`,
+  ].join('; ');
+}
 
 export async function buildServer(config: AppConfig): Promise<GameServer> {
   const services = createServices(config);
@@ -59,14 +71,23 @@ export async function buildServer(config: AppConfig): Promise<GameServer> {
   });
 
   // ---------------- cabeceras de seguridad
+  const telegramOn = !!config.TELEGRAM_BOT_TOKEN;
+  let cspCache = { at: 0, value: '' };
+  const csp = () => {
+    if (Date.now() - cspCache.at > 30_000) {
+      const ads = !!services.db.get("SELECT 1 FROM ad_networks WHERE enabled = 1 AND kind <> 'sandbox' LIMIT 1");
+      cspCache = { at: Date.now(), value: buildCsp({ telegram: telegramOn, ads }) };
+    }
+    return cspCache.value;
+  };
   app.addHook('onSend', async (req, reply, payload) => {
     reply.header('X-Content-Type-Options', 'nosniff');
-    reply.header('Referrer-Policy', 'no-referrer');
-    reply.header('X-Frame-Options', 'DENY');
+    reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+    if (!telegramOn) reply.header('X-Frame-Options', 'DENY');
     reply.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    reply.header('Cross-Origin-Opener-Policy', 'same-origin');
+    reply.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
     if (req.url.startsWith('/api/')) reply.header('Cache-Control', 'no-store');
-    else reply.header('Content-Security-Policy', CSP);
+    else reply.header('Content-Security-Policy', csp());
     return payload;
   });
 
@@ -114,9 +135,11 @@ export async function buildServer(config: AppConfig): Promise<GameServer> {
     gateway: gw,
     async start() {
       const addr = await app.listen({ host: config.HOST, port: config.PORT });
+      void services.telegram.start();
       return addr;
     },
     async stop() {
+      services.telegram.stop();
       gw.stop();
       await app.close();
       services.db.close();

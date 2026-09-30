@@ -22,7 +22,10 @@ import { SeasonService } from './modules/seasons/service';
 import { SocialService } from './modules/social/service';
 import { SponsorService } from './modules/sponsors/service';
 import { SandboxPaymentProvider } from './modules/store/payments';
+import { OffersService } from './modules/store/offers';
 import { StoreService } from './modules/store/service';
+import { TelegramService } from './modules/telegram/service';
+import { MonetizationService } from './modules/monetization/service';
 
 export type Services = ReturnType<typeof createServices>;
 
@@ -53,8 +56,14 @@ export function createServices(config: AppConfig, opts: { log?: Logger } = {}) {
   const payments = config.PAYMENT_PROVIDER === 'sandbox' ? new SandboxPaymentProvider() : null;
   const store = new StoreService(db, log, catalog, inventory, economy, seasons, analytics, payments);
   store.loadFromFile(path.join(config.CONTENT_DIR, 'store.json'));
-  const ads = new AdsService(db, config, ecoCfg, economy, rewards, antifraud, analytics);
+  const offers = new OffersService(db, config, bus, log, economy, ecoCfg, catalog, analytics);
+  offers.loadDefaults(store.offersToLoad);
+  const telegram = new TelegramService(db, config, log);
+  telegram.offers = offers;
+  offers.stars = telegram;
+  const ads = new AdsService(db, config, bus, ecoCfg, economy, rewards, antifraud, analytics, (uid) => offers.isVip(uid));
   ads.seed();
+  const monetization = new MonetizationService(db);
   const social = new SocialService(db);
   const marketplace = new MarketplaceService(db, ecoCfg, economy, catalog, antifraud, social, analytics);
   const sponsors = new SponsorService(db);
@@ -78,6 +87,9 @@ export function createServices(config: AppConfig, opts: { log?: Logger } = {}) {
     missions,
     store,
     ads,
+    offers,
+    telegram,
+    monetization,
     social,
     marketplace,
     sponsors,

@@ -13,6 +13,7 @@ import type { AntiFraudService } from '../antifraud/service';
 import type { EconomyConfigService } from '../economy/config';
 import type { Economy } from '../economy/ledger';
 import type { ReferralService } from '../referrals/service';
+import type { VerifiedInitData } from '../telegram/initData';
 import type { Mailer } from './mailer';
 import { DUMMY_HASH, hashPassword, verifyPassword } from './password';
 
@@ -66,7 +67,6 @@ export class AuthService {
     const passwordHash = await hashPassword(input.password);
     const id = newId();
     const now = clock.now();
-    const eco = this.ecoCfg.get();
     const verifyToken = randomToken();
     this.db.tx(() => {
       let code = referralCode();
@@ -82,27 +82,7 @@ export class AuthService {
         code,
         now,
       );
-      this.economy.ensureWallets(id);
-      this.economy.apply({
-        userId: id,
-        type: 'starter',
-        idempotencyKey: `starter:${id}`,
-        currency: eco.starter.coins > 0 ? [{ code: 'coins', delta: eco.starter.coins, reason: 'starter_pack' }] : [],
-        grantItems: eco.starter.items.map((itemId) => ({ itemId, qty: 1 })),
-        source: 'starter',
-      });
-      this.antifraud.registerDevice(id, input.deviceId, ip);
-      this.db.run(
-        'INSERT INTO audit_log(id, actor_id, action, target_type, target_id, details, ip, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        newId(),
-        id,
-        'register',
-        'user',
-        id,
-        json.str({ ua: ua.slice(0, 200) }),
-        ip,
-        now,
-      );
+      this.initAccount(id, input.deviceId, ip, ua, 'register');
       this.db.run(
         'INSERT INTO email_verifications(id, user_id, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?, ?)',
         newId(),
@@ -140,6 +120,95 @@ export class AuthService {
     this.db.run('UPDATE users SET last_login_at = ? WHERE id = ?', clock.now(), u.id);
     this.analytics.track('login', u.id, {});
     return this.createSession(u.id, input.deviceId, ip, ua);
+  }
+
+  /** Billetera, kit inicial, dispositivo y auditoría de una cuenta nueva (dentro de una transacción). */
+  private initAccount(id: string, deviceId: string, ip: string, ua: string, action: string) {
+    const eco = this.ecoCfg.get();
+    const now = clock.now();
+    this.economy.ensureWallets(id);
+    this.economy.apply({
+      userId: id,
+      type: 'starter',
+      idempotencyKey: `starter:${id}`,
+      currency: eco.starter.coins > 0 ? [{ code: 'coins', delta: eco.starter.coins, reason: 'starter_pack' }] : [],
+      grantItems: eco.starter.items.map((itemId) => ({ itemId, qty: 1 })),
+      source: 'starter',
+    });
+    this.antifraud.registerDevice(id, deviceId, ip);
+    this.db.run(
+      'INSERT INTO audit_log(id, actor_id, action, target_type, target_id, details, ip, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      newId(),
+      id,
+      action,
+      'user',
+      id,
+      json.str({ ua: ua.slice(0, 200) }),
+      ip,
+      now,
+    );
+  }
+
+  /**
+   * Acceso desde una Telegram Mini App. `tg` ya fue verificado criptográficamente (initData).
+   * Crea la cuenta la primera vez (una cuenta de Telegram = una cuenta de juego).
+   */
+  async loginWithTelegram(tg: VerifiedInitData, input: { deviceId: string; referralCode?: string | null }, ip: string, ua: string) {
+    const tgId = String(tg.user.id);
+    const now = clock.now();
+    const link = this.db.get<{ user_id: string }>('SELECT user_id FROM telegram_accounts WHERE telegram_id = ?', tgId);
+    let userId = link?.user_id;
+    let created = false;
+    if (!userId) {
+      const maxPerIp = this.ecoCfg.get().antifraud.maxRegistrationsPerIpPerDay;
+      if (this.antifraud.registrationsFromIp(ip) >= maxPerIp) throw tooMany('Se han creado demasiadas cuentas desde esta red hoy.');
+      const base = (tg.user.username ?? `tg${tgId}`).replace(/[^A-Za-z0-9_]/g, '').slice(0, 16) || `tg${tgId}`.slice(0, 16);
+      let username = base.length >= 3 ? base : `tg_${base}`;
+      for (let i = 2; this.db.get('SELECT 1 FROM users WHERE username = ? COLLATE NOCASE', username); i++) username = `${base.slice(0, 16)}_${i}`;
+      const passwordHash = await hashPassword(randomToken(24)); // inutilizable: se entra sólo por Telegram
+      const id = newId();
+      this.db.tx(() => {
+        let code = referralCode();
+        while (this.db.get('SELECT 1 FROM users WHERE referral_code = ?', code)) code = referralCode();
+        // La identidad la verifica Telegram; el correo es un marcador interno no entregable.
+        this.db.run(
+          'INSERT INTO users(id, email, username, password_hash, role, status, email_verified, referral_code, created_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)',
+          id,
+          `tg${tgId}@telegram.invalid`,
+          username,
+          passwordHash,
+          'player',
+          'active',
+          code,
+          now,
+        );
+        this.db.run(
+          'INSERT INTO telegram_accounts(telegram_id, user_id, username, first_name, language_code, is_premium, created_at, last_seen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          tgId,
+          id,
+          tg.user.username ?? null,
+          tg.user.first_name?.slice(0, 64) ?? null,
+          tg.user.language_code ?? null,
+          tg.user.is_premium ? 1 : 0,
+          now,
+          now,
+        );
+        this.initAccount(id, input.deviceId, ip, ua, 'register');
+        const ref = (input.referralCode ?? tg.startParam ?? '').trim().toUpperCase();
+        if (/^[A-Z0-9]{6,12}$/.test(ref)) this.referrals.attach(id, ref, ip);
+      });
+      userId = id;
+      created = true;
+      this.analytics.track('user_registered', id, { via: 'telegram', referred: !!(input.referralCode ?? tg.startParam) });
+    } else {
+      const u = this.db.get<{ status: string; status_reason: string | null }>('SELECT status, status_reason FROM users WHERE id = ?', userId)!;
+      if (u.status !== 'active') throw forbidden(`Cuenta ${u.status === 'banned' ? 'bloqueada' : 'suspendida'}${u.status_reason ? ': ' + u.status_reason : ''}.`);
+      this.db.run('UPDATE telegram_accounts SET last_seen = ?, username = ?, is_premium = ? WHERE telegram_id = ?', now, tg.user.username ?? null, tg.user.is_premium ? 1 : 0, tgId);
+      this.antifraud.registerDevice(userId, input.deviceId, ip);
+      this.db.run('UPDATE users SET last_login_at = ? WHERE id = ?', now, userId);
+      this.analytics.track('login', userId, { via: 'telegram' });
+    }
+    return { ...this.createSession(userId, input.deviceId, ip, ua), created, firstName: tg.user.first_name ?? null };
   }
 
   private createSession(userId: string, deviceId: string, ip: string, ua: string) {

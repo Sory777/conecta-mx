@@ -46,6 +46,23 @@ export const EconomySchema = z.object({
     enabled: z.boolean(),
     /** Estimación de ingreso por cada 1000 anuncios recompensados completados (centavos). */
     estimatedEcpmUsdCents: int(0, 100_000),
+    /** Mediación: 'best_ecpm' elige la red que más paga (con exploración); 'weighted' reparte por peso. */
+    strategy: z.enum(['best_ecpm', 'weighted']),
+    /** % de solicitudes que prueban otras redes para seguir midiendo su eCPM. */
+    explorePct: z.number().min(0).max(100),
+    /** Intersticial al terminar un misterio (pausa natural): desactivado, opcional (botón) o automático. */
+    interstitialAfterMission: z.enum(['off', 'optional', 'auto']),
+    /** Redes sin verificación en servidor sólo pagan monedas (nunca puntos de recompensa). */
+    unverifiedCoinsOnly: z.boolean(),
+  }),
+  vip: z.object({
+    coinBonusPct: pct,
+    dailyGems: int(0, 1000),
+    noInterstitials: z.boolean(),
+  }),
+  telegram: z.object({
+    /** Valor neto estimado de 1 Telegram Star para el desarrollador, en centavos de USD. Verifica la tasa vigente. */
+    starUsdCents: z.number().min(0).max(100),
   }),
   marketplace: z.object({
     enabled: z.boolean(),
@@ -98,7 +115,9 @@ export const DEFAULT_ECONOMY: EconomyConfig = {
     minCompletedMissions: 1,
     rewardTypes: ['tarjeta_regalo'],
   },
-  ads: { enabled: true, estimatedEcpmUsdCents: 600 },
+  ads: { enabled: true, estimatedEcpmUsdCents: 600, strategy: 'best_ecpm', explorePct: 10, interstitialAfterMission: 'optional', unverifiedCoinsOnly: true },
+  vip: { coinBonusPct: 10, dailyGems: 10, noInterstitials: true },
+  telegram: { starUsdCents: 1.3 },
   marketplace: {
     enabled: false,
     commissionPct: 10,

@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { z } from 'zod';
 import type { Db } from '../../db/database';
-import { clock, DAY_MS } from '../../lib/clock';
-import { badRequest, forbidden, notFound, tooMany } from '../../lib/errors';
+import { clock } from '../../lib/clock';
+import { badRequest, notFound } from '../../lib/errors';
 import { newId } from '../../lib/ids';
 import type { Logger } from '../../lib/logger';
 import type { AnalyticsService } from '../analytics/service';
@@ -10,6 +10,7 @@ import type { Economy } from '../economy/ledger';
 import type { ItemCatalog } from '../inventory/catalog';
 import type { InventoryService } from '../inventory/service';
 import type { SeasonService } from '../seasons/service';
+import { OfferSchema } from './offers';
 import type { PaymentProvider } from './payments';
 
 export const ProductSchema = z.object({
@@ -26,7 +27,7 @@ export const ProductSchema = z.object({
 
 const StoreFile = z.object({
   products: z.array(ProductSchema),
-  gemPacks: z.array(z.object({ sku: z.string(), gems: z.number().int().positive(), priceCents: z.number().int().positive(), currency: z.string(), label: z.string() })),
+  offers: z.array(OfferSchema).default([]),
 });
 
 /**
@@ -35,6 +36,9 @@ const StoreFile = z.object({
  *  - Las gemas se compran con dinero real a través de un PaymentProvider (sandbox en el MVP).
  */
 export class StoreService {
+  /** Ofertas de pago leídas del archivo; las inserta OffersService. */
+  offersToLoad: z.infer<typeof OfferSchema>[] = [];
+
   constructor(
     private readonly db: Db,
     private readonly log: Logger,
@@ -55,16 +59,7 @@ export class StoreService {
       return;
     }
     for (const p of data.products) if (!this.db.get('SELECT 1 FROM store_products WHERE sku = ?', p.sku)) this.upsertProduct(p);
-    for (const g of data.gemPacks) {
-      this.db.run(
-        'INSERT OR IGNORE INTO gem_packs(sku, label, gems, price_cents, currency, active) VALUES (?, ?, ?, ?, ?, 1)',
-        g.sku,
-        g.label,
-        g.gems,
-        g.priceCents,
-        g.currency,
-      );
-    }
+    this.offersToLoad = data.offers;
   }
 
   upsertProduct(p: z.infer<typeof ProductSchema>) {
@@ -110,11 +105,9 @@ export class StoreService {
           owned: !!(def && !def.stackable && owned.has(def.id)),
         };
       });
-    const gemPacks = this.db.all('SELECT sku, label, gems, price_cents AS priceCents, currency FROM gem_packs WHERE active = 1 ORDER BY price_cents');
     const season = this.seasons.current();
     return {
       products,
-      gemPacks,
       paymentsSandbox: this.payments?.sandbox ?? true,
       paymentsAvailable: !!this.payments,
       seasonPass: season ? { seasonId: season.id, name: season.name, priceGems: season.premium_price_gems } : null,
@@ -147,47 +140,5 @@ export class StoreService {
     return { ok: true, duplicate: tx.duplicate, item: def?.name ?? null };
   }
 
-  /** Compra de gemas con dinero real. En el MVP sólo existe el proveedor SANDBOX (no se cobra nada). */
-  async buyGems(userId: string, sku: string, receipt?: string) {
-    if (!this.payments) throw forbidden('No hay proveedor de pagos configurado.');
-    const pack = this.db.get<{ sku: string; gems: number; price_cents: number; currency: string }>(
-      'SELECT sku, gems, price_cents, currency FROM gem_packs WHERE sku = ? AND active = 1',
-      sku,
-    );
-    if (!pack) throw notFound('Paquete no disponible.');
-    if (this.payments.sandbox) {
-      const today = this.db.get<{ n: number }>('SELECT COUNT(*) AS n FROM purchases WHERE user_id = ? AND sandbox = 1 AND created_at > ?', userId, clock.now() - DAY_MS)!.n;
-      if (today >= 10) throw tooMany('Límite de compras sandbox por día alcanzado.');
-    }
-    const v = await this.payments.verify({ sku, priceCents: pack.price_cents, currency: pack.currency, receipt });
-    if (!v.valid) throw badRequest('invalid_receipt', 'No se pudo verificar la compra.');
-    return this.db.tx(() => {
-      if (this.db.get('SELECT 1 FROM purchases WHERE provider = ? AND provider_ref = ?', this.payments!.id, v.providerRef)) {
-        throw badRequest('duplicate_receipt', 'Esta compra ya fue procesada.');
-      }
-      const tx = this.economy.apply({
-        userId,
-        type: 'iap',
-        idempotencyKey: `iap:${this.payments!.id}:${v.providerRef}`,
-        details: { sku, sandbox: v.sandbox, amountCents: v.amountCents },
-        currency: [{ code: 'gems', delta: pack.gems, reason: v.sandbox ? 'iap_sandbox' : 'iap' }],
-      });
-      this.db.run(
-        'INSERT INTO purchases(id, user_id, sku, provider, provider_ref, amount_cents, currency, status, sandbox, transaction_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        newId(),
-        userId,
-        sku,
-        this.payments!.id,
-        v.providerRef,
-        v.amountCents,
-        v.currency,
-        'completed',
-        v.sandbox ? 1 : 0,
-        tx.txId,
-        clock.now(),
-      );
-      this.analytics.track('iap', userId, { sku, amountCents: v.amountCents, sandbox: v.sandbox });
-      return { ok: true, gems: pack.gems, sandbox: v.sandbox };
-    });
-  }
+
 }

@@ -6,7 +6,7 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 type Param = SQLInputValue | boolean | undefined;
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 function norm(params: Param[]): SQLInputValue[] {
   return params.map((p) => (p === undefined ? null : typeof p === 'boolean' ? (p ? 1 : 0) : p));
@@ -100,10 +100,27 @@ export class Db {
   migrate() {
     const schema = readFileSync(path.join(here, 'schema.sql'), 'utf8');
     this.raw.exec(schema);
+    // v2 — monetización y Telegram: columnas añadidas a tablas existentes (idempotente).
+    this.addColumn('users', 'vip_until', 'INTEGER');
+    this.addColumn('ad_views', 'network_id', 'TEXT');
+    this.addColumn('ad_views', 'format', 'TEXT');
+    this.addColumn('ad_views', 'env', 'TEXT');
+    this.addColumn('ad_views', 'verified', 'INTEGER NOT NULL DEFAULT 0');
+    this.addColumn('ad_views', 'result', 'TEXT');
+    this.addColumn('sponsor_campaigns', 'link_url', 'TEXT');
+    this.addColumn('sponsor_campaigns', 'contract_value_cents', 'INTEGER NOT NULL DEFAULT 0');
+    this.addColumn('sponsor_campaigns', 'clicks', 'INTEGER NOT NULL DEFAULT 0');
+    this.addColumn('purchases', 'amount_stars', 'INTEGER NOT NULL DEFAULT 0');
+    this.raw.exec('CREATE INDEX IF NOT EXISTS idx_ad_views_network ON ad_views(network_id, format, started_at)');
     const row = this.get<{ v: number | null }>('SELECT MAX(version) AS v FROM schema_migrations');
     if (!row?.v || row.v < SCHEMA_VERSION) {
       this.run('INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES (?, ?)', SCHEMA_VERSION, Date.now());
     }
+  }
+
+  private addColumn(table: string, column: string, def: string) {
+    const cols = this.all<{ name: string }>(`PRAGMA table_info(${table})`);
+    if (!cols.some((c) => c.name === column)) this.raw.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`);
   }
 
   close() {

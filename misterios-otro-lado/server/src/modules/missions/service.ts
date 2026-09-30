@@ -661,7 +661,9 @@ export class MissionService {
     const notes: string[] = first ? [] : ['Repetición: recompensa reducida y sin puntos de recompensa.'];
 
     const coopBonus = viaCoop ? 1 + eco.missions.coopBonusPct / 100 : 1;
-    const coins = Math.round(ep.rewards.coins * eco.missions.coinMultiplier * mult.coinMult * (first ? 1 : eco.missions.repeatCoinFactor) * coopBonus);
+    const vipUntil = this.db.get<{ vip_until: number | null }>('SELECT vip_until FROM users WHERE id = ?', userId)?.vip_until ?? 0;
+    const vipBonus = vipUntil > clock.now() ? 1 + eco.vip.coinBonusPct / 100 : 1;
+    const coins = Math.round(ep.rewards.coins * eco.missions.coinMultiplier * mult.coinMult * (first ? 1 : eco.missions.repeatCoinFactor) * coopBonus * vipBonus);
     const xp = Math.round(ep.rewards.xp * eco.missions.xpMultiplier * mult.xpMult * (first ? 1 : 0.25));
     const items = first ? [...ep.rewards.items] : [];
     const drop = first ? this.rollDrop(ep.rewards.dropTable) : null;
@@ -693,6 +695,7 @@ export class MissionService {
 
     this.analytics.track('mission_completed', userId, { missionId: ep.id, first, coop: viaCoop, coins, rp, xp });
     if (viaCoop) notes.push(`Bonificación cooperativa +${eco.missions.coopBonusPct}% monedas`);
+    if (vipBonus > 1) notes.push(`Bonificación VIP +${eco.vip.coinBonusPct}% monedas`);
     const rewards: RewardSummary = {
       coins,
       rp,

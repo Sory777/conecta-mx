@@ -7,6 +7,9 @@ import { newId } from '../lib/ids';
 import type { Gateway } from '../modules/multiplayer/gateway';
 import { EventSchema, SeasonSchema } from '../modules/seasons/service';
 import { CampaignSchema } from '../modules/sponsors/service';
+import { NetworkSchema } from '../modules/ads/service';
+import { RevenueReportSchema } from '../modules/monetization/service';
+import { OfferSchema } from '../modules/store/offers';
 import { ProductSchema } from '../modules/store/service';
 import type { Services } from '../services';
 import { parse, requireRole } from './helpers';
@@ -368,6 +371,74 @@ export function registerAdminRoutes(app: FastifyInstance, s: Services, gateway: 
     s.bus.emit('world.refresh', {});
     audit(req, actor.id, 'sponsor_upsert', 'sponsor', r.id, b);
     return r;
+  });
+
+  // ------------------------------------------------------------ monetización
+  app.get('/api/admin/monetization', async (req) => {
+    requireRole(req, 'admin');
+    const days = Math.min(365, Math.max(1, Number((req.query as { days?: string }).days ?? 30) || 30));
+    return {
+      ...s.monetization.dashboard(days),
+      networks: s.ads.networks(),
+      reports: s.monetization.reports(60),
+      offers: s.db.all('SELECT * FROM offers ORDER BY sort'),
+      telegram: {
+        ...s.telegram.publicInfo(),
+        updates: s.config.TELEGRAM_UPDATES,
+        webAppUrl: s.config.TELEGRAM_WEBAPP_URL ?? null,
+        linkedAccounts: s.db.get<{ n: number }>('SELECT COUNT(*) AS n FROM telegram_accounts')!.n,
+      },
+      callbackSecretConfigured: !!s.config.ADS_CALLBACK_SECRET,
+    };
+  });
+
+  app.put('/api/admin/ad-networks/:id', async (req) => {
+    const actor = requireRole(req, 'admin');
+    const b = parse(NetworkSchema, req.body);
+    const r = s.ads.updateNetwork(id(req), b);
+    audit(req, actor.id, 'ad_network_update', 'ad_network', id(req), b);
+    return { ok: true, ...r };
+  });
+
+  app.post('/api/admin/revenue-reports', async (req) => {
+    const actor = requireRole(req, 'admin');
+    const b = parse(RevenueReportSchema, req.body);
+    if (!s.db.get('SELECT 1 FROM ad_networks WHERE id = ?', b.networkId)) throw badRequest('unknown_network', 'Red desconocida.');
+    s.monetization.addReport(b, actor.id);
+    audit(req, actor.id, 'revenue_report', 'ad_network', b.networkId, b);
+    return { ok: true };
+  });
+
+  app.post('/api/admin/revenue-reports/import', { bodyLimit: 512 * 1024 }, async (req) => {
+    const actor = requireRole(req, 'admin');
+    const b = parse(z.object({ csv: z.string().max(500_000) }), req.body);
+    const r = s.monetization.importCsv(b.csv, actor.id);
+    audit(req, actor.id, 'revenue_import', null, null, { imported: r.imported });
+    return r;
+  });
+
+  app.post('/api/admin/offers', async (req) => {
+    const actor = requireRole(req, 'admin');
+    const b = parse(OfferSchema, req.body);
+    s.offers.upsert(b);
+    audit(req, actor.id, 'offer_upsert', 'offer', b.sku, b);
+    return { ok: true };
+  });
+
+  app.post('/api/admin/purchases/:id/refund', async (req) => {
+    const actor = requireRole(req, 'admin');
+    const r = await s.offers.refund(id(req), actor.id);
+    audit(req, actor.id, 'purchase_refund', 'purchase', id(req));
+    return r;
+  });
+
+  app.get('/api/admin/purchases', async (req) => {
+    requireRole(req, 'admin');
+    return {
+      purchases: s.db.all(
+        'SELECT p.id, p.created_at, u.username, p.sku, p.provider, p.amount_cents, p.amount_stars, p.currency, p.status, p.sandbox FROM purchases p JOIN users u ON u.id = p.user_id ORDER BY p.created_at DESC LIMIT 200',
+      ),
+    };
   });
 
   // ------------------------------------------------------------ marketplace y auditoría

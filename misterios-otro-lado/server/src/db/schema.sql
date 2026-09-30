@@ -490,6 +490,88 @@ CREATE TABLE IF NOT EXISTS analytics_events (
 );
 CREATE INDEX IF NOT EXISTS idx_analytics_type ON analytics_events(type, created_at);
 
+-- ===================== MONETIZACIÓN (v2) =====================
+-- Cuentas de Telegram vinculadas (una cuenta de Telegram = una cuenta de juego)
+CREATE TABLE IF NOT EXISTS telegram_accounts (
+  telegram_id    TEXT PRIMARY KEY,
+  user_id        TEXT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  username       TEXT,
+  first_name     TEXT,
+  language_code  TEXT,
+  is_premium     INTEGER NOT NULL DEFAULT 0,
+  created_at     INTEGER NOT NULL,
+  last_seen      INTEGER NOT NULL
+);
+
+-- Ofertas de pago con dinero real (gemas, VIP, paquetes, propinas). Precio en centavos (web) y en Stars (Telegram).
+CREATE TABLE IF NOT EXISTS offers (
+  sku            TEXT PRIMARY KEY,
+  kind           TEXT NOT NULL CHECK (kind IN ('gems','vip','bundle','tip')),
+  label          TEXT NOT NULL,
+  description    TEXT NOT NULL DEFAULT '',
+  gems           INTEGER NOT NULL DEFAULT 0,
+  vip_days       INTEGER NOT NULL DEFAULT 0,
+  items          TEXT NOT NULL DEFAULT '[]',
+  price_cents    INTEGER NOT NULL CHECK (price_cents > 0),
+  price_stars    INTEGER NOT NULL CHECK (price_stars > 0),
+  once_per_user  INTEGER NOT NULL DEFAULT 0,
+  active         INTEGER NOT NULL DEFAULT 1,
+  sort           INTEGER NOT NULL DEFAULT 0
+);
+
+-- Intención de pago (se crea al emitir la factura; se completa al confirmar el proveedor)
+CREATE TABLE IF NOT EXISTS payment_intents (
+  id            TEXT PRIMARY KEY,
+  user_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sku           TEXT NOT NULL,
+  provider      TEXT NOT NULL,
+  amount        INTEGER NOT NULL,
+  currency      TEXT NOT NULL,
+  status        TEXT NOT NULL CHECK (status IN ('pending','paid','failed','refunded')),
+  provider_ref  TEXT UNIQUE,
+  created_at    INTEGER NOT NULL,
+  paid_at       INTEGER
+);
+
+-- Redes de anuncios (mediación). Los IDs de bloque/zona NO son secretos: los usa el cliente.
+CREATE TABLE IF NOT EXISTS ad_networks (
+  id               TEXT PRIMARY KEY,
+  name             TEXT NOT NULL,
+  kind             TEXT NOT NULL CHECK (kind IN ('sandbox','adsgram','monetag','adsense_h5')),
+  enabled          INTEGER NOT NULL DEFAULT 0,
+  env              TEXT NOT NULL DEFAULT 'any' CHECK (env IN ('any','telegram','web')),
+  formats          TEXT NOT NULL DEFAULT '[]',   -- ["rewarded","interstitial"]
+  config           TEXT NOT NULL DEFAULT '{}',   -- blockId / zoneId / client
+  est_ecpm         TEXT NOT NULL DEFAULT '{}',   -- {"rewarded": 400} centavos por 1000
+  weight           INTEGER NOT NULL DEFAULT 1,
+  server_verified  INTEGER NOT NULL DEFAULT 0,   -- 1 si la red confirma cada vista a nuestro servidor
+  updated_at       INTEGER NOT NULL
+);
+
+-- Ingresos REALES reportados por cada red (copiados de su panel o importados)
+CREATE TABLE IF NOT EXISTS ad_revenue_reports (
+  id             TEXT PRIMARY KEY,
+  day            TEXT NOT NULL,
+  network_id     TEXT NOT NULL REFERENCES ad_networks(id),
+  format         TEXT NOT NULL,
+  impressions    INTEGER NOT NULL CHECK (impressions >= 0),
+  revenue_cents  INTEGER NOT NULL CHECK (revenue_cents >= 0),
+  notes          TEXT,
+  created_by     TEXT,
+  created_at     INTEGER NOT NULL,
+  UNIQUE (day, network_id, format)
+);
+
+-- Eventos de patrocinio deduplicados (impresión/clic por usuario y día)
+CREATE TABLE IF NOT EXISTS sponsor_events (
+  campaign_id  TEXT NOT NULL,
+  user_id      TEXT NOT NULL,
+  type         TEXT NOT NULL CHECK (type IN ('impression','click')),
+  day          TEXT NOT NULL,
+  created_at   INTEGER NOT NULL,
+  PRIMARY KEY (campaign_id, user_id, type, day)
+);
+
 CREATE TABLE IF NOT EXISTS schema_migrations (
   version     INTEGER PRIMARY KEY,
   applied_at  INTEGER NOT NULL

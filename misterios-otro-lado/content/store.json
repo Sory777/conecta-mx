@@ -1,17 +1,156 @@
 {
   "products": [
-    { "sku": "linterna_potente", "name": "Linterna táctica", "description": "Más alcance y un haz más ancho.", "category": "herramientas", "itemId": "linterna_potente", "priceCurrency": "coins", "price": 300 },
-    { "sku": "lupa", "name": "Lupa de latón", "description": "Herramienta de investigación.", "category": "herramientas", "itemId": "lupa", "priceCurrency": "coins", "price": 150 },
-    { "sku": "gorro_lana", "name": "Gorro de lana", "description": "Cosmético.", "category": "ropa", "itemId": "gorro_lana", "priceCurrency": "coins", "price": 120 },
-    { "sku": "abrigo_detective", "name": "Gabardina de detective", "description": "Cosmético.", "category": "ropa", "itemId": "abrigo_detective", "priceCurrency": "coins", "price": 500 },
-    { "sku": "bicicleta_oxidada", "name": "Bicicleta oxidada", "description": "Vehículo (próximamente conducible).", "category": "vehiculos", "itemId": "bicicleta_oxidada", "priceCurrency": "coins", "price": 2000 },
-    { "sku": "calabaza_tallada", "name": "Calabaza tallada", "description": "Decoración de temporada.", "category": "decoracion", "itemId": "calabaza_tallada", "priceCurrency": "coins", "price": 80, "seasonId": "t1_ecos" },
-    { "sku": "sombrero_fedora", "name": "Fedora gris", "description": "Cosmético premium.", "category": "ropa", "itemId": "sombrero_fedora", "priceCurrency": "gems", "price": 60 },
-    { "sku": "abrigo_nocturno", "name": "Abrigo de medianoche", "description": "Cosmético premium.", "category": "ropa", "itemId": "abrigo_nocturno", "priceCurrency": "gems", "price": 90 }
+    {
+      "sku": "linterna_potente",
+      "name": "Linterna táctica",
+      "description": "Más alcance y un haz más ancho.",
+      "category": "herramientas",
+      "itemId": "linterna_potente",
+      "priceCurrency": "coins",
+      "price": 300
+    },
+    {
+      "sku": "lupa",
+      "name": "Lupa de latón",
+      "description": "Herramienta de investigación.",
+      "category": "herramientas",
+      "itemId": "lupa",
+      "priceCurrency": "coins",
+      "price": 150
+    },
+    {
+      "sku": "gorro_lana",
+      "name": "Gorro de lana",
+      "description": "Cosmético.",
+      "category": "ropa",
+      "itemId": "gorro_lana",
+      "priceCurrency": "coins",
+      "price": 120
+    },
+    {
+      "sku": "abrigo_detective",
+      "name": "Gabardina de detective",
+      "description": "Cosmético.",
+      "category": "ropa",
+      "itemId": "abrigo_detective",
+      "priceCurrency": "coins",
+      "price": 500
+    },
+    {
+      "sku": "bicicleta_oxidada",
+      "name": "Bicicleta oxidada",
+      "description": "Vehículo (próximamente conducible).",
+      "category": "vehiculos",
+      "itemId": "bicicleta_oxidada",
+      "priceCurrency": "coins",
+      "price": 2000
+    },
+    {
+      "sku": "calabaza_tallada",
+      "name": "Calabaza tallada",
+      "description": "Decoración de temporada.",
+      "category": "decoracion",
+      "itemId": "calabaza_tallada",
+      "priceCurrency": "coins",
+      "price": 80,
+      "seasonId": "t1_ecos"
+    },
+    {
+      "sku": "sombrero_fedora",
+      "name": "Fedora gris",
+      "description": "Cosmético premium.",
+      "category": "ropa",
+      "itemId": "sombrero_fedora",
+      "priceCurrency": "gems",
+      "price": 60
+    },
+    {
+      "sku": "abrigo_nocturno",
+      "name": "Abrigo de medianoche",
+      "description": "Cosmético premium.",
+      "category": "ropa",
+      "itemId": "abrigo_nocturno",
+      "priceCurrency": "gems",
+      "price": 90
+    }
   ],
-  "gemPacks": [
-    { "sku": "gems_100", "gems": 100, "priceCents": 99, "currency": "USD", "label": "Bolsa de gemas" },
-    { "sku": "gems_550", "gems": 550, "priceCents": 499, "currency": "USD", "label": "Cofre de gemas" },
-    { "sku": "gems_1200", "gems": 1200, "priceCents": 999, "currency": "USD", "label": "Baúl de gemas" }
+  "offers": [
+    {
+      "sku": "starter_pack",
+      "kind": "bundle",
+      "label": "Paquete del investigador",
+      "description": "Oferta única de bienvenida: 300 gemas, gabardina de detective y gorro de lana.",
+      "gems": 300,
+      "items": [
+        {
+          "itemId": "abrigo_detective",
+          "qty": 1
+        },
+        {
+          "itemId": "gorro_lana",
+          "qty": 1
+        }
+      ],
+      "priceCents": 199,
+      "priceStars": 100,
+      "oncePerUser": true,
+      "sort": 0
+    },
+    {
+      "sku": "vip_30",
+      "kind": "vip",
+      "label": "VIP 30 días",
+      "description": "Sin anuncios intersticiales, +10% monedas en misterios y un cofre diario de gemas.",
+      "vipDays": 30,
+      "gems": 50,
+      "priceCents": 299,
+      "priceStars": 150,
+      "sort": 1
+    },
+    {
+      "sku": "gems_100",
+      "kind": "gems",
+      "label": "Bolsa de gemas",
+      "description": "100 gemas.",
+      "gems": 100,
+      "priceCents": 99,
+      "priceStars": 50,
+      "sort": 2
+    },
+    {
+      "sku": "gems_550",
+      "kind": "gems",
+      "label": "Cofre de gemas",
+      "description": "550 gemas (10% extra).",
+      "gems": 550,
+      "priceCents": 499,
+      "priceStars": 250,
+      "sort": 3
+    },
+    {
+      "sku": "gems_1200",
+      "kind": "gems",
+      "label": "Baúl de gemas",
+      "description": "1200 gemas (20% extra).",
+      "gems": 1200,
+      "priceCents": 999,
+      "priceStars": 500,
+      "sort": 4
+    },
+    {
+      "sku": "tip_supporter",
+      "kind": "tip",
+      "label": "Apoya al creador",
+      "description": "Una propina para seguir creando misterios. Incluye la insignia de mecenas.",
+      "items": [
+        {
+          "itemId": "insignia_mecenas",
+          "qty": 1
+        }
+      ],
+      "priceCents": 99,
+      "priceStars": 50,
+      "sort": 5
+    }
   ]
 }

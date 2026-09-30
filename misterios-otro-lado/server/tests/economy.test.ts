@@ -118,7 +118,7 @@ describe('libro mayor económico', () => {
 
   it('compra de gemas sandbox queda marcada como sandbox', async () => {
     const p = await registerPlayer(base, 'gems');
-    const r = await server.services.store.buyGems(p.userId, 'gems_100');
+    const r = server.services.offers.buySandbox(p.userId, 'gems_100');
     expect(r.sandbox).toBe(true);
     const row = server.services.db.get<{ sandbox: number; provider: string }>('SELECT sandbox, provider FROM purchases WHERE user_id = ?', p.userId);
     expect(row).toEqual({ sandbox: 1, provider: 'sandbox' });
@@ -140,7 +140,10 @@ describe('anuncios recompensados', () => {
     clock.advance(6000);
     const done = s.ads.complete(p.userId, st2.token);
     expect(done.coins).toBeGreaterThan(0);
-    expect(() => s.ads.complete(p.userId, st2.token)).toThrow(/ya se procesó/);
+    const coinsAfter = s.economy.balances(p.userId).coins;
+    const again = s.ads.complete(p.userId, st2.token); // reintento: mismo resultado, sin pagar dos veces
+    expect(again.status).toBe('completed');
+    expect(s.economy.balances(p.userId).coins).toBe(coinsAfter);
     expect(() => s.ads.start(p.userId, 'rewarded_coins', '1.1.1.1', null)).toThrow(/Espera/);
     const sus = s.db.get<{ n: number }>("SELECT COUNT(*) AS n FROM suspicious_activity WHERE user_id = ? AND type = 'ad_completed_too_fast'", p.userId)!;
     expect(sus.n).toBe(1);

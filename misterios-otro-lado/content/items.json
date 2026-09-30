@@ -239,6 +239,16 @@
       "stackable": false,
       "tradeable": false,
       "equipSlot": null
+    },
+    {
+      "id": "insignia_mecenas",
+      "name": "Insignia de mecenas",
+      "description": "Gracias por apoyar el juego.",
+      "rarity": "epic",
+      "category": "collectible",
+      "stackable": false,
+      "tradeable": false,
+      "equipSlot": null
     }
   ]
 }

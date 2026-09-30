@@ -1,6 +1,6 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { badRequest, notFound } from '../lib/errors';
+import { badRequest, notFound, unauthorized } from '../lib/errors';
 import { CLIENT_EVENT_WHITELIST } from '../modules/analytics/service';
 import { REPORT_REASONS } from '../modules/social/service';
 import type { Services } from '../services';
@@ -28,6 +28,8 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
       realRedemptions: s.rewards.realRedemptionsActive(),
       mailSandbox: s.config.MAIL_PROVIDER === 'console',
       protocol: PROTOCOL_VERSION,
+      telegram: s.telegram.publicInfo(),
+      interstitialAfterMission: eco.ads.interstitialAfterMission,
     };
   });
 
@@ -51,6 +53,23 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
   app.post('/api/auth/login', { config: { authRate: true } }, async (req) => {
     const b = parse(z.object({ login: z.string().min(1).max(254), password: z.string().min(1).max(128), deviceId }), req.body);
     return s.auth.login(b, req.ip, ua(req.headers['user-agent']));
+  });
+
+  app.post('/api/auth/telegram', { config: { authRate: true } }, async (req) => {
+    const b = parse(z.object({ initData: z.string().min(10).max(4096), deviceId, referralCode: z.string().max(16).nullish() }), req.body);
+    if (!s.telegram.enabled) throw badRequest('telegram_disabled', 'El acceso con Telegram no está configurado en el servidor.');
+    const tg = s.telegram.verify(b.initData);
+    if (!tg) throw unauthorized('No se pudo verificar tu sesión de Telegram. Cierra y vuelve a abrir el juego.');
+    return s.auth.loginWithTelegram(tg, { deviceId: b.deviceId, referralCode: b.referralCode }, req.ip, ua(req.headers['user-agent']));
+  });
+
+  // Webhook del bot (sólo si TELEGRAM_UPDATES=webhook). Telegram firma cada llamada con el secret_token.
+  app.post('/api/telegram/webhook', { bodyLimit: 256 * 1024 }, async (req, reply) => {
+    const secret = s.config.TELEGRAM_WEBHOOK_SECRET;
+    const got = req.headers['x-telegram-bot-api-secret-token'];
+    if (s.config.TELEGRAM_UPDATES !== 'webhook' || !secret || got !== secret) return reply.status(403).send({ ok: false });
+    await s.telegram.handleUpdate(req.body as never);
+    return { ok: true };
   });
 
   app.post('/api/auth/logout', async (req) => {
@@ -80,7 +99,7 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
   // --------------------------------------------------------------- cuenta / personaje
   app.get('/api/me', async (req) => {
     const u = requireUser(req);
-    return s.accounts.profile(u.id);
+    return { ...s.accounts.profile(u.id), vipUntil: s.offers.vipUntil(u.id), telegramLinked: !!s.telegram.telegramIdOf(u.id) };
   });
 
   app.post('/api/characters', async (req) => {
@@ -134,10 +153,34 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
     return s.store.buy(u.id, b.sku, b.idempotencyKey);
   });
 
-  app.post('/api/store/gems', async (req) => {
+  // --------------------------------------------------------------- ofertas de pago / VIP
+  const envParam = (q: unknown) => ((q as { env?: string })?.env === 'telegram' ? 'telegram' : 'web') as 'telegram' | 'web';
+
+  app.get('/api/offers', async (req) => {
     const u = requireUser(req);
-    const b = parse(z.object({ sku: z.string().max(40), receipt: z.string().max(4000).optional() }), req.body);
-    return s.store.buyGems(u.id, b.sku, b.receipt);
+    return s.offers.list(u.id, envParam(req.query));
+  });
+
+  app.post('/api/offers/sandbox', async (req) => {
+    const u = requireUser(req);
+    const b = parse(z.object({ sku: z.string().max(40) }), req.body);
+    return s.offers.buySandbox(u.id, b.sku);
+  });
+
+  app.post('/api/offers/stars', async (req) => {
+    const u = requireUser(req);
+    const b = parse(z.object({ sku: z.string().max(40) }), req.body);
+    return s.offers.createStarsInvoice(u.id, b.sku);
+  });
+
+  app.get('/api/offers/intent/:id', async (req) => {
+    const u = requireUser(req);
+    return { status: s.offers.intentStatus(u.id, String((req.params as { id: string }).id)) };
+  });
+
+  app.post('/api/vip/daily', async (req) => {
+    const u = requireUser(req);
+    return s.offers.claimVipDaily(u.id);
   });
 
   app.get('/api/season', async (req) => {
@@ -166,16 +209,29 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
 
   app.post('/api/ads/start', async (req) => {
     const u = requireUser(req);
-    const b = parse(z.object({ placementId: z.string().max(40) }), req.body);
+    const b = parse(z.object({ placementId: z.string().max(40), env: z.enum(['telegram', 'web']).default('web') }), req.body);
     const devices = [...s.antifraud.devicesOf(u.id)];
-    return s.ads.start(u.id, b.placementId, req.ip, devices[0] ?? null);
+    return s.ads.start(u.id, b.placementId, req.ip, devices[0] ?? null, b.env);
   });
 
   app.post('/api/ads/complete', async (req) => {
     const u = requireUser(req);
-    const b = parse(z.object({ token: z.string().min(10).max(100) }), req.body);
-    return s.ads.complete(u.id, b.token);
+    const b = parse(z.object({ token: z.string().min(10).max(100), result: z.enum(['completed', 'closed', 'no_fill', 'error']).default('completed') }), req.body);
+    return s.ads.complete(u.id, b.token, b.result);
   });
+
+  app.get('/api/ads/status/:token', async (req) => {
+    const u = requireUser(req);
+    return s.ads.status(u.id, String((req.params as { token: string }).token).slice(0, 100));
+  });
+
+  // URL de recompensa / postback llamada POR LA RED DE ANUNCIOS (servidor a servidor).
+  const adCallback = async (req: FastifyRequest) => {
+    const q = { ...(req.query as Record<string, string>), ...((req.body as Record<string, string>) ?? {}) };
+    return s.ads.callback(String((req.params as { network: string }).network), String(q.sig ?? ''), { token: q.token, userid: q.userid ?? q.user_id });
+  };
+  app.get('/api/ads/callback/:network', adCallback);
+  app.post('/api/ads/callback/:network', adCallback);
 
   // --------------------------------------------------------------- recompensas
   app.get('/api/rewards', async (req) => {
@@ -244,7 +300,8 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
 
   app.get('/api/referrals', async (req) => {
     const u = requireUser(req);
-    return s.referrals.summary(u.id);
+    const r = s.referrals.summary(u.id);
+    return { ...r, telegramLink: r.code ? s.telegram.inviteLink(r.code) : null };
   });
 
   // --------------------------------------------------------------- marketplace
@@ -273,12 +330,18 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
   // --------------------------------------------------------------- patrocinios / analíticas
   app.get('/api/sponsors', async () => ({ campaigns: s.sponsors.active() }));
 
+  app.post('/api/sponsors/:id/event', async (req) => {
+    const u = requireUser(req);
+    const b = parse(z.object({ type: z.enum(['impression', 'click']) }), req.body);
+    s.sponsors.event(String((req.params as { id: string }).id), u.id, b.type);
+    return { ok: true };
+  });
+
   app.post('/api/analytics', async (req) => {
     const u = requireUser(req);
     const b = parse(z.object({ type: z.string().max(40), props: z.record(z.string(), z.unknown()).default({}) }), req.body);
     if (!CLIENT_EVENT_WHITELIST.has(b.type)) throw badRequest('invalid_event', 'Evento no permitido.');
     const props = JSON.stringify(b.props).length > 1000 ? {} : b.props;
-    if (b.type === 'sponsor_impression' && typeof props.campaignId === 'string') s.sponsors.impression(props.campaignId);
     s.analytics.track(`client:${b.type}`, u.id, props);
     return { ok: true };
   });

@@ -5,10 +5,11 @@ import { clock } from '../src/lib/clock';
 import type { ServerMsg } from '../../shared/protocol';
 import { PROTOCOL_VERSION } from '../../shared/constants';
 
-export async function startTestServer(overrides: Record<string, string> = {}) {
+export async function startTestServer(overrides: Record<string, string> = {}, beforeStart?: (s: GameServer) => void) {
   const config = loadConfig({ NODE_ENV: 'test', DATABASE_PATH: ':memory:', PORT: '0', HOST: '127.0.0.1', LOG_LEVEL: 'silent', AUTH_RATE_PER_10MIN: '100000', ...overrides });
   const server = await buildServer(config);
   server.services.ecoCfg.update({ antifraud: { maxRegistrationsPerIpPerDay: 1000 } }, null);
+  beforeStart?.(server);
   const addr = await server.start();
   const base = addr.replace('http://', '');
   return { server, base };

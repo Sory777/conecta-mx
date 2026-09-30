@@ -32,6 +32,24 @@ const EnvSchema = z.object({
   PAYMENT_PROVIDER: z.enum(['sandbox', 'none']).default('sandbox'),
   AD_PROVIDER: z.enum(['sandbox', 'none']).default('sandbox'),
   MAIL_PROVIDER: z.enum(['console', 'none']).default('console'),
+  // ---------------- Telegram
+  /** Token del bot (BotFather). SECRETO: sólo en el servidor. */
+  TELEGRAM_BOT_TOKEN: z.string().min(20).optional(),
+  TELEGRAM_BOT_USERNAME: z.string().regex(/^[A-Za-z0-9_]{3,64}$/).optional(),
+  /** Nombre corto de la Mini App creada con /newapp (para enlaces t.me/<bot>/<app>). */
+  TELEGRAM_APP_SHORT_NAME: z.string().regex(/^[A-Za-z0-9_]{3,64}$/).optional(),
+  /** URL HTTPS pública donde se sirve el juego (la que abre el botón del bot). */
+  TELEGRAM_WEBAPP_URL: z.string().url().optional(),
+  /** Cómo recibe el bot las actualizaciones: off | polling | webhook */
+  TELEGRAM_UPDATES: z.enum(['off', 'polling', 'webhook']).default('off'),
+  TELEGRAM_WEBHOOK_SECRET: z.string().regex(/^[A-Za-z0-9_-]{16,256}$/).optional(),
+  /** Antigüedad máxima aceptada del initData de la Mini App. */
+  TELEGRAM_INITDATA_MAX_AGE_SEC: z.coerce.number().int().min(60).max(7 * 86400).default(86400),
+  /** Cobros reales con Telegram Stars. Desactivado por defecto: actívalo conscientemente. */
+  TELEGRAM_STARS_ENABLED: bool.default(false),
+  // ---------------- Anuncios
+  /** Secreto para las URLs de recompensa/postback que llaman las redes de anuncios. */
+  ADS_CALLBACK_SECRET: z.string().min(16).optional(),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 });
 
