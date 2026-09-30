@@ -83,7 +83,7 @@ export const TOWN_BUILDINGS: Building[] = [
 
 export const LAMPS: { x: number; z: number; broken?: boolean }[] = [
   ...Array.from({ length: 6 }, (_, i) => {
-    const a = (i / 6) * Math.PI * 2 + Math.PI / 6;
+    const a = (i / 6) * Math.PI * 2;
     return { x: Math.cos(a) * 11, z: Math.sin(a) * 11 };
   }),
   { x: 2.5, z: -24 },

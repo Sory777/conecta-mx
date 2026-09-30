@@ -350,7 +350,7 @@ export class Gateway {
       case 'share_clue':
         return this.onShareClue(conn, String(msg.clueId ?? '').slice(0, 64));
       case 'party_invite':
-        return this.onPartyInvite(conn, String(msg.username ?? '').slice(0, 20));
+        return this.onPartyInvite(conn, String(msg.username ?? '').slice(0, 20), typeof msg.userId === 'string' ? msg.userId.slice(0, 64) : null);
       case 'party_respond':
         return this.onPartyRespond(conn, String(msg.inviteId ?? ''), !!msg.accept);
       case 'party_leave':
@@ -507,8 +507,8 @@ export class Gateway {
     }
   }
 
-  private onPartyInvite(conn: Conn, username: string) {
-    const target = this.d.social.findUser(username);
+  private onPartyInvite(conn: Conn, username: string, userId: string | null) {
+    const target = userId ? this.d.social.findUserById(userId) : this.d.social.findUser(username);
     const tc = target ? this.conns.get(target.id) : undefined;
     if (!target || !tc) return this.send(conn, { t: 'notice', level: 'warn', text: 'Ese jugador no está en línea.' });
     if (target.id === conn.userId) return;

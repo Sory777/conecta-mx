@@ -146,7 +146,7 @@ export type ClientMsg =
   | { t: 'track'; missionId: string }
   | { t: 'chat'; channel: 'world' | 'party'; text: string }
   | { t: 'share_clue'; clueId: string }
-  | { t: 'party_invite'; username: string }
+  | { t: 'party_invite'; username?: string; userId?: string }
   | { t: 'party_respond'; inviteId: string; accept: boolean }
   | { t: 'party_leave' }
   | { t: 'party_kick'; userId: string }

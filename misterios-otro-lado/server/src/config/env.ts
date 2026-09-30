@@ -38,12 +38,22 @@ const EnvSchema = z.object({
 export type AppConfig = z.infer<typeof EnvSchema> & { serverSecret: string; projectRoot: string };
 
 export function loadConfig(overrides: Record<string, string | undefined> = {}): AppConfig {
-  const parsed = EnvSchema.safeParse({ ...process.env, ...overrides });
+  // Carga opcional de `.env` en la raíz del proyecto (sin dependencias externas).
+  const envFile = path.join(projectRoot, '.env');
+  if (overrides.NODE_ENV !== 'test' && existsSync(envFile)) process.loadEnvFile(envFile);
+  // Variables vacías (p. ej. `SERVER_SECRET=`) se tratan como no definidas.
+  const merged = Object.fromEntries(Object.entries({ ...process.env, ...overrides }).filter(([, v]) => v !== undefined && v !== ''));
+  const parsed = EnvSchema.safeParse(merged);
   if (!parsed.success) {
     const msg = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('\n');
     throw new Error(`Configuración inválida:\n${msg}`);
   }
   const env = parsed.data;
+  // Rutas relativas: relativas a la raíz del proyecto (no al directorio de trabajo).
+  const abs = (p: string) => (p === ':memory:' || path.isAbsolute(p) ? p : path.resolve(projectRoot, p));
+  env.DATABASE_PATH = abs(env.DATABASE_PATH);
+  env.CONTENT_DIR = abs(env.CONTENT_DIR);
+  env.CLIENT_DIST = abs(env.CLIENT_DIST);
   if (env.NODE_ENV === 'production') {
     if (!env.SERVER_SECRET) throw new Error('SERVER_SECRET es obligatorio en producción (mín. 32 caracteres).');
     if (env.SANDBOX_MODE && env.PAYMENT_PROVIDER === 'sandbox') {

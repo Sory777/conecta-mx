@@ -17,6 +17,10 @@ export class SocialService {
     return this.db.get<{ id: string; username: string }>('SELECT id, username FROM users WHERE username = ? COLLATE NOCASE', username.trim());
   }
 
+  findUserById(id: string) {
+    return this.db.get<{ id: string; username: string }>('SELECT id, username FROM users WHERE id = ?', id);
+  }
+
   isBlockedEither(a: string, b: string): boolean {
     return !!this.db.get('SELECT 1 FROM blocks WHERE (user_id = ? AND blocked_id = ?) OR (user_id = ? AND blocked_id = ?)', a, b, b, a);
   }
@@ -48,8 +52,8 @@ export class SocialService {
     }));
   }
 
-  requestFriend(userId: string, username: string) {
-    const target = this.findUser(username);
+  requestFriend(userId: string, username: string | null, targetId?: string | null) {
+    const target = targetId ? this.findUserById(targetId) : username ? this.findUser(username) : undefined;
     if (!target) throw notFound('Jugador no encontrado.');
     if (target.id === userId) throw badRequest('self', 'No puedes agregarte a ti mismo.');
     if (this.isBlockedEither(userId, target.id)) throw badRequest('blocked', 'No puedes enviar solicitud a este jugador.');

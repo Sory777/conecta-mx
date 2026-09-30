@@ -61,15 +61,19 @@ export class AccountService {
     };
     const now = clock.now();
     const id = newId();
+    // Pequeña dispersión para que los recién llegados no aparezcan unos encima de otros
+    const a = Math.random() * Math.PI * 2;
+    const sx = SPAWN.x + Math.cos(a) * 1.8;
+    const sz = SPAWN.z + Math.sin(a) * 1.2;
     this.db.run(
       'INSERT INTO characters(id, user_id, slot, name, appearance, pos_x, pos_y, pos_z, rot_y, created_at, updated_at) VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?)',
       id,
       userId,
       clean,
       json.str(app),
-      SPAWN.x,
-      heightAt(SPAWN.x, SPAWN.z),
-      SPAWN.z,
+      sx,
+      heightAt(sx, sz),
+      sz,
       SPAWN.rotY,
       now,
       now,

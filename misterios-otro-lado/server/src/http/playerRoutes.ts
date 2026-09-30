@@ -197,8 +197,8 @@ export function registerPlayerRoutes(app: FastifyInstance, s: Services, gateway:
 
   app.post('/api/social/friends', async (req) => {
     const u = requireUser(req);
-    const b = parse(z.object({ username: z.string().min(3).max(20) }), req.body);
-    return s.social.requestFriend(u.id, b.username);
+    const b = parse(z.object({ username: z.string().min(3).max(20).optional(), userId: z.string().max(64).optional() }), req.body);
+    return s.social.requestFriend(u.id, b.username ?? null, b.userId ?? null);
   });
 
   app.post('/api/social/friends/:id/accept', async (req) => {
