@@ -117,33 +117,38 @@ try {
   log('Grupo formado ✔');
 
   // A camina hacia Don Aurelio y habla con él
-  await walkTo(A.page, 3.4, 7.0);
+  await walkTo(A.page, 3.7, 6.3, 0.5);
   await A.page.locator('.prompt:not(.hidden)').waitFor({ timeout: 30000 });
   await A.page.screenshot({ path: path.join(out, 'ana-3-aviso.png') });
   await A.page.keyboard.press('KeyE');
   await A.page.locator('.dialogue:not(.hidden)').waitFor({ timeout: 30000 });
   await A.page.screenshot({ path: path.join(out, 'ana-4-dialogo.png') });
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 10 && (await A.page.locator('.dialogue:not(.hidden)').count()); i++) {
     await A.page.keyboard.press('KeyE');
-    await A.page.waitForTimeout(150);
+    await A.page.waitForTimeout(400);
   }
   await A.page.waitForTimeout(600);
   const objective = await A.page.locator('.objective').innerText();
   log('Objetivo tras hablar:', objective.replace(/\n/g, ' | '));
   if (!/pozo/i.test(objective)) throw new Error('El misterio no avanzó a la etapa del pozo');
   await A.page.keyboard.press('KeyJ');
+  await A.page.locator('.panel').waitFor();
   await A.page.waitForTimeout(300);
   await A.page.screenshot({ path: path.join(out, 'ana-5-diario.png') });
   await A.page.keyboard.press('Escape');
+  await A.page.locator('.panel').waitFor({ state: 'detached' });
   await A.page.keyboard.press('KeyM');
-  await A.page.waitForTimeout(500);
+  await A.page.locator('.map-canvas').waitFor();
+  await A.page.waitForTimeout(800);
   await A.page.screenshot({ path: path.join(out, 'ana-6-mapa.png') });
   await A.page.keyboard.press('Escape');
   // Chat
+  await A.page.locator('.panel').waitFor({ state: 'detached' });
   await A.page.keyboard.press('Enter');
+  await A.page.locator('.chat:not(.collapsed)').waitFor();
   await A.page.keyboard.type('¿Alguien vio la luz en la colina?');
   await A.page.keyboard.press('Enter');
-  await B.page.getByText('¿Alguien vio la luz en la colina?').waitFor({ timeout: 5000 });
+  await B.page.getByText('¿Alguien vio la luz en la colina?').waitFor({ timeout: 30000 });
   log('Chat entre jugadores ✔');
   await B.page.screenshot({ path: path.join(out, 'beto-3-chat.png') });
 
