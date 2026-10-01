@@ -166,7 +166,7 @@ export function productsPage({ products, store, category, flash }) {
   const body = html`<div class="head"><h1>Productos <span class="muted">(${products.length})</span></h1>
   <form method="post" action="/admin/sync"><button class="btn sm ghost">Sincronizar catálogo</button></form></div>
   ${filters({ action: '/admin/productos', store, extra: catSel.toString() })}
-  <p class="muted small">Cada tienda vende solo sus productos, elegidos entre los más vendidos de su nicho. «Popularidad» es el número de tiendas que venden el producto en el proveedor. «Ganas por pieza» ya descuenta el costo del producto, el envío y la comisión de pago estimada. Puedes poner el nombre en español: la sincronización no lo reemplaza.</p>
+  <p class="muted small">Cada tienda vende solo sus productos, elegidos entre los más vendidos de su nicho. «Popularidad» es el número de tiendas que venden el producto en el proveedor. «Ganas por pieza» ya descuenta el costo del producto, el envío y la comisión de pago estimada. Puedes poner el nombre en español u ocultar un producto que no te guste: la sincronización respeta ambos cambios.</p>
   <section class="panel"><div class="scroll"><table class="table">
   <thead><tr><th>Producto</th><th>Tienda</th><th>Categoría</th><th class="num">Popularidad</th><th class="num">Costo + envío</th><th class="num">Precio venta</th><th class="num">Ganas por pieza</th><th>Estado</th></tr></thead>
   <tbody>${products.map((p) => html`<tr>
@@ -183,7 +183,8 @@ export function productsPage({ products, store, category, flash }) {
       const g = unitProfitCents(p.price_cents, p.cost_cents + p.shipping_cents);
       return html`<strong>${money(g)}</strong><br><span class="muted small">${pct(g / p.price_cents)} del precio</span>`;
     })()}</td>
-    <td>${p.active ? html`<span class="badge good">Activo</span>` : html`<span class="badge neutral">Inactivo</span>`}</td>
+    <td>${!p.active ? html`<span class="badge neutral">Inactivo</span>` : p.hidden ? html`<span class="badge neutral">Oculto</span>` : html`<span class="badge good">Activo</span>`}
+      ${p.active ? html`<form method="post" action="/admin/productos/${p.id}"><input type="hidden" name="hidden" value="${p.hidden ? '0' : '1'}"><button class="link small">${p.hidden ? 'Mostrar' : 'Ocultar'}</button></form>` : ''}</td>
   </tr>`)}</tbody></table></div></section>`;
   return layout({ title: 'Productos', active: 'products', body, flash });
 }

@@ -9,7 +9,7 @@ import { html, raw, money } from './views/html.js';
 import * as V from './views/store.js';
 import * as A from './views/admin.js';
 import {
-  syncCatalog, setProductTitle, unitProfitCents, listStoreProducts, getStoreProduct, catalogIsEmpty, isStoreActive, storeMarkup, updateStoreSettings,
+  syncCatalog, setProductTitle, setProductHidden, unitProfitCents, listStoreProducts, getStoreProduct, catalogIsEmpty, isStoreActive, storeMarkup, updateStoreSettings,
 } from './services/catalog.js';
 import {
   createOrder, priceCart, getOrder, getOrderByNumber, getOrderItems, getOrderEvents, setPaymentRef, markPaid,
@@ -315,7 +315,8 @@ admin.get('/productos', (req, res) => {
 });
 
 admin.post('/productos/:id', (req, res) => {
-  setProductTitle(Number(req.params.id), req.body.title);
+  if (req.body.hidden != null) setProductHidden(Number(req.params.id), req.body.hidden === '1');
+  else setProductTitle(Number(req.params.id), req.body.title);
   // Volvemos a la misma lista filtrada (solo la ruta local, nunca a otro dominio).
   let to = '/admin/productos';
   try { const u = new URL(req.get('referer')); if (u.pathname === to) to += u.search; } catch {}

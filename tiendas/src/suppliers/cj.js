@@ -59,6 +59,20 @@ async function shippingFor(vid) {
   }
 }
 
+// Busca la primera variante cuyo nombre/clave contenga un color permitido y ningún
+// otro color (CJ nombra las variantes como "Black-XL", "White M", "Black Red-L"…).
+const OTHER_COLORS = /\b(red|blue|pink|green|yellow|purple|orange|brown|gr[ae]y|beige|khaki|navy|apricot|coffee|wine|camel|rose|violet|multicolou?r|colorful)\b/;
+export function pickColorVariant(variants, colors) {
+  for (const v of variants) {
+    const name = `${v.variantKey || ''} ${v.variantNameEn || ''}`.toLowerCase();
+    if (OTHER_COLORS.test(name)) continue;
+    for (const [en, es] of Object.entries(colors)) {
+      if (new RegExp(`\\b${en}\\b`).test(name)) return { variant: v, colorEs: es };
+    }
+  }
+  return null;
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Busca los productos más vendidos para una palabra clave. CJ no publica ventas
@@ -102,8 +116,15 @@ export const cjSupplier = {
         if (taken >= perSearch) break;
         if (!p.pid || used.has(p.pid) || p.inventory === 0) continue;
         await sleep(env.cjDelayMs);
-        const variants = await cj('GET', `/product/variant/query?pid=${encodeURIComponent(p.pid)}`).catch(() => []);
-        const v = (variants || [])[0];
+        const variants = (await cj('GET', `/product/variant/query?pid=${encodeURIComponent(p.pid)}`).catch(() => [])) || [];
+        let v = variants[0];
+        let colorEs = null;
+        if (s.colors) {
+          // Tienda con colores restringidos: solo variantes cuyo nombre incluya un color permitido.
+          const match = pickColorVariant(variants, s.colors);
+          if (!match) continue;
+          ({ variant: v, colorEs } = match);
+        }
         const vid = v?.vid || p.pid;
         const costUsd = num(v?.variantSellPrice ?? p.price);
         if (!costUsd) continue;
@@ -116,7 +137,8 @@ export const cjSupplier = {
           popularity: p.listed,
           supplierProductId: p.pid,
           supplierVariantId: vid,
-          title: p.name,
+          title: colorEs ? `${p.name} · ${colorEs}` : p.name,
+          color: colorEs,
           description: `${s.label}. ${p.name}`,
           category: s.category,
           imageUrl: v?.variantImage || p.image || null,

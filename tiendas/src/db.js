@@ -97,6 +97,7 @@ for (const [col, def] of [
   ['popularity', 'INTEGER NOT NULL DEFAULT 0'], // tiendas que lo venden en el proveedor (indicador de ventas)
   ['search_term', 'TEXT'], // búsqueda del nicho con la que se encontró
   ['title_custom', 'TEXT'], // nombre en español editado desde el panel (la sincronización no lo pisa)
+  ['hidden', 'INTEGER NOT NULL DEFAULT 0'], // ocultado a mano desde el panel (la sincronización lo respeta)
 ]) {
   if (!productCols.has(col)) db.exec(`ALTER TABLE products ADD COLUMN ${col} ${def}`);
 }

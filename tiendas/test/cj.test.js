@@ -38,18 +38,18 @@ globalThis.fetch = async (url, opts = {}) => {
   throw new Error(`URL inesperada ${url}`);
 };
 
-const { cjSupplier } = await import('../src/suppliers/cj.js');
+const { cjSupplier, pickColorVariant } = await import('../src/suppliers/cj.js');
 
 test('CJ: toma los más vendidos de cada búsqueda sin repetir productos entre tiendas', async () => {
   const out = await cjSupplier.fetchCatalog({
     searches: [
       { store: 'voltia', category: 'gadgets', query: 'wireless earbuds', label: 'Audífonos inalámbricos', icon: 'headphones' },
-      { store: 'ambar', category: 'gadgets', query: 'bluetooth earphones', label: 'Audífonos', icon: 'headphones' },
+      { store: 'pixelpop', category: 'gadgets', query: 'bluetooth earphones', label: 'Audífonos', icon: 'headphones' },
     ],
   });
   assert.deepEqual(out.map((p) => [p.store, p.supplierProductId]), [
     ['voltia', 'P1'], ['voltia', 'P2'], // los 2 más vendidos
-    ['ambar', 'P5'], ['ambar', 'P6'], // P1 ya es de voltia y P4 está agotado
+    ['pixelpop', 'P5'], ['pixelpop', 'P6'], // P1 ya es de voltia y P4 está agotado
   ]);
   const listCall = calls.find((c) => c.includes('listV2'));
   assert.match(listCall, /orderBy=1&sort=desc/, 'ordenado por ventas (listedNum)');
@@ -58,4 +58,14 @@ test('CJ: toma los más vendidos de cada búsqueda sin repetir productos entre t
   assert.equal(out[0].shippingUsd, 2.75);
   assert.equal(out[0].popularity, 9000);
   assert.equal(out[0].imageUrl, 'https://img/p1.jpg');
+});
+
+test('CJ: tiendas en negro y blanco solo toman variantes de esos colores', () => {
+  const colors = { black: 'Negro', white: 'Blanco' };
+  const pick = (names) => pickColorVariant(names.map((n, i) => ({ vid: `V${i}`, variantKey: n })), colors);
+  assert.equal(pick(['Red-M', 'Black-M', 'White-M']).variant.vid, 'V1');
+  assert.equal(pick(['Red-M', 'Black-M']).colorEs, 'Negro');
+  assert.equal(pick(['White XL']).colorEs, 'Blanco');
+  assert.equal(pick(['Black Red-L', 'Pink-S', 'Blackish-M']), null, 'combinados, otros colores o falsos positivos se descartan');
+  assert.equal(pick([]), null);
 });

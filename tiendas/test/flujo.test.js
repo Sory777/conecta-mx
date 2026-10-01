@@ -58,7 +58,7 @@ test('cada tienda tiene productos propios, distintos a los de las demás', () =>
     assert.ok(rows.length >= 20, `${s.slug} tiene productos`);
     for (const r of rows) assert.ok(r.price_cents > r.landed, 'precio mayor al costo');
     assert.deepEqual(rows.slice(0, 4).map((r) => r.featured), [1, 1, 1, 1], 'los más populares son los destacados');
-    for (const c of ['gadgets', 'ropa', 'accesorios']) {
+    for (const c of s.categories) {
       const n = db.prepare('SELECT COUNT(*) n FROM store_products sp JOIN products p ON p.id = sp.product_id WHERE sp.store_slug = ? AND category = ?').get(s.slug, c).n;
       assert.ok(n > 0, `${s.slug} tiene ${c}`);
     }
@@ -68,9 +68,10 @@ test('cada tienda tiene productos propios, distintos a los de las demás', () =>
 test('las búsquedas de nicho se reparten por turnos y ninguna se repite', async () => {
   const { nicheSearches } = await import('../src/services/catalog.js');
   const list = nicheSearches();
-  assert.equal(list.length, 90);
+  const total = STORES.reduce((n, s) => n + Object.values(s.niche).flat().length, 0);
+  assert.equal(list.length, total);
   assert.deepEqual(list.slice(0, 10).map((x) => x.store), STORES.map((s) => s.slug));
-  assert.equal(new Set(list.map((x) => `${x.store}:${x.query}`)).size, 90);
+  assert.equal(new Set(list.map((x) => `${x.store}:${x.query}`)).size, total);
 });
 
 test('el carrito ignora precios enviados por el navegador', async () => {
@@ -143,8 +144,8 @@ test('pedido completo: pago -> proveedor -> ganancia en el panel', async () => {
 test('error del proveedor queda registrado y se puede reintentar', async () => {
   const { mockSupplier } = await import('../src/suppliers/mock.js');
   const { forwardToSupplier, markPaid, createOrder } = await import('../src/services/orders.js');
-  const id = db.prepare("SELECT product_id FROM store_products WHERE store_slug = 'ambar' LIMIT 1").get().product_id;
-  const order = createOrder('ambar', [{ id, qty: 1 }], customer);
+  const id = db.prepare("SELECT product_id FROM store_products WHERE store_slug = 'alasnegras' LIMIT 1").get().product_id;
+  const order = createOrder('alasnegras', [{ id, qty: 1 }], customer);
   markPaid(order.id, 'TEST');
   const original = mockSupplier.createOrder;
   mockSupplier.createOrder = async () => { throw new Error('Sin saldo'); };
@@ -154,4 +155,34 @@ test('error del proveedor queda registrado y se puede reintentar', async () => {
   mockSupplier.createOrder = original;
   o = await forwardToSupplier(order.id);
   assert.equal(o.status, 'sent_to_supplier');
+});
+
+test('Alas Negras: solo ropa, solo negro y blanco, diseño monocromático', async () => {
+  const store = STORES.find((s) => s.slug === 'alasnegras');
+  const hex = Object.values(store.palette);
+  for (const c of hex) {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+    assert.ok(r === g && g === b, `${c} es un gris neutro (sin color)`);
+  }
+  const rows = db.prepare(`SELECT p.category, COALESCE(p.title_custom, p.title) title FROM store_products sp
+    JOIN products p ON p.id = sp.product_id WHERE sp.store_slug = 'alasnegras'`).all();
+  assert.ok(rows.length >= 40);
+  for (const r of rows) {
+    assert.ok(['playeras', 'sudaderas', 'chamarras', 'pantalones'].includes(r.category), `${r.title} es ropa`);
+    assert.match(r.title, /· (Negro|Blanco)$/, `${r.title} es negro o blanco`);
+  }
+  const page = await (await get('/s/alasnegras/')).text();
+  assert.match(page, /data-hero="rhinestone"/);
+  for (const c of ['Playeras', 'Sudaderas', 'Chamarras', 'Pantalones']) assert.ok(page.includes(`>${c}<`));
+});
+
+test('ocultar un producto lo quita de la tienda y la sincronización lo respeta', async () => {
+  const { setProductHidden } = await import('../src/services/catalog.js');
+  const id = db.prepare("SELECT product_id FROM store_products WHERE store_slug = 'kiro' LIMIT 1").get().product_id;
+  setProductHidden(id, true);
+  assert.equal((await get(`/s/kiro/p/${id}`)).status, 404);
+  await runSync();
+  assert.equal((await get(`/s/kiro/p/${id}`)).status, 404);
+  setProductHidden(id, false);
+  assert.equal((await get(`/s/kiro/p/${id}`)).status, 200);
 });

@@ -43,6 +43,8 @@ const ICONS = {
   umbrella: '<path d="M2 12a10 10 0 0 1 20 0zM12 12v7a2 2 0 0 0 4 0M12 2v0"/>',
   fan: '<circle cx="12" cy="12" r="2"/><path d="M12 10c0-4 1-7 4-7 2 0 2 3-1 5M14 12c4 0 7 1 7 4 0 2-3 2-5-1M12 14c0 4-1 7-4 7-2 0-2-3 1-5M10 12c-4 0-7-1-7-4 0-2 3-2 5 1"/>',
   sparkle: '<path d="M12 3c.8 4.5 3.5 7.2 8 8-4.5.8-7.2 3.5-8 8-.8-4.5-3.5-7.2-8-8 4.5-.8 7.2-3.5 8-8zM19 3v4M17 5h4"/>',
+  skull: '<path d="M12 3a8 8 0 0 0-8 8c0 2.6 1.2 4.3 3 5.4V19a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2.6c1.8-1.1 3-2.8 3-5.4a8 8 0 0 0-8-8z"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><path d="M12 15.5v1M10 21v-2M14 21v-2"/>',
+  wings: '<path d="M12 8v12M12 9C9 5 5 4 2 5c1 3 3 4 5 4-2 1-3 2-4 4 3 0 5-1 6-2-1 2-1 4 0 5 1-2 2-3 3-5M12 9c3-4 7-5 10-4-1 3-3 4-5 4 2 1 3 2 4 4-3 0-5-1-6-2 1 2 1 4 0 5-1-2-2-3-3-5"/>',
   belt: '<rect x="2" y="9" width="20" height="6" rx="1"/><rect x="9" y="7" width="6" height="10" rx="1"/><path d="M12 10v4"/>',
 };
 
@@ -66,6 +68,12 @@ export function logoMark(store, size = 36) {
     leaf: `<circle cx="20" cy="20" r="19" fill="${a}"/><path d="M10 30C10 16 18 9 31 9c0 13-7 21-21 21z" fill="${p}"/><path d="M11 29 25 15" stroke="${a}" stroke-width="2" stroke-linecap="round"/>`,
     triangle: `<rect width="40" height="40" rx="10" fill="${a}"/><path d="M20 7 34 32H6z" fill="${p}" stroke="#1d1d1d" stroke-width="2.5" stroke-linejoin="round"/><circle cx="29" cy="11" r="4" fill="#1d1d1d"/>`,
     ring: `<circle cx="20" cy="20" r="16" fill="none" stroke="${p}" stroke-width="5"/><circle cx="20" cy="20" r="6" fill="${a}"/>`,
+    skullwings: `<rect width="40" height="40" fill="${on}"/>
+      <path d="M13 17C9 12 5 11 1 12c1 4 4 5 7 5-3 1-4 3-5 5 4 0 6-1 8-3M27 17c4-5 8-6 12-5-1 4-4 5-7 5 3 1 4 3 5 5-4 0-6-1-8-3" fill="${p}"/>
+      <path d="M20 9a8 8 0 0 0-8 8c0 2.5 1.1 4.2 2.8 5.3V26a2 2 0 0 0 2 2h6.4a2 2 0 0 0 2-2v-3.7c1.7-1.1 2.8-2.8 2.8-5.3a8 8 0 0 0-8-8z" fill="${p}"/>
+      <circle cx="16.8" cy="18" r="2.2" fill="${on}"/><circle cx="23.2" cy="18" r="2.2" fill="${on}"/><path d="M20 21.5l-1.2 2.3h2.4z" fill="${on}"/>
+      <path d="M18 28v-2.5M22 28v-2.5" stroke="${on}" stroke-width="1.2"/>
+      <circle cx="20" cy="5" r="1.3" fill="${a}"/><circle cx="6" cy="27" r="1" fill="${a}"/><circle cx="34" cy="27" r="1" fill="${a}"/>`,
     diamond: `<path d="M20 1 39 20 20 39 1 20z" fill="${p}"/><path d="M20 10 30 20 20 30 10 20z" fill="${a}"/>`,
   };
   return `<svg class="logo-mark" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true">${shapes[store.logoShape] || shapes.circle}</svg>`;
@@ -88,6 +96,7 @@ export function productArt(store, product) {
   const patterns = {
     grid: `<pattern id="${id}p" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0v20" fill="none" stroke="${a}" stroke-opacity=".18"/></pattern>`,
     dots: `<pattern id="${id}p" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2" fill="${a}" fill-opacity=".35"/></pattern>`,
+    rhinestone: `<pattern id="${id}p" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="${a}" fill-opacity=".55"/><circle cx="17" cy="13" r="1" fill="${a}" fill-opacity=".35"/><circle cx="9" cy="20" r=".7" fill="${a}" fill-opacity=".5"/></pattern>`,
     stripes: `<pattern id="${id}p" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="14" fill="${a}" fill-opacity=".15"/></pattern>`,
   };
   const pat = patterns[store.hero] || '';
@@ -116,7 +125,7 @@ export function themeCss(store) {
 }
 
 // Familias con un solo peso: pedirles otros pesos hace fallar la hoja de Google Fonts.
-const SINGLE_WEIGHT = new Set(['Bebas Neue']);
+const SINGLE_WEIGHT = new Set(['Bebas Neue', 'Pirata One']);
 
 export function fontsHref(store) {
   const fams = [...new Set([store.fonts.heading, store.fonts.body])]

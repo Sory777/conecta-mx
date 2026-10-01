@@ -70,6 +70,9 @@ p{margin:0 0 1em}
 [data-hero=blob] .hero{background:var(--bg)}
 [data-hero=blob] .hero::before{content:"";position:absolute;width:520px;height:520px;right:-120px;top:-160px;border-radius:42% 58% 63% 37%/45% 41% 59% 55%;background:rgb(var(--primary-rgb)/.22)}
 [data-hero=blob] .hero::after{content:"";position:absolute;width:300px;height:300px;left:-80px;bottom:-140px;border-radius:50%;background:rgb(var(--accent-rgb)/.45)}
+[data-hero=rhinestone] .hero{background-color:#000;background-image:linear-gradient(90deg,#000 0,rgb(0 0 0/.9) 40%,transparent 70%),radial-gradient(circle,rgb(255 255 255/.9) 0 1.6px,transparent 2.2px),radial-gradient(circle,rgb(255 255 255/.45) 0 1px,transparent 1.6px),radial-gradient(circle,rgb(255 255 255/.7) 0 .8px,transparent 1.3px),radial-gradient(600px 320px at 78% 50%,rgb(255 255 255/.12),transparent 70%);background-size:auto,46px 46px,23px 23px,71px 71px,auto;background-position:0 0,0 0,11px 7px,30px 19px,0 0;border-bottom:1px solid #fff}
+[data-hero=rhinestone] .hero h1{letter-spacing:.01em;text-shadow:0 0 18px rgb(255 255 255/.35)}
+[data-hero=rhinestone] .hero-art{filter:drop-shadow(0 0 30px rgb(255 255 255/.25))}
 [data-hero=split] .hero{background:linear-gradient(90deg,var(--surface) 55%,rgb(var(--accent-rgb)/.35) 55%)}
 
 /* ---------- Beneficios ---------- */
@@ -85,7 +88,7 @@ p{margin:0 0 1em}
 [data-card=flat] .card{background:transparent}
 [data-card=flat] .card.summary,[data-card=flat] .card.cart-lines,[data-card=flat] form.card,[data-card=flat] .narrow .card{background:var(--surface);border:1px solid var(--border)}
 [data-card=brutal] .card{border:2px solid var(--text);box-shadow:5px 5px 0 var(--text)}
-.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
 .cat{display:flex;align-items:center;gap:14px;padding:22px;text-decoration:none;font:700 1.15rem var(--font-heading);text-transform:var(--heading-transform)}
 .cat svg{color:var(--primary)}
 [data-card=flat] .cat{background:rgb(var(--accent-rgb)/.18)}
@@ -161,6 +164,7 @@ p{margin:0 0 1em}
   .hero-inner,.product,.cart-layout{grid-template-columns:1fr}
   .hero-art{display:none}
   [data-hero=split] .hero{background:var(--surface)}
+  [data-hero=rhinestone] .hero-copy{background:rgb(0 0 0/.82);box-shadow:0 0 24px 18px rgb(0 0 0/.82)}
   .trust{grid-template-columns:1fr 1fr}
   .cats{grid-template-columns:1fr}
   .search input{width:120px}

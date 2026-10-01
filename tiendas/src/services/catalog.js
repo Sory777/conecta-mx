@@ -36,7 +36,7 @@ export function updateStoreSettings(slug, { markup, active }) {
 export function repriceStore(slug) {
   const markup = storeMarkup(slug);
   const products = db.prepare(`SELECT id, cost_cents, shipping_cents FROM products
-    WHERE active = 1 AND store_slug = ? ORDER BY popularity DESC, id`).all(slug);
+    WHERE active = 1 AND hidden = 0 AND store_slug = ? ORDER BY popularity DESC, id`).all(slug);
   tx(() => {
     db.prepare('DELETE FROM store_products WHERE store_slug = ?').run(slug);
     const ins = db.prepare('INSERT INTO store_products (store_slug, product_id, price_cents, featured) VALUES (?, ?, ?, ?)');
@@ -51,7 +51,7 @@ export function repriceStore(slug) {
 // tienda acapare los productos más populares cuando dos nichos se parecen.
 export function nicheSearches(stores = STORES) {
   const perStore = stores.map((s) => s.categories.flatMap((category) =>
-    (s.niche?.[category] || []).map(([query, label, icon]) => ({ store: s.slug, category, query, label, icon }))));
+    (s.niche?.[category] || []).map(([query, label, icon]) => ({ store: s.slug, category, query, label, icon, colors: s.onlyColors || null }))));
   const rounds = Math.max(0, ...perStore.map((l) => l.length));
   const out = [];
   for (let i = 0; i < rounds; i++) for (const list of perStore) if (list[i]) out.push(list[i]);
@@ -89,6 +89,11 @@ export async function syncCatalog(supplierName = env.supplier) {
   });
   for (const s of STORES) repriceStore(s.slug);
   return { supplier: supplier.name, imported: seen.size };
+}
+
+export function setProductHidden(id, hidden) {
+  const p = db.prepare('UPDATE products SET hidden = ? WHERE id = ? RETURNING store_slug').get(hidden ? 1 : 0, id);
+  if (p?.store_slug) repriceStore(p.store_slug);
 }
 
 export function setProductTitle(id, title) {

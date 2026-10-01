@@ -12,7 +12,8 @@
 //   iconStroke   grosor de trazo de los iconos
 //   uppercase    títulos en mayúsculas
 //   markup       margen por defecto sobre el costo del proveedor (0.6 = +60 %)
-//   categories   orden de categorías en la portada
+//   categories   orden de categorías en la portada (claves de CATEGORIES)
+//   onlyColors   (opcional) solo importar variantes de estos colores, p. ej. { black: 'Negro' }
 //   domains      dominios propios que resuelven a esta tienda (opcional)
 //   niche        búsquedas por categoría: [búsqueda en inglés para CJ, nombre en español, icono].
 //                Cada tienda importa los productos más vendidos de SUS búsquedas, así
@@ -173,20 +174,26 @@ export const STORES = [
     },
   },
   {
-    slug: 'ambar',
-    name: 'Ámbar Urbano',
-    tagline: 'Streetwear sin reglas',
-    heroTitle: 'Calle. Estilo. Actitud.',
-    heroText: 'Sudaderas, gorras, mochilas y gadgets para moverte por la ciudad.',
-    palette: { bg: '#1b1b1d', surface: '#242427', text: '#f4f1ea', muted: '#a5a19a', primary: '#ffb000', onPrimary: '#1b1b1d', accent: '#ff5a1f', border: '#38383d' },
-    fonts: { heading: 'Bebas Neue', body: 'Barlow' },
-    radius: 0, header: 'left', hero: 'gradient', card: 'flat', button: 'solid',
-    logoShape: 'diamond', iconStroke: 2, uppercase: true,
-    markup: 0.9, categories: ['ropa', 'accesorios', 'gadgets'], domains: [],
+    // Tienda exclusiva de ropa con pedrería, calaveras y alas, solo en negro y blanco.
+    // El estilo se inspira en el tattoo/Y2K, pero NO vende la marca Ed Hardy ni ninguna otra
+    // (las búsquedas evitan nombres de marca para no importar imitaciones).
+    slug: 'alasnegras',
+    name: 'Alas Negras',
+    tagline: 'Pedrería, calaveras y alas. Solo negro y blanco.',
+    heroTitle: 'Brilla en la oscuridad',
+    heroText: 'Playeras, sudaderas, chamarras y jeans con pedrería y gráficos estilo tattoo. Toda la colección en negro y blanco.',
+    palette: { bg: '#000000', surface: '#0d0d0d', text: '#ffffff', muted: '#a6a6a6', primary: '#ffffff', onPrimary: '#000000', accent: '#ffffff', border: '#2e2e2e' },
+    fonts: { heading: 'Pirata One', body: 'Barlow' },
+    radius: 0, header: 'centered', hero: 'rhinestone', card: 'bordered', button: 'solid',
+    logoShape: 'skullwings', iconStroke: 1.75, uppercase: false,
+    markup: 0.9, categories: ['playeras', 'sudaderas', 'chamarras', 'pantalones'], domains: [],
+    // Solo se importan variantes en estos colores (nombre del color en inglés en CJ, y su nombre en español).
+    onlyColors: { black: 'Negro', white: 'Blanco' },
     niche: {
-      ropa: [['oversized hoodie streetwear', 'Sudadera oversize', 'hoodie'], ['cargo pants', 'Pantalón cargo', 'pants'], ['puffer jacket', 'Chamarra puffer', 'jacket']],
-      accesorios: [['baseball cap', 'Gorra', 'cap'], ['men chain necklace', 'Cadena', 'gem'], ['crossbody sling bag', 'Bolsa sling', 'bag']],
-      gadgets: [['over ear headphones', 'Audífonos de diadema', 'headphones'], ['phone tripod', 'Tripié para celular', 'camera'], ['mini power bank', 'Mini power bank', 'battery']],
+      playeras: [['rhinestone skull t-shirt', 'Playera calavera con pedrería', 'skull'], ['rhinestone wings t-shirt', 'Playera alas con pedrería', 'wings'], ['tattoo style graphic t-shirt', 'Playera estilo tattoo', 'shirt']],
+      sudaderas: [['rhinestone skull hoodie', 'Sudadera calavera con pedrería', 'skull'], ['rhinestone zip up hoodie', 'Sudadera con cierre y pedrería', 'hoodie'], ['gothic wings hoodie', 'Sudadera alas góticas', 'wings']],
+      chamarras: [['rhinestone denim jacket', 'Chamarra de mezclilla con pedrería', 'jacket'], ['skull bomber jacket', 'Chamarra bomber calavera', 'jacket']],
+      pantalones: [['rhinestone jeans', 'Jeans con pedrería', 'pants'], ['skull print pants', 'Pantalón estampado calavera', 'pants']],
     },
   },
 ];
@@ -195,6 +202,11 @@ export const CATEGORIES = {
   gadgets: { name: 'Gadgets', icon: 'cpu' },
   ropa: { name: 'Ropa', icon: 'shirt' },
   accesorios: { name: 'Accesorios', icon: 'watch' },
+  // Categorías de tiendas especializadas en ropa.
+  playeras: { name: 'Playeras', icon: 'shirt' },
+  sudaderas: { name: 'Sudaderas', icon: 'hoodie' },
+  chamarras: { name: 'Chamarras', icon: 'jacket' },
+  pantalones: { name: 'Pantalones', icon: 'pants' },
 };
 
 export function getStore(slug) {

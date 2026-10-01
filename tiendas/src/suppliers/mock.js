@@ -5,7 +5,10 @@
 import crypto from 'node:crypto';
 
 // Rango de costo (USD) y envío por categoría, para generar precios realistas.
-const COST = { gadgets: [4, 22, 2.4], ropa: [4, 14, 2.2], accesorios: [2, 12, 1.6] };
+const COST = {
+  gadgets: [4, 22, 2.4], ropa: [4, 14, 2.2], accesorios: [2, 12, 1.6],
+  playeras: [5, 12, 1.9], sudaderas: [10, 20, 3.2], chamarras: [14, 28, 3.8], pantalones: [9, 18, 3],
+};
 const VARIANTS = ['Negro', 'Blanco', 'Arena', 'Azul marino', 'Rosa', 'Verde olivo', 'Gris', 'Lavanda'];
 const h = (s) => crypto.createHash('sha1').update(s).digest().readUInt32BE(0);
 
@@ -22,7 +25,8 @@ export const mockSupplier = {
       for (let i = 0; i < perSearch; i++) {
         const key = `${s.store}:${s.query}:${i}`;
         const [min, max, ship] = COST[s.category] || COST.accesorios;
-        const variant = VARIANTS[(h(s.store + s.query) + i * 3) % VARIANTS.length];
+        const palette = s.colors ? Object.values(s.colors) : VARIANTS;
+        const variant = palette[(h(s.store + s.query) + i * 3) % palette.length];
         out.push({
           store: s.store,
           searchTerm: s.query,
