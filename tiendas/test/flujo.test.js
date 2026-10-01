@@ -172,7 +172,9 @@ test('Alas Negras: solo ropa, solo negro y blanco, diseño monocromático', asyn
     assert.match(r.title, /· (Negro|Blanco)$/, `${r.title} es negro o blanco`);
   }
   const page = await (await get('/s/alasnegras/')).text();
-  assert.match(page, /data-hero="rhinestone"/);
+  assert.match(page, /data-hero="noir"/);
+  assert.match(page, /data-mood="noir"/);
+  assert.doesNotMatch(page.slice(0, page.indexOf('class="trust')), /calavera|skull/i, 'cabecera y portada sin calaveras');
   for (const c of ['Playeras', 'Sudaderas', 'Chamarras', 'Pantalones']) assert.ok(page.includes(`>${c}<`));
 });
 

@@ -13,6 +13,7 @@
 //   uppercase    títulos en mayúsculas
 //   markup       margen por defecto sobre el costo del proveedor (0.6 = +60 %)
 //   categories   orden de categorías en la portada (claves de CATEGORIES)
+//   mood         (opcional) 'noir': capa de estilo de lujo nocturno sobre las variantes anteriores
 //   onlyColors   (opcional) solo importar variantes de estos colores, p. ej. { black: 'Negro' }
 //   domains      dominios propios que resuelven a esta tienda (opcional)
 //   niche        búsquedas por categoría: [búsqueda en inglés para CJ, nombre en español, icono].
@@ -174,24 +175,25 @@ export const STORES = [
     },
   },
   {
-    // Tienda exclusiva de ropa con pedrería, calaveras y alas, solo en negro y blanco.
-    // El estilo se inspira en el tattoo/Y2K, pero NO vende la marca Ed Hardy ni ninguna otra
-    // (las búsquedas evitan nombres de marca para no importar imitaciones).
+    // Tienda exclusiva de ropa con pedrería y detalles oscuros, solo en negro y blanco.
+    // Estética "noir": elegante y misteriosa (tipografía clásica, mucho espacio, niebla).
+    // Las búsquedas evitan nombres de marca (p. ej. Ed Hardy) para no importar imitaciones.
     slug: 'alasnegras',
     name: 'Alas Negras',
-    tagline: 'Pedrería, calaveras y alas. Solo negro y blanco.',
-    heroTitle: 'Brilla en la oscuridad',
-    heroText: 'Playeras, sudaderas, chamarras y jeans con pedrería y gráficos estilo tattoo. Toda la colección en negro y blanco.',
-    palette: { bg: '#000000', surface: '#0d0d0d', text: '#ffffff', muted: '#a6a6a6', primary: '#ffffff', onPrimary: '#000000', accent: '#ffffff', border: '#2e2e2e' },
-    fonts: { heading: 'Pirata One', body: 'Barlow' },
-    radius: 0, header: 'centered', hero: 'rhinestone', card: 'bordered', button: 'solid',
-    logoShape: 'skullwings', iconStroke: 1.75, uppercase: false,
+    tagline: 'Colección en negro y blanco',
+    heroTitle: 'Lo que brilla de noche',
+    heroText: 'Prendas en negro y blanco con detalles de pedrería. Para quienes no necesitan explicar su estilo.',
+    palette: { bg: '#000000', surface: '#0a0a0a', text: '#f5f5f5', muted: '#8f8f8f', primary: '#f5f5f5', onPrimary: '#000000', accent: '#ffffff', border: '#1f1f1f' },
+    fonts: { heading: 'Cinzel', body: 'Jost' },
+    radius: 0, header: 'centered', hero: 'noir', card: 'flat', button: 'outline',
+    logoShape: 'eclipse', iconStroke: 1, uppercase: false,
+    mood: 'noir',
     markup: 0.9, categories: ['playeras', 'sudaderas', 'chamarras', 'pantalones'], domains: [],
     // Solo se importan variantes en estos colores (nombre del color en inglés en CJ, y su nombre en español).
     onlyColors: { black: 'Negro', white: 'Blanco' },
     niche: {
-      playeras: [['rhinestone skull t-shirt', 'Playera calavera con pedrería', 'skull'], ['rhinestone wings t-shirt', 'Playera alas con pedrería', 'wings'], ['tattoo style graphic t-shirt', 'Playera estilo tattoo', 'shirt']],
-      sudaderas: [['rhinestone skull hoodie', 'Sudadera calavera con pedrería', 'skull'], ['rhinestone zip up hoodie', 'Sudadera con cierre y pedrería', 'hoodie'], ['gothic wings hoodie', 'Sudadera alas góticas', 'wings']],
+      playeras: [['rhinestone skull t-shirt', 'Playera calavera con pedrería', 'shirt'], ['rhinestone wings t-shirt', 'Playera alas con pedrería', 'shirt'], ['tattoo style graphic t-shirt', 'Playera estilo tattoo', 'shirt']],
+      sudaderas: [['rhinestone skull hoodie', 'Sudadera calavera con pedrería', 'hoodie'], ['rhinestone zip up hoodie', 'Sudadera con cierre y pedrería', 'hoodie'], ['gothic wings hoodie', 'Sudadera alas góticas', 'hoodie']],
       chamarras: [['rhinestone denim jacket', 'Chamarra de mezclilla con pedrería', 'jacket'], ['skull bomber jacket', 'Chamarra bomber calavera', 'jacket']],
       pantalones: [['rhinestone jeans', 'Jeans con pedrería', 'pants'], ['skull print pants', 'Pantalón estampado calavera', 'pants']],
     },

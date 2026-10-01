@@ -25,7 +25,7 @@ export function layout({ store, prefix, title, body, description }) {
 <link rel="stylesheet" href="/static/store.css">
 <link rel="stylesheet" href="${prefix}/theme.css">
 </head>
-<body data-store="${store.slug}" data-prefix="${prefix}" data-header="${store.header}" data-hero="${store.hero}" data-card="${store.card}" data-button="${store.button}">
+<body data-store="${store.slug}" data-prefix="${prefix}" data-header="${store.header}" data-hero="${store.hero}" data-card="${store.card}" data-button="${store.button}" data-mood="${store.mood || 'default'}">
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="${prefix}/" aria-label="${store.name}, inicio">${raw(logoMark(store, 36))}<span class="brand-name">${store.name}</span></a>

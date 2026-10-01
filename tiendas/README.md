@@ -14,7 +14,7 @@ pero con identidad visual propia, y un **panel central** para administrarlas tod
 | Raíz & Co. | natural, tierra | Fraunces / DM Sans | hoja |
 | Pixel Pop | neo-brutalista, sombras duras | Fredoka / Poppins | triángulo |
 | Mar Azul | costero, rayas | Montserrat / Source Sans 3 | anillo |
-| Alas Negras | solo negro y blanco, banner de pedrería | Pirata One (gótica) / Barlow | calavera con alas |
+| Alas Negras | lujo nocturno: solo negro y blanco, niebla, líneas finas | Cinzel / Jost | eclipse |
 
 Cada marca se define en `src/config/stores.js` (nombre, paleta, fuentes, estilo de cabecera,
 banner, tarjetas, botones, isotipo, margen y nicho de productos). Para cambiar una marca o crear otra, edita ese archivo.
@@ -35,7 +35,8 @@ Cada tienda tiene su **nicho**: 3 búsquedas por categoría (gadgets, ropa, acce
 | Pixel Pop | mini impresora, lámpara kawaii, juguetes antiestrés | calcetines divertidos, pijama de caricatura, playera kawaii | funda kawaii, llavero de peluche, mochila kawaii |
 | Mar Azul | cámara deportiva, pulsera de actividad, licuadora portátil | traje de baño, short de baño, camisa playera | lentes polarizados, bolsa de playa, funda impermeable |
 
-**Alas Negras** es una tienda solo de ropa, con sus propias categorías (playeras, sudaderas, chamarras y
+**Alas Negras** es una tienda solo de ropa con estética de casa de moda nocturna (`mood: 'noir'`: tipografía
+clásica espaciada, banner con niebla animada, categorías como texto, sin calaveras en el diseño), con sus propias categorías (playeras, sudaderas, chamarras y
 pantalones): pedrería, calaveras, alas y gráficos estilo tattoo. **Solo importa variantes en negro o blanco**
 (`onlyColors` en su configuración): de cada producto toma la variante cuyo color en CJ sea negro o blanco y
 descarta las combinadas con otros colores. El nombre del color se agrega al producto («· Negro», «· Blanco»).
