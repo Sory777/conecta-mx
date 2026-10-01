@@ -51,7 +51,13 @@ export function repriceStore(slug) {
 // tienda acapare los productos más populares cuando dos nichos se parecen.
 export function nicheSearches(stores = STORES) {
   const perStore = stores.map((s) => s.categories.flatMap((category) =>
-    (s.niche?.[category] || []).map(([query, label, icon]) => ({ store: s.slug, category, query, label, icon, colors: s.onlyColors || null }))));
+    (s.niche?.[category] || []).flatMap(([query, label, icon]) => {
+      const base = { store: s.slug, category, icon, colors: s.onlyColors || null };
+      if (!s.audiences) return [{ ...base, query, label, audience: null }];
+      return Object.entries(s.audiences).map(([key, a]) => ({
+        ...base, query: `${a.en} ${query}`, label: `${label} para ${a.name.toLowerCase()}`, audience: key,
+      }));
+    })));
   const rounds = Math.max(0, ...perStore.map((l) => l.length));
   const out = [];
   for (let i = 0; i < rounds; i++) for (const list of perStore) if (list[i]) out.push(list[i]);
@@ -67,18 +73,19 @@ export async function syncCatalog(supplierName = env.supplier) {
   tx(() => {
     const up = db.prepare(`INSERT INTO products
       (supplier, supplier_product_id, supplier_variant_id, title, description, category, image_url, icon, cost_cents, shipping_cents,
-       store_slug, popularity, search_term, active, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))
+       store_slug, popularity, search_term, audience, active, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))
       ON CONFLICT(supplier, supplier_variant_id) DO UPDATE SET
         title = excluded.title, description = excluded.description, category = excluded.category,
         image_url = excluded.image_url, icon = excluded.icon, cost_cents = excluded.cost_cents,
         shipping_cents = excluded.shipping_cents, store_slug = excluded.store_slug, popularity = excluded.popularity,
-        search_term = excluded.search_term, active = 1, updated_at = excluded.updated_at`);
+        search_term = excluded.search_term, audience = excluded.audience, active = 1, updated_at = excluded.updated_at`);
     for (const p of feed) {
       if (seen.has(p.supplierVariantId)) continue; // un producto, una sola tienda
       seen.add(p.supplierVariantId);
       up.run(supplier.name, p.supplierProductId, p.supplierVariantId, p.title, p.description || '', p.category,
-        p.imageUrl, p.icon, toCents(p.costUsd), toCents(p.shippingUsd || 0), p.store, p.popularity || 0, p.searchTerm || null);
+        p.imageUrl, p.icon, toCents(p.costUsd), toCents(p.shippingUsd || 0), p.store, p.popularity || 0, p.searchTerm || null,
+        p.audience || null);
     }
     // Lo que el proveedor ya no ofrece se desactiva (no se borra: hay pedidos que lo referencian).
     const all = db.prepare('SELECT id, supplier_variant_id FROM products WHERE supplier = ?').all(supplier.name);
@@ -101,10 +108,11 @@ export function setProductTitle(id, title) {
   db.prepare('UPDATE products SET title_custom = ? WHERE id = ?').run(t || null, id);
 }
 
-export function listStoreProducts(slug, { category, q, featured, limit = 60 } = {}) {
+export function listStoreProducts(slug, { category, audience, q, featured, limit = 60 } = {}) {
   const where = ['sp.store_slug = ?', 'p.active = 1'];
   const args = [slug];
   if (category) { where.push('p.category = ?'); args.push(category); }
+  if (audience) { where.push('p.audience = ?'); args.push(audience); }
   if (q) { where.push('(COALESCE(p.title_custom, p.title) LIKE ? OR p.search_term LIKE ?)'); args.push(`%${q}%`, `%${q}%`); }
   if (featured != null) where.push(`sp.featured = ${featured ? 1 : 0}`);
   args.push(limit);

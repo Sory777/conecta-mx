@@ -134,6 +134,7 @@ export const cjSupplier = {
         out.push({
           store: s.store,
           searchTerm: s.query,
+          audience: s.audience || null,
           popularity: p.listed,
           supplierProductId: p.pid,
           supplierVariantId: vid,

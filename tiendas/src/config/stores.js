@@ -14,6 +14,8 @@
 //   markup       margen por defecto sobre el costo del proveedor (0.6 = +60 %)
 //   categories   orden de categorías en la portada (claves de CATEGORIES)
 //   mood         (opcional) 'noir': capa de estilo de lujo nocturno sobre las variantes anteriores
+//   audiences    (opcional) públicos, p. ej. dama/caballero: duplica cada búsqueda por público y
+//                agrega secciones y filtros por público en la tienda
 //   onlyColors   (opcional) solo importar variantes de estos colores, p. ej. { black: 'Negro' }
 //   domains      dominios propios que resuelven a esta tienda (opcional)
 //   niche        búsquedas por categoría: [búsqueda en inglés para CJ, nombre en español, icono].
@@ -191,6 +193,8 @@ export const STORES = [
     markup: 0.9, categories: ['playeras', 'sudaderas', 'chamarras', 'pantalones'], domains: [],
     // Solo se importan variantes en estos colores (nombre del color en inglés en CJ, y su nombre en español).
     onlyColors: { black: 'Negro', white: 'Blanco' },
+    // Cada búsqueda del nicho se hace una vez para dama y otra para caballero.
+    audiences: { dama: { name: 'Dama', en: 'women' }, caballero: { name: 'Caballero', en: 'men' } },
     niche: {
       playeras: [['rhinestone skull t-shirt', 'Playera calavera con pedrería', 'shirt'], ['rhinestone wings t-shirt', 'Playera alas con pedrería', 'shirt'], ['tattoo style graphic t-shirt', 'Playera estilo tattoo', 'shirt']],
       sudaderas: [['rhinestone skull hoodie', 'Sudadera calavera con pedrería', 'hoodie'], ['rhinestone zip up hoodie', 'Sudadera con cierre y pedrería', 'hoodie'], ['gothic wings hoodie', 'Sudadera alas góticas', 'hoodie']],

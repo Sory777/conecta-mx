@@ -8,7 +8,10 @@ import { MX_STATES, STATUS_LABELS } from '../services/orders.js';
 const I = (store, name, size) => raw(icon(name, { size, stroke: store.iconStroke }));
 
 export function layout({ store, prefix, title, body, description }) {
-  const nav = store.categories.map((c) => html`<a href="${prefix}/c/${c}">${CATEGORIES[c].name}</a>`);
+  const nav = [
+    ...Object.entries(store.audiences || {}).map(([k, a]) => html`<a href="${prefix}/para/${k}">${a.name}</a>`),
+    ...store.categories.map((c) => html`<a class="${store.audiences ? 'nav-cat' : ''}" href="${prefix}/c/${c}">${CATEGORIES[c].name}</a>`),
+  ];
   const isDark = parseInt(store.palette.bg.slice(1, 3), 16) < 80;
   return html`<!doctype html>
 <html lang="es-MX">
@@ -101,6 +104,10 @@ export function homePage({ store, prefix, featured, products }) {
   </div>
 </section>
 ${trustBar(store)}
+${store.audiences ? html`<section class="wrap section">
+  <h2 class="section-title">Colecciones</h2>
+  <div class="cats audiences">${Object.entries(store.audiences).map(([k, a]) => html`<a class="card cat" href="${prefix}/para/${k}">${a.name}</a>`)}</div>
+</section>` : ''}
 <section class="wrap section">
   <h2 class="section-title">Categorías</h2>
   <div class="cats">${store.categories.map((c) => html`<a class="card cat" href="${prefix}/c/${c}">${I(store, CATEGORIES[c].icon, 32)}<span>${CATEGORIES[c].name}</span></a>`)}</div>
@@ -110,10 +117,20 @@ ${featured.length ? html`<section class="wrap section"><h2 class="section-title"
   return layout({ store, prefix, body });
 }
 
-export function listPage({ store, prefix, title, products, q }) {
+// Filtros en chips: en una categoría se filtra por público; en un público, por categoría.
+function chips({ store, prefix, category, audience, byAudience }) {
+  if (!store.audiences) return '';
+  const opts = byAudience
+    ? [[null, 'Todo'], ...store.categories.map((c) => [c, CATEGORIES[c].name])].map(([c, label]) => [`${prefix}/para/${audience}${c ? `?c=${c}` : ''}`, label, c === category])
+    : [[null, 'Todo'], ...Object.entries(store.audiences).map(([k, a]) => [k, a.name])].map(([k, label]) => [`${prefix}/c/${category}${k ? `?para=${k}` : ''}`, label, k === audience]);
+  return html`<nav class="chips" aria-label="Filtrar">${opts.map(([href, label, on]) => html`<a href="${href}" class="${on ? 'on' : ''}" ${raw(on ? 'aria-current="page"' : '')}>${label}</a>`)}</nav>`;
+}
+
+export function listPage({ store, prefix, title, products, q, category, audience, byAudience }) {
   const body = html`<section class="wrap section page-head">
   <h1>${title}</h1>
   ${q != null ? html`<p class="muted">${products.length} resultado${products.length === 1 ? '' : 's'} para “${q}”</p>` : ''}
+  ${category || byAudience ? chips({ store, prefix, category, audience, byAudience }) : ''}
 </section>
 <section class="wrap section">${grid(store, prefix, products)}</section>`;
   return layout({ store, prefix, title, body });

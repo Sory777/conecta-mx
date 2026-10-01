@@ -40,6 +40,8 @@ clásica espaciada, banner con niebla animada, categorías como texto, sin calav
 pantalones): pedrería, calaveras, alas y gráficos estilo tattoo. **Solo importa variantes en negro o blanco**
 (`onlyColors` en su configuración): de cada producto toma la variante cuyo color en CJ sea negro o blanco y
 descarta las combinadas con otros colores. El nombre del color se agrega al producto («· Negro», «· Blanco»).
+La colección está dividida en **Dama** y **Caballero** (`audiences`): cada búsqueda se hace dos veces
+(«women …» y «men …»), la tienda tiene secciones `/para/dama` y `/para/caballero` y filtros por público en cada categoría.
 Las búsquedas no usan nombres de marca (como Ed Hardy) para no importar imitaciones, que en México son
 ilegales y CJ o Stripe pueden bloquear.
 

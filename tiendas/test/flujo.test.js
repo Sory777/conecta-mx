@@ -68,7 +68,7 @@ test('cada tienda tiene productos propios, distintos a los de las demás', () =>
 test('las búsquedas de nicho se reparten por turnos y ninguna se repite', async () => {
   const { nicheSearches } = await import('../src/services/catalog.js');
   const list = nicheSearches();
-  const total = STORES.reduce((n, s) => n + Object.values(s.niche).flat().length, 0);
+  const total = STORES.reduce((n, s) => n + Object.values(s.niche).flat().length * Object.keys(s.audiences || { _: 1 }).length, 0);
   assert.equal(list.length, total);
   assert.deepEqual(list.slice(0, 10).map((x) => x.store), STORES.map((s) => s.slug));
   assert.equal(new Set(list.map((x) => `${x.store}:${x.query}`)).size, total);
@@ -187,4 +187,23 @@ test('ocultar un producto lo quita de la tienda y la sincronización lo respeta'
   assert.equal((await get(`/s/kiro/p/${id}`)).status, 404);
   setProductHidden(id, false);
   assert.equal((await get(`/s/kiro/p/${id}`)).status, 200);
+});
+
+test('Alas Negras separa la colección en dama y caballero', async () => {
+  const counts = db.prepare(`SELECT p.audience, COUNT(*) n FROM store_products sp JOIN products p ON p.id = sp.product_id
+    WHERE sp.store_slug = 'alasnegras' GROUP BY p.audience`).all();
+  assert.deepEqual(counts.map((r) => r.audience).sort(), ['caballero', 'dama']);
+  assert.ok(counts.every((r) => r.n >= 20));
+
+  const dama = await (await get('/s/alasnegras/para/dama')).text();
+  assert.match(dama, /para dama/);
+  assert.doesNotMatch(dama, /para caballero/);
+  const filtrada = await (await get('/s/alasnegras/c/playeras?para=caballero')).text();
+  assert.match(filtrada, /Playera[^<]*para caballero/);
+  assert.doesNotMatch(filtrada, /para dama/);
+  assert.match(filtrada, /aria-current="page">Caballero</);
+  assert.equal((await get('/s/alasnegras/para/ninos')).status, 404);
+  // Otras tiendas no tienen públicos ni categorías ajenas.
+  assert.equal((await get('/s/voltia/para/dama')).status, 404);
+  assert.equal((await get('/s/voltia/c/playeras')).status, 404);
 });

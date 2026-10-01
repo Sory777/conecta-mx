@@ -30,6 +30,7 @@ export const mockSupplier = {
         out.push({
           store: s.store,
           searchTerm: s.query,
+          audience: s.audience || null,
           popularity: 4000 - i * 900 + (h(key) % 500),
           supplierProductId: `MOCK-${s.store}-${h(s.query) % 100000}-${i}`,
           supplierVariantId: `MOCK-V-${s.store}-${h(s.query) % 100000}-${i}`,

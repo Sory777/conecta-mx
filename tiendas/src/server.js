@@ -90,10 +90,29 @@ shop.get('/', (req, res) => {
   send(res, V.homePage({ ...ctx(res), featured: listStoreProducts(store.slug, { featured: true, limit: 4 }), products: listStoreProducts(store.slug, { featured: false, limit: 12 }) }));
 });
 
+// Filtro opcional por público: /c/playeras?para=dama
+const audienceOf = (store, key) => (store.audiences?.[key] ? key : null);
+
 shop.get('/c/:cat', (req, res) => {
+  const { store } = res.locals;
   const cat = CATEGORIES[req.params.cat];
-  if (!cat) return send(res, V.notFoundPage(ctx(res)), 404);
-  send(res, V.listPage({ ...ctx(res), title: cat.name, products: listStoreProducts(res.locals.store.slug, { category: req.params.cat }) }));
+  if (!cat || !store.categories.includes(req.params.cat)) return send(res, V.notFoundPage(ctx(res)), 404);
+  const audience = audienceOf(store, req.query.para);
+  send(res, V.listPage({
+    ...ctx(res), title: cat.name, category: req.params.cat, audience,
+    products: listStoreProducts(store.slug, { category: req.params.cat, audience }),
+  }));
+});
+
+shop.get('/para/:aud', (req, res) => {
+  const { store } = res.locals;
+  const audience = audienceOf(store, req.params.aud);
+  if (!audience) return send(res, V.notFoundPage(ctx(res)), 404);
+  const category = store.categories.includes(req.query.c) ? req.query.c : null;
+  send(res, V.listPage({
+    ...ctx(res), title: store.audiences[audience].name, audience, category, byAudience: true,
+    products: listStoreProducts(store.slug, { audience, category, limit: 120 }),
+  }));
 });
 
 shop.get('/buscar', (req, res) => {

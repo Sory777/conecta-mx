@@ -232,6 +232,14 @@ body[data-mood=noir]{font-weight:300;letter-spacing:.01em}
 [data-mood=noir] .footer-inner .muted{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase}
 [data-mood=noir] .toast{background:var(--text);color:#000;font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;border-radius:0}
 
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips a{padding:7px 14px;border:1px solid var(--border);border-radius:999px;text-decoration:none;font-size:.85rem;color:var(--muted)}
+.chips a.on,.chips a:hover{border-color:var(--primary);color:var(--primary)}
+[data-mood=noir] .chips{justify-content:center;gap:28px;margin-top:22px}
+[data-mood=noir] .chips a{border:0;border-radius:0;padding:4px 0;font-size:.64rem;letter-spacing:.28em;text-transform:uppercase}
+[data-mood=noir] .chips a.on{color:var(--text);border-bottom:1px solid var(--text)}
+[data-mood=noir] .cats.audiences .cat{padding:84px 16px;font:400 1.1rem var(--font-heading);letter-spacing:.4em}
+
 /* ---------- Responsivo ---------- */
 @media (max-width:860px){
   .hero-inner,.product,.cart-layout{grid-template-columns:1fr}
@@ -247,6 +255,7 @@ body[data-mood=noir]{font-weight:300;letter-spacing:.01em}
   [data-mood=noir] .section{padding-top:48px}
   [data-mood=noir] .section-title{gap:14px;letter-spacing:.3em;font-size:.82rem}
   [data-mood=noir] .main-nav{gap:16px;justify-content:center}
+  .main-nav .nav-cat{display:none}
   [data-mood=noir] .main-nav a{letter-spacing:.16em;font-size:.64rem}
   [data-mood=noir] .grid{gap:32px 14px}
   [data-mood=noir] .card-title{letter-spacing:.1em;font-size:.68rem}
