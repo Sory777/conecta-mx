@@ -14,6 +14,9 @@
 //   markup       margen por defecto sobre el costo del proveedor (0.6 = +60 %)
 //   categories   orden de categorías en la portada
 //   domains      dominios propios que resuelven a esta tienda (opcional)
+//   niche        búsquedas por categoría: [búsqueda en inglés para CJ, nombre en español, icono].
+//                Cada tienda importa los productos más vendidos de SUS búsquedas, así
+//                ninguna tienda repite productos de otra.
 
 export const STORES = [
   {
@@ -27,6 +30,11 @@ export const STORES = [
     radius: 10, header: 'left', hero: 'grid', card: 'bordered', button: 'solid',
     logoShape: 'bolt', iconStroke: 2, uppercase: false,
     markup: 0.7, categories: ['gadgets', 'accesorios', 'ropa'], domains: [],
+    niche: {
+      gadgets: [['wireless earbuds', 'Audífonos inalámbricos', 'headphones'], ['magnetic power bank', 'Power bank magnético', 'battery'], ['smart watch', 'Reloj inteligente', 'watch']],
+      ropa: [['gaming hoodie', 'Sudadera gamer', 'hoodie'], ['quick dry t-shirt', 'Playera deportiva dry-fit', 'shirt'], ['sport socks', 'Calcetines deportivos', 'socks']],
+      accesorios: [['magsafe phone case', 'Funda MagSafe', 'phone'], ['anti theft laptop backpack', 'Mochila para laptop', 'backpack'], ['usb c hub', 'Hub USB-C multipuerto', 'cable']],
+    },
   },
   {
     slug: 'lume',
@@ -39,6 +47,11 @@ export const STORES = [
     radius: 2, header: 'centered', hero: 'split', card: 'flat', button: 'outline',
     logoShape: 'circle', iconStroke: 1.25, uppercase: false,
     markup: 0.85, categories: ['ropa', 'accesorios', 'gadgets'], domains: [],
+    niche: {
+      ropa: [['women summer dress', 'Vestido de verano', 'dress'], ['women elegant blouse', 'Blusa elegante', 'shirt'], ['pleated midi skirt', 'Falda plisada', 'dress']],
+      accesorios: [['women jewelry set', 'Set de joyería', 'gem'], ['women crossbody bag', 'Bolsa crossbody', 'bag'], ['cat eye sunglasses', 'Lentes de sol cat eye', 'glasses']],
+      gadgets: [['led makeup mirror', 'Espejo LED de maquillaje', 'sparkle'], ['hair straightener brush', 'Cepillo alisador', 'sparkle'], ['facial cleansing brush', 'Cepillo facial eléctrico', 'sparkle']],
+    },
   },
   {
     slug: 'kiro',
@@ -51,6 +64,11 @@ export const STORES = [
     radius: 0, header: 'split', hero: 'stripes', card: 'flat', button: 'solid',
     logoShape: 'square', iconStroke: 1.5, uppercase: false,
     markup: 0.6, categories: ['accesorios', 'gadgets', 'ropa'], domains: [],
+    niche: {
+      accesorios: [['minimalist wallet', 'Cartera minimalista', 'wallet'], ['minimalist watch', 'Reloj minimalista', 'watch'], ['canvas tote bag', 'Tote bag de lona', 'bag']],
+      gadgets: [['led desk lamp', 'Lámpara de escritorio LED', 'lamp'], ['wireless charger stand', 'Cargador inalámbrico', 'battery'], ['mini humidifier', 'Mini humidificador', 'fan']],
+      ropa: [['basic cotton t-shirt', 'Playera básica de algodón', 'shirt'], ['linen shirt', 'Camisa de lino', 'shirt'], ['wide leg pants', 'Pantalón de pierna ancha', 'pants']],
+    },
   },
   {
     slug: 'brisa',
@@ -63,6 +81,11 @@ export const STORES = [
     radius: 18, header: 'left', hero: 'blob', card: 'shadow', button: 'pill',
     logoShape: 'wave', iconStroke: 2, uppercase: false,
     markup: 0.65, categories: ['ropa', 'gadgets', 'accesorios'], domains: [],
+    niche: {
+      ropa: [['high waist leggings', 'Leggings de tiro alto', 'pants'], ['oversized t-shirt', 'Playera oversize', 'shirt'], ['women summer shorts', 'Shorts de verano', 'pants']],
+      gadgets: [['portable neck fan', 'Ventilador portátil', 'fan'], ['waterproof bluetooth speaker', 'Bocina resistente al agua', 'speaker'], ['smart water bottle', 'Botella inteligente', 'package']],
+      accesorios: [['bucket hat', 'Sombrero bucket', 'cap'], ['beach bag', 'Bolsa de playa', 'bag'], ['claw hair clips', 'Pinzas para cabello', 'gem']],
+    },
   },
   {
     slug: 'zocalo',
@@ -75,6 +98,11 @@ export const STORES = [
     radius: 8, header: 'centered', hero: 'dots', card: 'bordered', button: 'solid',
     logoShape: 'hex', iconStroke: 2, uppercase: false,
     markup: 0.55, categories: ['gadgets', 'ropa', 'accesorios'], domains: [],
+    niche: {
+      gadgets: [['kitchen gadgets', 'Gadgets de cocina', 'package'], ['led strip lights', 'Tira de luces LED', 'lamp'], ['car phone holder', 'Soporte de celular para auto', 'phone']],
+      ropa: [['men polo shirt', 'Playera polo', 'shirt'], ['pajama set', 'Pijama de dos piezas', 'hoodie'], ['cargo shorts', 'Bermuda cargo', 'pants']],
+      accesorios: [['automatic umbrella', 'Paraguas automático', 'umbrella'], ['men leather belt', 'Cinturón de piel', 'belt'], ['keychain', 'Llavero', 'gem']],
+    },
   },
   {
     slug: 'nebula',
@@ -87,6 +115,11 @@ export const STORES = [
     radius: 14, header: 'split', hero: 'gradient', card: 'shadow', button: 'pill',
     logoShape: 'star', iconStroke: 1.75, uppercase: true,
     markup: 0.75, categories: ['gadgets', 'accesorios', 'ropa'], domains: [],
+    niche: {
+      gadgets: [['rgb gaming mouse', 'Mouse gamer RGB', 'mouse'], ['mechanical keyboard', 'Teclado mecánico', 'keyboard'], ['galaxy star projector', 'Proyector de galaxia', 'projector']],
+      ropa: [['anime hoodie', 'Sudadera anime', 'hoodie'], ['graphic t-shirt', 'Playera gráfica', 'shirt'], ['techwear pants', 'Pantalón techwear', 'pants']],
+      accesorios: [['headphone stand rgb', 'Base RGB para audífonos', 'headphones'], ['rgb mouse pad', 'Mousepad RGB', 'keyboard'], ['mobile game controller', 'Control para celular', 'gamepad']],
+    },
   },
   {
     slug: 'raiz',
@@ -99,6 +132,11 @@ export const STORES = [
     radius: 6, header: 'centered', hero: 'split', card: 'bordered', button: 'outline',
     logoShape: 'leaf', iconStroke: 1.5, uppercase: false,
     markup: 0.8, categories: ['ropa', 'accesorios', 'gadgets'], domains: [],
+    niche: {
+      ropa: [['cotton hoodie', 'Sudadera de algodón', 'hoodie'], ['linen dress', 'Vestido de lino', 'dress'], ['knit sweater', 'Suéter tejido', 'hoodie']],
+      accesorios: [['straw hat', 'Sombrero de palma', 'cap'], ['wooden watch', 'Reloj de madera', 'watch'], ['canvas backpack', 'Mochila de lona', 'backpack']],
+      gadgets: [['bamboo wireless charger', 'Cargador de bambú', 'battery'], ['aroma diffuser', 'Difusor de aromas', 'fan'], ['solar garden light', 'Lámpara solar', 'lamp']],
+    },
   },
   {
     slug: 'pixelpop',
@@ -111,6 +149,11 @@ export const STORES = [
     radius: 12, header: 'left', hero: 'dots', card: 'brutal', button: 'offset',
     logoShape: 'triangle', iconStroke: 2.5, uppercase: false,
     markup: 0.6, categories: ['gadgets', 'accesorios', 'ropa'], domains: [],
+    niche: {
+      gadgets: [['mini thermal printer', 'Mini impresora térmica', 'camera'], ['cute night light', 'Lámpara de noche kawaii', 'lamp'], ['fidget toys', 'Juguetes antiestrés', 'gamepad']],
+      accesorios: [['cute phone case', 'Funda kawaii', 'phone'], ['plush keychain', 'Llavero de peluche', 'gem'], ['cute backpack', 'Mochila kawaii', 'backpack']],
+      ropa: [['funny socks', 'Calcetines divertidos', 'socks'], ['cartoon pajamas', 'Pijama de caricatura', 'hoodie'], ['kawaii t-shirt', 'Playera kawaii', 'shirt']],
+    },
   },
   {
     slug: 'marazul',
@@ -123,6 +166,11 @@ export const STORES = [
     radius: 4, header: 'split', hero: 'stripes', card: 'shadow', button: 'solid',
     logoShape: 'ring', iconStroke: 1.75, uppercase: true,
     markup: 0.7, categories: ['ropa', 'accesorios', 'gadgets'], domains: [],
+    niche: {
+      ropa: [['women swimsuit', 'Traje de baño', 'dress'], ['men swim trunks', 'Short de baño', 'pants'], ['hawaiian shirt', 'Camisa playera', 'shirt']],
+      accesorios: [['polarized sunglasses', 'Lentes polarizados', 'glasses'], ['large beach tote', 'Bolsa de playa grande', 'bag'], ['waterproof phone pouch', 'Funda impermeable', 'phone']],
+      gadgets: [['action camera', 'Cámara deportiva', 'camera'], ['fitness tracker', 'Pulsera de actividad', 'watch'], ['portable blender', 'Licuadora portátil', 'battery']],
+    },
   },
   {
     slug: 'ambar',
@@ -135,6 +183,11 @@ export const STORES = [
     radius: 0, header: 'left', hero: 'gradient', card: 'flat', button: 'solid',
     logoShape: 'diamond', iconStroke: 2, uppercase: true,
     markup: 0.9, categories: ['ropa', 'accesorios', 'gadgets'], domains: [],
+    niche: {
+      ropa: [['oversized hoodie streetwear', 'Sudadera oversize', 'hoodie'], ['cargo pants', 'Pantalón cargo', 'pants'], ['puffer jacket', 'Chamarra puffer', 'jacket']],
+      accesorios: [['baseball cap', 'Gorra', 'cap'], ['men chain necklace', 'Cadena', 'gem'], ['crossbody sling bag', 'Bolsa sling', 'bag']],
+      gadgets: [['over ear headphones', 'Audífonos de diadema', 'headphones'], ['phone tripod', 'Tripié para celular', 'camera'], ['mini power bank', 'Mini power bank', 'battery']],
+    },
   },
 ];
 

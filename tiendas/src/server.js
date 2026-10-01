@@ -9,7 +9,7 @@ import { html, raw, money } from './views/html.js';
 import * as V from './views/store.js';
 import * as A from './views/admin.js';
 import {
-  syncCatalog, listStoreProducts, getStoreProduct, catalogIsEmpty, isStoreActive, storeMarkup, updateStoreSettings,
+  syncCatalog, setProductTitle, listStoreProducts, getStoreProduct, catalogIsEmpty, isStoreActive, storeMarkup, updateStoreSettings,
 } from './services/catalog.js';
 import {
   createOrder, priceCart, getOrder, getOrderByNumber, getOrderItems, getOrderEvents, setPaymentRef, markPaid,
@@ -87,7 +87,7 @@ shop.use((req, res, next) => {
 
 shop.get('/', (req, res) => {
   const { store } = res.locals;
-  send(res, V.homePage({ ...ctx(res), featured: listStoreProducts(store.slug, { featured: true, limit: 4 }), products: listStoreProducts(store.slug, { limit: 12 }) }));
+  send(res, V.homePage({ ...ctx(res), featured: listStoreProducts(store.slug, { featured: true, limit: 4 }), products: listStoreProducts(store.slug, { featured: false, limit: 12 }) }));
 });
 
 shop.get('/c/:cat', (req, res) => {
@@ -305,11 +305,21 @@ admin.post('/sync', async (req, res) => {
 admin.get('/productos', (req, res) => {
   const store = getStore(req.query.store)?.slug || '';
   const category = CATEGORIES[req.query.category] ? req.query.category : '';
-  const products = db.prepare(`SELECT p.*, MIN(sp.price_cents) min_price, MAX(sp.price_cents) max_price, COUNT(sp.store_slug) store_count
-    FROM products p ${store ? 'JOIN' : 'LEFT JOIN'} store_products sp ON sp.product_id = p.id ${store ? 'AND sp.store_slug = ?' : ''}
-    ${category ? 'WHERE p.category = ?' : ''} GROUP BY p.id ORDER BY p.active DESC, p.category, p.id`)
-    .all(...[store, category].filter(Boolean));
+  const where = []; const args = [];
+  if (store) { where.push('p.store_slug = ?'); args.push(store); }
+  if (category) { where.push('p.category = ?'); args.push(category); }
+  const products = db.prepare(`SELECT p.*, sp.price_cents FROM products p
+    LEFT JOIN store_products sp ON sp.product_id = p.id AND sp.store_slug = p.store_slug
+    ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY p.active DESC, p.store_slug, p.category, p.popularity DESC`).all(...args);
   send(res, A.productsPage({ products, store, category, flash: flashOf(req) }));
+});
+
+admin.post('/productos/:id', (req, res) => {
+  setProductTitle(Number(req.params.id), req.body.title);
+  // Volvemos a la misma lista filtrada (solo la ruta local, nunca a otro dominio).
+  let to = '/admin/productos';
+  try { const u = new URL(req.get('referer')); if (u.pathname === to) to += u.search; } catch {}
+  res.redirect(303, to);
 });
 
 admin.get('/tiendas', (req, res) => {

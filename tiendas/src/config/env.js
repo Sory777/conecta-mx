@@ -24,7 +24,10 @@ export const env = {
   supplier: e.SUPPLIER || 'mock',
   cjApiKey: e.CJ_API_KEY || '',
   cjLogistic: e.CJ_LOGISTIC || 'CJPacket Ordinary',
-  cjKeywords: (e.CJ_KEYWORDS || 'gadgets:wireless earbuds,smart watch,phone holder;ropa:hoodie,t-shirt,dress;accesorios:sunglasses,backpack,wallet'),
+  // Productos por búsqueda de nicho (cada tienda tiene 9 búsquedas: 3 por categoría).
+  cjPerSearch: Number(e.CJ_PER_SEARCH || 4),
+  // Pausa entre llamadas para respetar el límite de peticiones de CJ.
+  cjDelayMs: Number(e.CJ_DELAY_MS ?? 1100),
   usdToMxn: Number(e.USD_TO_MXN || 18.5),
 
   // Pagos: 'mock' (demo, aprueba al instante) o 'stripe'.

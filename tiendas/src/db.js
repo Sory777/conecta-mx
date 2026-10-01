@@ -90,6 +90,18 @@ CREATE TABLE IF NOT EXISTS order_events (
 );
 `);
 
+// Migraciones de columnas agregadas después de la primera versión.
+const productCols = new Set(db.prepare('PRAGMA table_info(products)').all().map((c) => c.name));
+for (const [col, def] of [
+  ['store_slug', 'TEXT'], // tienda dueña del producto (cada producto vive en una sola tienda)
+  ['popularity', 'INTEGER NOT NULL DEFAULT 0'], // tiendas que lo venden en el proveedor (indicador de ventas)
+  ['search_term', 'TEXT'], // búsqueda del nicho con la que se encontró
+  ['title_custom', 'TEXT'], // nombre en español editado desde el panel (la sincronización no lo pisa)
+]) {
+  if (!productCols.has(col)) db.exec(`ALTER TABLE products ADD COLUMN ${col} ${def}`);
+}
+db.exec('CREATE INDEX IF NOT EXISTS products_store ON products(store_slug, active)');
+
 export function tx(fn) {
   db.exec('BEGIN');
   try {

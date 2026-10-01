@@ -17,7 +17,33 @@ pero con identidad visual propia, y un **panel central** para administrarlas tod
 | Ámbar Urbano | streetwear oscuro | Bebas Neue / Barlow | diamante |
 
 Cada marca se define en `src/config/stores.js` (nombre, paleta, fuentes, estilo de cabecera,
-banner, tarjetas, botones, isotipo, margen). Para cambiar una marca o crear otra, edita ese archivo.
+banner, tarjetas, botones, isotipo, margen y nicho de productos). Para cambiar una marca o crear otra, edita ese archivo.
+
+## Productos distintos en cada tienda
+
+Cada tienda tiene su **nicho**: 3 búsquedas por categoría (gadgets, ropa, accesorios), pensadas para su marca.
+
+| Tienda | Gadgets | Ropa | Accesorios |
+|---|---|---|---|
+| Voltia | audífonos inalámbricos, power bank magnético, reloj inteligente | sudadera gamer, playera dry-fit, calcetines deportivos | funda MagSafe, mochila para laptop, hub USB-C |
+| Lumé Boutique | espejo LED, cepillo alisador, cepillo facial | vestido de verano, blusa elegante, falda plisada | joyería, bolsa crossbody, lentes cat eye |
+| Kiro Market | lámpara de escritorio, cargador inalámbrico, mini humidificador | playera básica, camisa de lino, pantalón pierna ancha | cartera minimalista, reloj minimalista, tote bag |
+| Brisa Store | ventilador portátil, bocina resistente al agua, botella inteligente | leggings, playera oversize, shorts | sombrero bucket, bolsa de playa, pinzas para cabello |
+| Zócalo Shop | gadgets de cocina, tira LED, soporte de celular para auto | playera polo, pijama, bermuda cargo | paraguas, cinturón, llaveros |
+| Nébula | mouse gamer, teclado mecánico, proyector de galaxia | sudadera anime, playera gráfica, pantalón techwear | base RGB para audífonos, mousepad RGB, control para celular |
+| Raíz & Co. | cargador de bambú, difusor de aromas, lámpara solar | sudadera de algodón, vestido de lino, suéter tejido | sombrero de palma, reloj de madera, mochila de lona |
+| Pixel Pop | mini impresora, lámpara kawaii, juguetes antiestrés | calcetines divertidos, pijama de caricatura, playera kawaii | funda kawaii, llavero de peluche, mochila kawaii |
+| Mar Azul | cámara deportiva, pulsera de actividad, licuadora portátil | traje de baño, short de baño, camisa playera | lentes polarizados, bolsa de playa, funda impermeable |
+| Ámbar Urbano | audífonos de diadema, tripié, mini power bank | sudadera oversize, pantalón cargo, chamarra puffer | gorra, cadena, bolsa sling |
+
+En cada sincronización el sistema busca en CJ los productos **más vendidos** de cada búsqueda
+(CJ no publica ventas reales; se ordena por `listedNum`, el número de tiendas que venden el producto,
+que es su indicador público de demanda) y toma los primeros (`CJ_PER_SEARCH`, 4 por defecto, ≈36 por tienda).
+**Un producto pertenece a una sola tienda**: si dos búsquedas encuentran el mismo, la segunda toma el
+siguiente de la lista. Los productos agotados se omiten, y los 4 más populares de cada tienda salen como destacados.
+
+CJ entrega los nombres en inglés. Desde **Panel → Productos** puedes escribir el nombre en español de
+cada producto; las siguientes sincronizaciones no lo reemplazan.
 
 ## Cómo funciona el dinero
 
@@ -58,8 +84,8 @@ npm start
 - Tiendas: `http://localhost:3000/s/voltia/`, `/s/lume/`, … (portada con las 10 en `http://localhost:3000/`)
 - Panel central: `http://localhost:3000/admin`
 
-En modo demo (`SUPPLIER=mock`, `PAYMENTS=mock`) se cargan 36 productos de ejemplo
-(gadgets, ropa y accesorios), los pagos se aprueban solos y los pedidos «avanzan» de estado en
+En modo demo (`SUPPLIER=mock`, `PAYMENTS=mock`) se generan 27 productos de ejemplo por tienda,
+distintos en cada una y basados en su nicho, los pagos se aprueban solos y los pedidos «avanzan» de estado en
 minutos. En producción (`NODE_ENV=production`) los pagos demo se bloquean.
 
 ## Pasar a producción
@@ -68,10 +94,11 @@ minutos. En producción (`NODE_ENV=production`) los pagos demo se bloquean.
    ```
    SUPPLIER=cj
    CJ_API_KEY=...
-   CJ_KEYWORDS=gadgets:wireless earbuds,smart watch;ropa:hoodie,dress;accesorios:sunglasses,wallet
+   CJ_PER_SEARCH=4
    USD_TO_MXN=18.5
    ```
-   Luego `npm run sync` (o el botón «Sincronizar catálogo»). El catálogo se resincroniza solo cada 6 h:
+   Luego `npm run sync` (o el botón «Sincronizar catálogo»). La primera importación tarda unos
+   20–30 minutos (≈360 productos, con pausas para respetar el límite de CJ). Se resincroniza sola una vez al día:
    los cambios de costo se reflejan en los precios y lo que CJ deja de vender se desactiva.
    > El adaptador de CJ (`src/suppliers/cj.js`) sigue la documentación de su API v2.0, pero no se
    > probó contra una cuenta real. Haz un pedido de prueba antes de abrir al público y ajusta el
@@ -94,7 +121,7 @@ Para agregar otro proveedor (AliExpress Dropshipping, Spocket, etc.) crea un mó
   filtros por tienda y periodo.
 - **Pedidos**: todos los pedidos de las 10 tiendas, filtrables; detalle con desglose de ganancia,
   historial, reenvío al proveedor, actualización de rastreo y cancelación.
-- **Productos**: costo, precio de venta y ganancia por producto, y en qué tiendas está.
+- **Productos**: tienda a la que pertenece, popularidad, costo, precio de venta y ganancia; edición del nombre en español.
 - **Tiendas**: margen de cada tienda (recalcula precios al guardar), activar/desactivar, logotipo SVG.
 
 ## Antes de vender (México)

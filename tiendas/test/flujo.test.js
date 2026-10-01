@@ -49,17 +49,28 @@ test('las 10 tiendas cargan con identidad propia', async () => {
   }
 });
 
-test('cada tienda tiene su catálogo y precios con su margen', () => {
+test('cada tienda tiene productos propios, distintos a los de las demás', () => {
+  const owners = db.prepare(`SELECT product_id, COUNT(DISTINCT store_slug) n FROM store_products GROUP BY product_id HAVING n > 1`).all();
+  assert.deepEqual(owners, [], 'ningún producto se repite entre tiendas');
   for (const s of STORES) {
-    const rows = db.prepare(`SELECT sp.price_cents, p.cost_cents + p.shipping_cents landed FROM store_products sp
-      JOIN products p ON p.id = sp.product_id WHERE store_slug = ?`).all(s.slug);
+    const rows = db.prepare(`SELECT sp.price_cents, sp.featured, p.cost_cents + p.shipping_cents landed, p.popularity
+      FROM store_products sp JOIN products p ON p.id = sp.product_id WHERE sp.store_slug = ? ORDER BY p.popularity DESC`).all(s.slug);
     assert.ok(rows.length >= 20, `${s.slug} tiene productos`);
     for (const r of rows) assert.ok(r.price_cents > r.landed, 'precio mayor al costo');
+    assert.deepEqual(rows.slice(0, 4).map((r) => r.featured), [1, 1, 1, 1], 'los más populares son los destacados');
     for (const c of ['gadgets', 'ropa', 'accesorios']) {
-      const n = db.prepare('SELECT COUNT(*) n FROM store_products sp JOIN products p ON p.id = sp.product_id WHERE store_slug = ? AND category = ?').get(s.slug, c).n;
+      const n = db.prepare('SELECT COUNT(*) n FROM store_products sp JOIN products p ON p.id = sp.product_id WHERE sp.store_slug = ? AND category = ?').get(s.slug, c).n;
       assert.ok(n > 0, `${s.slug} tiene ${c}`);
     }
   }
+});
+
+test('las búsquedas de nicho se reparten por turnos y ninguna se repite', async () => {
+  const { nicheSearches } = await import('../src/services/catalog.js');
+  const list = nicheSearches();
+  assert.equal(list.length, 90);
+  assert.deepEqual(list.slice(0, 10).map((x) => x.store), STORES.map((s) => s.slug));
+  assert.equal(new Set(list.map((x) => `${x.store}:${x.query}`)).size, 90);
 });
 
 test('el carrito ignora precios enviados por el navegador', async () => {

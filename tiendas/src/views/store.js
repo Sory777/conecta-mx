@@ -105,8 +105,8 @@ ${trustBar(store)}
   <h2 class="section-title">Categorías</h2>
   <div class="cats">${store.categories.map((c) => html`<a class="card cat" href="${prefix}/c/${c}">${I(store, CATEGORIES[c].icon, 32)}<span>${CATEGORIES[c].name}</span></a>`)}</div>
 </section>
-${featured.length ? html`<section class="wrap section"><h2 class="section-title">Destacados</h2>${grid(store, prefix, featured)}</section>` : ''}
-<section class="wrap section"><h2 class="section-title">Lo más nuevo</h2>${grid(store, prefix, products)}</section>`;
+${featured.length ? html`<section class="wrap section"><h2 class="section-title">Los más vendidos</h2>${grid(store, prefix, featured)}</section>` : ''}
+<section class="wrap section"><h2 class="section-title">Más para ti</h2>${grid(store, prefix, products)}</section>`;
   return layout({ store, prefix, body });
 }
 

@@ -59,36 +59,75 @@ async function shippingFor(vid) {
   }
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Busca los productos más vendidos para una palabra clave. CJ no publica ventas
+// reales; usamos su orden por "listedNum" (cuántas tiendas venden el producto),
+// que es su indicador público de demanda.
+async function topProducts(keyword, size) {
+  try {
+    const data = await cj('GET', `/product/listV2?keyWord=${encodeURIComponent(keyword)}&orderBy=1&sort=desc&page=1&size=${size}`);
+    return (data?.content || []).flatMap((g) => g.productList || []).map((p) => ({
+      pid: p.id, name: p.nameEn, image: p.bigImage, price: p.sellPrice, listed: Number(p.listedNum) || 0,
+      inventory: p.warehouseInventoryNum,
+    }));
+  } catch {
+    // Cuentas/versiones antiguas: endpoint clásico, ordenamos nosotros por listedNum.
+    const data = await cj('GET', `/product/list?pageNum=1&pageSize=${size}&productNameEn=${encodeURIComponent(keyword)}`);
+    return (data?.list || []).map((p) => ({
+      pid: p.pid, name: p.productNameEn, image: p.productImage, price: p.sellPrice, listed: Number(p.listedNum) || 0,
+    })).sort((a, b) => b.listed - a.listed);
+  }
+}
+
 export const cjSupplier = {
   name: 'cj',
   label: 'CJ Dropshipping',
 
-  // CJ_KEYWORDS: "gadgets:earbuds,smart watch;ropa:hoodie;accesorios:wallet"
-  async fetchCatalog({ perKeyword = 8 } = {}) {
-    const groups = env.cjKeywords.split(';').map((g) => g.split(':')).filter((g) => g.length === 2);
+  // searches: [{ store, category, query, label, icon }]. Cada producto se asigna a una sola
+  // tienda: si dos búsquedas encuentran el mismo, se queda con la primera y la otra toma el siguiente.
+  async fetchCatalog({ searches, perSearch = env.cjPerSearch } = {}) {
+    const used = new Set();
     const out = [];
-    for (const [category, words] of groups) {
-      for (const keyword of words.split(',').map((w) => w.trim()).filter(Boolean)) {
-        const data = await cj('GET', `/product/list?pageNum=1&pageSize=${perKeyword}&productNameEn=${encodeURIComponent(keyword)}`);
-        for (const p of data?.list || []) {
-          const variants = await cj('GET', `/product/variant/query?pid=${encodeURIComponent(p.pid)}`).catch(() => []);
-          const v = (variants || [])[0];
-          const vid = v?.vid || p.pid;
-          out.push({
-            supplierProductId: p.pid,
-            supplierVariantId: vid,
-            title: p.productNameEn,
-            description: p.productNameEn,
-            category: category.trim(),
-            imageUrl: v?.variantImage || p.productImage || null,
-            icon: null,
-            costUsd: num(v?.variantSellPrice ?? p.sellPrice),
-            shippingUsd: await shippingFor(vid),
-          });
-        }
+    for (const s of searches) {
+      let candidates;
+      try {
+        candidates = await topProducts(s.query, Math.min(100, perSearch * 4));
+      } catch (err) {
+        console.error(`[cj] búsqueda "${s.query}" (${s.store}):`, err.message);
+        continue;
       }
+      let taken = 0;
+      for (const p of candidates) {
+        if (taken >= perSearch) break;
+        if (!p.pid || used.has(p.pid) || p.inventory === 0) continue;
+        await sleep(env.cjDelayMs);
+        const variants = await cj('GET', `/product/variant/query?pid=${encodeURIComponent(p.pid)}`).catch(() => []);
+        const v = (variants || [])[0];
+        const vid = v?.vid || p.pid;
+        const costUsd = num(v?.variantSellPrice ?? p.price);
+        if (!costUsd) continue;
+        await sleep(env.cjDelayMs);
+        used.add(p.pid);
+        taken += 1;
+        out.push({
+          store: s.store,
+          searchTerm: s.query,
+          popularity: p.listed,
+          supplierProductId: p.pid,
+          supplierVariantId: vid,
+          title: p.name,
+          description: `${s.label}. ${p.name}`,
+          category: s.category,
+          imageUrl: v?.variantImage || p.image || null,
+          icon: s.icon,
+          costUsd,
+          shippingUsd: await shippingFor(vid),
+        });
+      }
+      await sleep(env.cjDelayMs);
     }
-    return out.filter((p) => p.costUsd > 0);
+    return out;
   },
 
   async createOrder(order) {

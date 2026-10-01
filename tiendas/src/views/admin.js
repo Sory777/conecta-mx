@@ -165,15 +165,20 @@ export function productsPage({ products, store, category, flash }) {
   const body = html`<div class="head"><h1>Productos <span class="muted">(${products.length})</span></h1>
   <form method="post" action="/admin/sync"><button class="btn sm ghost">Sincronizar catálogo</button></form></div>
   ${filters({ action: '/admin/productos', store, extra: catSel.toString() })}
+  <p class="muted small">Cada tienda vende solo sus productos, elegidos entre los más vendidos de su nicho. «Popularidad» es el número de tiendas que venden el producto en el proveedor. Puedes poner el nombre en español: la sincronización no lo reemplaza.</p>
   <section class="panel"><div class="scroll"><table class="table">
-  <thead><tr><th>Producto</th><th>Categoría</th><th class="num">Costo + envío</th><th class="num">Precio venta</th><th class="num">Ganancia aprox.</th><th class="num">Tiendas</th><th>Estado</th></tr></thead>
+  <thead><tr><th>Producto</th><th>Tienda</th><th>Categoría</th><th class="num">Popularidad</th><th class="num">Costo + envío</th><th class="num">Precio venta</th><th class="num">Ganancia aprox.</th><th>Estado</th></tr></thead>
   <tbody>${products.map((p) => html`<tr>
-    <td>${p.title}<br><span class="muted small">${p.supplier} · ${p.supplier_variant_id}</span></td>
+    <td><form method="post" action="/admin/productos/${p.id}" class="inline title-form">
+      <input name="title" value="${p.title_custom || p.title}" aria-label="Nombre del producto" maxlength="200">
+      <button class="btn sm ghost">Guardar</button></form>
+      <span class="muted small">${p.title_custom ? html`Original: ${p.title} · ` : ''}${p.supplier} · ${p.search_term || ''}</span></td>
+    <td>${p.store_slug ? storeChip(p.store_slug) : '—'}</td>
     <td>${CATEGORIES[p.category]?.name || p.category}</td>
+    <td class="num">${p.popularity.toLocaleString('es-MX')}</td>
     <td class="num">${money(p.cost_cents + p.shipping_cents)}</td>
-    <td class="num">${p.min_price === p.max_price ? money(p.min_price) : html`${money(p.min_price)} – ${money(p.max_price)}`}</td>
-    <td class="num">${p.min_price == null ? '—' : money(Math.round((p.min_price + p.max_price) / 2) - p.cost_cents - p.shipping_cents)}</td>
-    <td class="num">${p.store_count}</td>
+    <td class="num">${p.price_cents == null ? '—' : money(p.price_cents)}</td>
+    <td class="num">${p.price_cents == null ? '—' : money(p.price_cents - p.cost_cents - p.shipping_cents)}</td>
     <td>${p.active ? html`<span class="badge good">Activo</span>` : html`<span class="badge neutral">Inactivo</span>`}</td>
   </tr>`)}</tbody></table></div></section>`;
   return layout({ title: 'Productos', active: 'products', body, flash });
