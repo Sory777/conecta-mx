@@ -38,7 +38,7 @@ Cada tienda tiene su **nicho**: 3 búsquedas por categoría (gadgets, ropa, acce
 
 En cada sincronización el sistema busca en CJ los productos **más vendidos** de cada búsqueda
 (CJ no publica ventas reales; se ordena por `listedNum`, el número de tiendas que venden el producto,
-que es su indicador público de demanda) y toma los primeros (`CJ_PER_SEARCH`, 4 por defecto, ≈36 por tienda).
+que es su indicador público de demanda) y toma los primeros (`CJ_PER_SEARCH`, 8 por defecto, ≈72 por tienda y ≈720 en total).
 **Un producto pertenece a una sola tienda**: si dos búsquedas encuentran el mismo, la segunda toma el
 siguiente de la lista. Los productos agotados se omiten, y los 4 más populares de cada tienda salen como destacados.
 
@@ -84,7 +84,7 @@ npm start
 - Tiendas: `http://localhost:3000/s/voltia/`, `/s/lume/`, … (portada con las 10 en `http://localhost:3000/`)
 - Panel central: `http://localhost:3000/admin`
 
-En modo demo (`SUPPLIER=mock`, `PAYMENTS=mock`) se generan 27 productos de ejemplo por tienda,
+En modo demo (`SUPPLIER=mock`, `PAYMENTS=mock`) se generan 54 productos de ejemplo por tienda,
 distintos en cada una y basados en su nicho, los pagos se aprueban solos y los pedidos «avanzan» de estado en
 minutos. En producción (`NODE_ENV=production`) los pagos demo se bloquean.
 
@@ -98,7 +98,7 @@ minutos. En producción (`NODE_ENV=production`) los pagos demo se bloquean.
    USD_TO_MXN=18.5
    ```
    Luego `npm run sync` (o el botón «Sincronizar catálogo»). La primera importación tarda unos
-   20–30 minutos (≈360 productos, con pausas para respetar el límite de CJ). Se resincroniza sola una vez al día:
+   40–50 minutos (≈720 productos, con pausas para respetar el límite de CJ). Se resincroniza sola una vez al día:
    los cambios de costo se reflejan en los precios y lo que CJ deja de vender se desactiva.
    > El adaptador de CJ (`src/suppliers/cj.js`) sigue la documentación de su API v2.0, pero no se
    > probó contra una cuenta real. Haz un pedido de prueba antes de abrir al público y ajusta el
@@ -121,7 +121,9 @@ Para agregar otro proveedor (AliExpress Dropshipping, Spocket, etc.) crea un mó
   filtros por tienda y periodo.
 - **Pedidos**: todos los pedidos de las 10 tiendas, filtrables; detalle con desglose de ganancia,
   historial, reenvío al proveedor, actualización de rastreo y cancelación.
-- **Productos**: tienda a la que pertenece, popularidad, costo, precio de venta y ganancia; edición del nombre en español.
+- **Productos**: tienda a la que pertenece, popularidad, costo, precio de venta y **cuánto ganas por pieza**
+  (precio − costo del producto − envío − comisión de pago); edición del nombre en español.
+- **Tiendas**: precio promedio y ganancia promedio por pieza de cada tienda.
 - **Tiendas**: margen de cada tienda (recalcula precios al guardar), activar/desactivar, logotipo SVG.
 
 ## Antes de vender (México)

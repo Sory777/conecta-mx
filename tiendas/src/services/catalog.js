@@ -2,10 +2,16 @@ import { db, tx } from '../db.js';
 import { env } from '../config/env.js';
 import { STORES, getStore } from '../config/stores.js';
 import { getSupplier } from '../suppliers/index.js';
+import { estimateFeeCents } from '../payments/index.js';
 
 // Precio "psicológico" en pesos: 237.4 -> 239, 1012 -> 1019.
 export function prettyPriceCents(mxn) {
   return (Math.ceil((mxn + 1) / 10) * 10 - 1) * 100;
+}
+
+// Lo que te queda por pieza vendida: precio − costo del proveedor (producto + envío) − comisión de pago.
+export function unitProfitCents(priceCents, landedCents) {
+  return priceCents - landedCents - estimateFeeCents(priceCents);
 }
 
 export function storeMarkup(slug) {

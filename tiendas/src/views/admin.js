@@ -3,6 +3,7 @@ import { html, raw, money } from './html.js';
 import { logoMark } from './brand.js';
 import { STORES, CATEGORIES, getStore } from '../config/stores.js';
 import { STATUS_LABELS } from '../services/orders.js';
+import { unitProfitCents } from '../services/catalog.js';
 
 const STATUS_TONE = {
   pending_payment: 'neutral', paid: 'info', supplier_error: 'critical', sent_to_supplier: 'info',
@@ -165,9 +166,9 @@ export function productsPage({ products, store, category, flash }) {
   const body = html`<div class="head"><h1>Productos <span class="muted">(${products.length})</span></h1>
   <form method="post" action="/admin/sync"><button class="btn sm ghost">Sincronizar catálogo</button></form></div>
   ${filters({ action: '/admin/productos', store, extra: catSel.toString() })}
-  <p class="muted small">Cada tienda vende solo sus productos, elegidos entre los más vendidos de su nicho. «Popularidad» es el número de tiendas que venden el producto en el proveedor. Puedes poner el nombre en español: la sincronización no lo reemplaza.</p>
+  <p class="muted small">Cada tienda vende solo sus productos, elegidos entre los más vendidos de su nicho. «Popularidad» es el número de tiendas que venden el producto en el proveedor. «Ganas por pieza» ya descuenta el costo del producto, el envío y la comisión de pago estimada. Puedes poner el nombre en español: la sincronización no lo reemplaza.</p>
   <section class="panel"><div class="scroll"><table class="table">
-  <thead><tr><th>Producto</th><th>Tienda</th><th>Categoría</th><th class="num">Popularidad</th><th class="num">Costo + envío</th><th class="num">Precio venta</th><th class="num">Ganancia aprox.</th><th>Estado</th></tr></thead>
+  <thead><tr><th>Producto</th><th>Tienda</th><th>Categoría</th><th class="num">Popularidad</th><th class="num">Costo + envío</th><th class="num">Precio venta</th><th class="num">Ganas por pieza</th><th>Estado</th></tr></thead>
   <tbody>${products.map((p) => html`<tr>
     <td><form method="post" action="/admin/productos/${p.id}" class="inline title-form">
       <input name="title" value="${p.title_custom || p.title}" aria-label="Nombre del producto" maxlength="200">
@@ -178,7 +179,10 @@ export function productsPage({ products, store, category, flash }) {
     <td class="num">${p.popularity.toLocaleString('es-MX')}</td>
     <td class="num">${money(p.cost_cents + p.shipping_cents)}</td>
     <td class="num">${p.price_cents == null ? '—' : money(p.price_cents)}</td>
-    <td class="num">${p.price_cents == null ? '—' : money(p.price_cents - p.cost_cents - p.shipping_cents)}</td>
+    <td class="num">${p.price_cents == null ? '—' : (() => {
+      const g = unitProfitCents(p.price_cents, p.cost_cents + p.shipping_cents);
+      return html`<strong>${money(g)}</strong><br><span class="muted small">${pct(g / p.price_cents)} del precio</span>`;
+    })()}</td>
     <td>${p.active ? html`<span class="badge good">Activo</span>` : html`<span class="badge neutral">Inactivo</span>`}</td>
   </tr>`)}</tbody></table></div></section>`;
   return layout({ title: 'Productos', active: 'products', body, flash });
@@ -187,10 +191,11 @@ export function productsPage({ products, store, category, flash }) {
 export function storesPage({ rows, flash }) {
   const body = html`<div class="head"><h1>Tiendas</h1></div>
   <p class="muted">Cambia el margen de cada tienda: los precios se recalculan al guardar. Una tienda inactiva deja de aceptar pedidos.</p>
-  <div class="store-grid">${rows.map(({ store: s, markup, active, products, url }) => html`
+  <div class="store-grid">${rows.map(({ store: s, markup, active, products, url, avgPrice, avgProfit }) => html`
   <section class="panel store-card" style="--p:${s.palette.primary};--a:${s.palette.accent};--b:${s.palette.bg};--t:${s.palette.text}">
     <div class="swatch">${raw(logoMark(s, 44))}<div><strong>${s.name}</strong><br><span class="small">${s.tagline}</span></div></div>
     <p class="small muted">${s.fonts.heading} / ${s.fonts.body} · cabecera ${s.header} · héroe ${s.hero} · tarjetas ${s.card}</p>
+    <p class="per-piece">Precio promedio <strong>${money(avgPrice)}</strong> · ganas en promedio <strong>${money(avgProfit)}</strong> por pieza${avgPrice ? ` (${pct(avgProfit / avgPrice)})` : ''}</p>
     <p class="small"><a href="${url}" target="_blank" rel="noopener">${url}</a> · ${products} productos · <a href="${url}/logo.svg" target="_blank" rel="noopener">logotipo SVG</a></p>
     <form method="post" action="/admin/tiendas/${s.slug}" class="inline">
       <label>Margen % <input type="number" name="markup" min="5" max="500" step="1" value="${Math.round(markup * 100)}"></label>

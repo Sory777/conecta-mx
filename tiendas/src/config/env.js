@@ -25,7 +25,7 @@ export const env = {
   cjApiKey: e.CJ_API_KEY || '',
   cjLogistic: e.CJ_LOGISTIC || 'CJPacket Ordinary',
   // Productos por búsqueda de nicho (cada tienda tiene 9 búsquedas: 3 por categoría).
-  cjPerSearch: Number(e.CJ_PER_SEARCH || 4),
+  cjPerSearch: Number(e.CJ_PER_SEARCH || 8),
   // Pausa entre llamadas para respetar el límite de peticiones de CJ.
   cjDelayMs: Number(e.CJ_DELAY_MS ?? 1100),
   usdToMxn: Number(e.USD_TO_MXN || 18.5),

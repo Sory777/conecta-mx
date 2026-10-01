@@ -9,7 +9,7 @@ import { html, raw, money } from './views/html.js';
 import * as V from './views/store.js';
 import * as A from './views/admin.js';
 import {
-  syncCatalog, setProductTitle, listStoreProducts, getStoreProduct, catalogIsEmpty, isStoreActive, storeMarkup, updateStoreSettings,
+  syncCatalog, setProductTitle, unitProfitCents, listStoreProducts, getStoreProduct, catalogIsEmpty, isStoreActive, storeMarkup, updateStoreSettings,
 } from './services/catalog.js';
 import {
   createOrder, priceCart, getOrder, getOrderByNumber, getOrderItems, getOrderEvents, setPaymentRef, markPaid,
@@ -323,9 +323,14 @@ admin.post('/productos/:id', (req, res) => {
 });
 
 admin.get('/tiendas', (req, res) => {
-  const counts = new Map(db.prepare('SELECT store_slug, COUNT(*) n FROM store_products GROUP BY store_slug').all().map((r) => [r.store_slug, r.n]));
+  const items = db.prepare(`SELECT sp.store_slug, sp.price_cents, p.cost_cents + p.shipping_cents landed
+    FROM store_products sp JOIN products p ON p.id = sp.product_id`).all();
+  const stats = Map.groupBy(items, (r) => r.store_slug);
+  const avg = (list, f) => (list?.length ? Math.round(list.reduce((a, r) => a + f(r), 0) / list.length) : 0);
   const rows = STORES.map((s) => ({
-    store: s, markup: storeMarkup(s.slug), active: isStoreActive(s.slug), products: counts.get(s.slug) || 0,
+    store: s, markup: storeMarkup(s.slug), active: isStoreActive(s.slug), products: stats.get(s.slug)?.length || 0,
+    avgPrice: avg(stats.get(s.slug), (r) => r.price_cents),
+    avgProfit: avg(stats.get(s.slug), (r) => unitProfitCents(r.price_cents, r.landed)),
     url: s.domains[0] ? `https://${s.domains[0]}` : `${env.baseUrl}/s/${s.slug}`,
   }));
   send(res, A.storesPage({ rows, flash: flashOf(req) }));

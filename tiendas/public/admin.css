@@ -58,3 +58,4 @@ select,input{font:inherit;padding:7px 10px;border:1px solid var(--border);border
 .login label{display:flex;flex-direction:column;gap:6px;font-weight:600}
 @media (max-width:860px){.kpis{grid-template-columns:1fr 1fr}.cols{grid-template-columns:1fr}.store-grid{grid-template-columns:1fr}.bar-col{display:none}}
 .title-form{flex-wrap:nowrap;margin-bottom:4px}.title-form input{min-width:260px;flex:1}
+.per-piece{margin:0 0 6px}
