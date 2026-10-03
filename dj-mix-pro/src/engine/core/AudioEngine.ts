@@ -1,4 +1,4 @@
-import workletUrl from '../worklets/deck-player.worklet.ts?worker&url';
+import { deckPlayerWorklet } from '../worklets/deck-player.worklet';
 import { Deck, type DeckId } from '../deck/Deck';
 import { Mixer } from '../mixer/Mixer';
 
@@ -25,7 +25,7 @@ export class AudioEngine {
    */
   static async create(): Promise<AudioEngine> {
     const ctx = new AudioContext({ latencyHint: 'interactive' });
-    await ctx.audioWorklet.addModule(workletUrl);
+    await loadWorklet(ctx, `(${deckPlayerWorklet.toString()})();`);
     if (ctx.state !== 'running') await ctx.resume();
     return new AudioEngine(ctx, new Mixer(ctx, 2));
   }
@@ -40,4 +40,23 @@ export class AudioEngine {
   async resume(): Promise<void> {
     if (this.ctx.state !== 'running') await this.ctx.resume();
   }
+}
+
+/**
+ * Carga código de worklet sin archivos externos. Blob URL funciona en http(s);
+ * abierto como archivo local (file://, origen opaco) Chrome lo rechaza y se usa
+ * una data: URL.
+ */
+async function loadWorklet(ctx: AudioContext, code: string): Promise<void> {
+  const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+  try {
+    await ctx.audioWorklet.addModule(blobUrl);
+    return;
+  } catch (err) {
+    console.warn('Worklet por Blob URL rechazado, probando data: URL', err);
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+  const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(code)));
+  await ctx.audioWorklet.addModule(`data:text/javascript;base64,${b64}`);
 }
