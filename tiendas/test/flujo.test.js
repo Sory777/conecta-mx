@@ -1,17 +1,14 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 
-const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tiendas-'));
-process.env.DB_PATH = path.join(dir, 'test.db');
+process.env.PGLITE_DIR = 'memory://';
+process.env.SESSION_SECRET = 'prueba';
 process.env.ADMIN_PASSWORD = 'secreto-de-prueba';
 process.env.SUPPLIER = 'mock';
 process.env.PAYMENTS = 'mock';
 
 const { app, runSync } = await import('../src/server.js');
-const { db } = await import('../src/db.js');
+const { q, one } = await import('../src/db.js');
 const { STORES } = await import('../src/config/stores.js');
 
 let server, base;
@@ -49,17 +46,17 @@ test('las 10 tiendas cargan con identidad propia', async () => {
   }
 });
 
-test('cada tienda tiene productos propios, distintos a los de las demás', () => {
-  const owners = db.prepare(`SELECT product_id, COUNT(DISTINCT store_slug) n FROM store_products GROUP BY product_id HAVING n > 1`).all();
+test('cada tienda tiene productos propios, distintos a los de las demás', async () => {
+  const owners = await q('SELECT product_id FROM tiendas.store_products GROUP BY product_id HAVING COUNT(DISTINCT store_slug) > 1');
   assert.deepEqual(owners, [], 'ningún producto se repite entre tiendas');
   for (const s of STORES) {
-    const rows = db.prepare(`SELECT sp.price_cents, sp.featured, p.cost_cents + p.shipping_cents landed, p.popularity
-      FROM store_products sp JOIN products p ON p.id = sp.product_id WHERE sp.store_slug = ? ORDER BY p.popularity DESC`).all(s.slug);
+    const rows = await q(`SELECT sp.price_cents, sp.featured, p.cost_cents + p.shipping_cents landed, p.popularity
+      FROM tiendas.store_products sp JOIN tiendas.products p ON p.id = sp.product_id WHERE sp.store_slug = $1 ORDER BY p.popularity DESC`, [s.slug]);
     assert.ok(rows.length >= 20, `${s.slug} tiene productos`);
     for (const r of rows) assert.ok(r.price_cents > r.landed, 'precio mayor al costo');
     assert.deepEqual(rows.slice(0, 4).map((r) => r.featured), [1, 1, 1, 1], 'los más populares son los destacados');
     for (const c of s.categories) {
-      const n = db.prepare('SELECT COUNT(*) n FROM store_products sp JOIN products p ON p.id = sp.product_id WHERE sp.store_slug = ? AND category = ?').get(s.slug, c).n;
+      const { n } = await one('SELECT COUNT(*)::int n FROM tiendas.store_products sp JOIN tiendas.products p ON p.id = sp.product_id WHERE sp.store_slug = $1 AND category = $2', [s.slug, c]);
       assert.ok(n > 0, `${s.slug} tiene ${c}`);
     }
   }
@@ -75,7 +72,7 @@ test('las búsquedas de nicho se reparten por turnos y ninguna se repite', async
 });
 
 test('el carrito ignora precios enviados por el navegador', async () => {
-  const { product_id: id, price_cents } = db.prepare("SELECT product_id, price_cents FROM store_products WHERE store_slug = 'voltia' LIMIT 1").get();
+  const { product_id: id, price_cents } = await one("SELECT product_id, price_cents FROM tiendas.store_products WHERE store_slug = 'voltia' LIMIT 1");
   const res = await fetch(`${base}/s/voltia/api/cart`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items: [{ id, qty: 2, price: 1 }, { id: 999999, qty: 1 }] }),
@@ -92,7 +89,7 @@ test('checkout valida los datos de envío', async () => {
 });
 
 test('pedido completo: pago -> proveedor -> ganancia en el panel', async () => {
-  const items = db.prepare("SELECT product_id id FROM store_products WHERE store_slug = 'nebula' LIMIT 2").all().map((r) => ({ id: r.id, qty: 1 }));
+  const items = (await q("SELECT product_id id FROM tiendas.store_products WHERE store_slug = 'nebula' LIMIT 2")).map((r) => ({ id: r.id, qty: 1 }));
   const res = await post('/s/nebula/checkout', { ...customer, cart: JSON.stringify(items) });
   assert.equal(res.status, 303);
   const pay = new URL(res.headers.get('location'));
@@ -102,7 +99,7 @@ test('pedido completo: pago -> proveedor -> ganancia en el panel', async () => {
   assert.equal(confirm.status, 303);
   const orderUrl = confirm.headers.get('location');
 
-  const order = db.prepare("SELECT * FROM orders WHERE store_slug = 'nebula' ORDER BY id DESC").get();
+  const order = await one("SELECT * FROM tiendas.orders WHERE store_slug = 'nebula' ORDER BY id DESC LIMIT 1");
   assert.equal(order.status, 'sent_to_supplier');
   assert.match(order.supplier_order_id, /^mock:MOCK-SO-NEB-/);
   assert.equal(order.phone, '5512345678');
@@ -134,19 +131,19 @@ test('pedido completo: pago -> proveedor -> ganancia en el panel', async () => {
   assert.equal(csrf.status, 403);
 
   // Cambiar el margen de una tienda recalcula sus precios.
-  const before = db.prepare("SELECT SUM(price_cents) s FROM store_products WHERE store_slug = 'kiro'").get().s;
+  const before = (await one("SELECT SUM(price_cents)::int8 s FROM tiendas.store_products WHERE store_slug = 'kiro'")).s;
   const save = await post('/admin/tiendas/kiro', { markup: '120', active: '1' }, { headers: { cookie } });
   assert.equal(save.status, 303);
-  const afterSum = db.prepare("SELECT SUM(price_cents) s FROM store_products WHERE store_slug = 'kiro'").get().s;
+  const afterSum = (await one("SELECT SUM(price_cents)::int8 s FROM tiendas.store_products WHERE store_slug = 'kiro'")).s;
   assert.ok(afterSum > before);
 });
 
 test('error del proveedor queda registrado y se puede reintentar', async () => {
   const { mockSupplier } = await import('../src/suppliers/mock.js');
   const { forwardToSupplier, markPaid, createOrder } = await import('../src/services/orders.js');
-  const id = db.prepare("SELECT product_id FROM store_products WHERE store_slug = 'alasnegras' LIMIT 1").get().product_id;
-  const order = createOrder('alasnegras', [{ id, qty: 1 }], customer);
-  markPaid(order.id, 'TEST');
+  const id = (await one("SELECT product_id FROM tiendas.store_products WHERE store_slug = 'alasnegras' LIMIT 1")).product_id;
+  const order = await createOrder('alasnegras', [{ id, qty: 1 }], customer);
+  await markPaid(order.id, 'TEST');
   const original = mockSupplier.createOrder;
   mockSupplier.createOrder = async () => { throw new Error('Sin saldo'); };
   let o = await forwardToSupplier(order.id);
@@ -164,8 +161,8 @@ test('Alas Negras: solo ropa, solo negro y blanco, diseño monocromático', asyn
     const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
     assert.ok(r === g && g === b, `${c} es un gris neutro (sin color)`);
   }
-  const rows = db.prepare(`SELECT p.category, COALESCE(p.title_custom, p.title) title FROM store_products sp
-    JOIN products p ON p.id = sp.product_id WHERE sp.store_slug = 'alasnegras'`).all();
+  const rows = await q(`SELECT p.category, COALESCE(p.title_custom, p.title) title FROM tiendas.store_products sp
+    JOIN tiendas.products p ON p.id = sp.product_id WHERE sp.store_slug = 'alasnegras'`);
   assert.ok(rows.length >= 40);
   for (const r of rows) {
     assert.ok(['playeras', 'sudaderas', 'chamarras', 'pantalones'].includes(r.category), `${r.title} es ropa`);
@@ -180,18 +177,18 @@ test('Alas Negras: solo ropa, solo negro y blanco, diseño monocromático', asyn
 
 test('ocultar un producto lo quita de la tienda y la sincronización lo respeta', async () => {
   const { setProductHidden } = await import('../src/services/catalog.js');
-  const id = db.prepare("SELECT product_id FROM store_products WHERE store_slug = 'kiro' LIMIT 1").get().product_id;
-  setProductHidden(id, true);
+  const id = (await one("SELECT product_id FROM tiendas.store_products WHERE store_slug = 'kiro' LIMIT 1")).product_id;
+  await setProductHidden(id, true);
   assert.equal((await get(`/s/kiro/p/${id}`)).status, 404);
   await runSync();
   assert.equal((await get(`/s/kiro/p/${id}`)).status, 404);
-  setProductHidden(id, false);
+  await setProductHidden(id, false);
   assert.equal((await get(`/s/kiro/p/${id}`)).status, 200);
 });
 
 test('Alas Negras separa la colección en dama y caballero', async () => {
-  const counts = db.prepare(`SELECT p.audience, COUNT(*) n FROM store_products sp JOIN products p ON p.id = sp.product_id
-    WHERE sp.store_slug = 'alasnegras' GROUP BY p.audience`).all();
+  const counts = await q(`SELECT p.audience, COUNT(*)::int n FROM tiendas.store_products sp JOIN tiendas.products p ON p.id = sp.product_id
+    WHERE sp.store_slug = 'alasnegras' GROUP BY p.audience`);
   assert.deepEqual(counts.map((r) => r.audience).sort(), ['caballero', 'dama']);
   assert.ok(counts.every((r) => r.n >= 20));
 
@@ -206,4 +203,23 @@ test('Alas Negras separa la colección en dama y caballero', async () => {
   // Otras tiendas no tienen públicos ni categorías ajenas.
   assert.equal((await get('/s/voltia/para/dama')).status, 404);
   assert.equal((await get('/s/voltia/c/playeras')).status, 404);
+});
+
+test('la sincronización por partes termina y no repite productos entre tiendas', async () => {
+  const { startSync, syncStep } = await import('../src/services/catalog.js');
+  await startSync('mock');
+  let state, steps = 0;
+  do { state = await syncStep({ budgetMs: 1 }); steps += 1; } while (!state.finished_at && steps < 500);
+  assert.ok(state.finished_at, 'terminó');
+  assert.ok(steps > 10, 'avanzó en varios pasos');
+  assert.equal(state.cursor, state.total);
+  assert.ok(state.imported > 400);
+  const dupes = await q('SELECT product_id FROM tiendas.store_products GROUP BY product_id HAVING COUNT(DISTINCT store_slug) > 1');
+  assert.deepEqual(dupes, []);
+  assert.equal((await get('/s/voltia/')).status, 200);
+});
+
+test('la tarea programada exige el secreto', async () => {
+  assert.equal((await get('/api/cron')).status, 401);
+  assert.equal((await get('/api/cron', { headers: { authorization: 'Bearer otro' } })).status, 401);
 });

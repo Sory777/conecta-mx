@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { db, tx } from '../db.js';
+import { q, one, tx } from '../db.js';
 import { getStoreProduct } from './catalog.js';
 import { estimateFeeCents } from '../payments/index.js';
 import { getSupplier } from '../suppliers/index.js';
@@ -41,11 +41,11 @@ export function validateCustomer(input) {
 }
 
 // Los precios SIEMPRE se recalculan desde la base: nunca se confía en el carrito del navegador.
-export function priceCart(storeSlug, cart) {
+export async function priceCart(storeSlug, cart) {
   const lines = [];
   for (const raw of (Array.isArray(cart) ? cart : []).slice(0, 30)) {
     const qty = Math.min(10, Math.max(1, Math.floor(Number(raw?.qty) || 0)));
-    const p = getStoreProduct(storeSlug, Number(raw?.id));
+    const p = await getStoreProduct(storeSlug, Number(raw?.id));
     if (!p || !qty) continue;
     const existing = lines.find((l) => l.product.id === p.id);
     if (existing) existing.qty = Math.min(10, existing.qty + qty);
@@ -61,71 +61,73 @@ function newOrderNumber(storeSlug) {
   return `${storeSlug.slice(0, 3).toUpperCase()}-${d}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
 }
 
-export function createOrder(storeSlug, cart, customerInput) {
+export async function createOrder(storeSlug, cart, customerInput) {
   const { customer, errors } = validateCustomer(customerInput);
   if (Object.keys(errors).length) throw Object.assign(new ValidationError('Revisa tus datos'), { errors });
-  const { lines, total, cost } = priceCart(storeSlug, cart);
+  const { lines, total, cost } = await priceCart(storeSlug, cart);
   if (!lines.length) throw new ValidationError('Tu carrito está vacío');
 
-  return tx(() => {
-    const number = newOrderNumber(storeSlug);
-    const { lastInsertRowid: id } = db.prepare(`INSERT INTO orders
+  const id = await tx(async (t) => {
+    const [{ id }] = await t(`INSERT INTO tiendas.orders
       (number, store_slug, status, customer_name, email, phone, street, colonia, city, state, zip, total_cents, supplier_cost_cents)
-      VALUES (?, ?, 'pending_payment', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(number, storeSlug, customer.name, customer.email, customer.phone, customer.street, customer.colonia,
-        customer.city, customer.state, customer.zip, total, cost);
-    const ins = db.prepare(`INSERT INTO order_items (order_id, product_id, supplier_variant_id, title, qty, unit_price_cents, unit_cost_cents)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`);
+      VALUES ($1, $2, 'pending_payment', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
+    [newOrderNumber(storeSlug), storeSlug, customer.name, customer.email, customer.phone, customer.street, customer.colonia,
+      customer.city, customer.state, customer.zip, total, cost]);
     for (const l of lines) {
-      ins.run(id, l.product.id, l.product.supplier_variant_id, l.product.title, l.qty, l.product.price_cents,
-        l.product.cost_cents + l.product.shipping_cents);
+      await t(`INSERT INTO tiendas.order_items (order_id, product_id, supplier_variant_id, title, qty, unit_price_cents, unit_cost_cents)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, l.product.id, l.product.supplier_variant_id, l.product.title, l.qty, l.product.price_cents,
+        l.product.cost_cents + l.product.shipping_cents]);
     }
-    logEvent(id, 'created', `Pedido creado por ${customer.name}`);
-    return getOrder(Number(id));
+    await t('INSERT INTO tiendas.order_events (order_id, type, message) VALUES ($1, $2, $3)', [id, 'created', `Pedido creado por ${customer.name}`]);
+    return id;
   });
+  return getOrder(id);
 }
 
 export function getOrder(id) {
-  return db.prepare('SELECT * FROM orders WHERE id = ?').get(id) || null;
+  return one('SELECT * FROM tiendas.orders WHERE id = $1', [id]);
 }
 export function getOrderByNumber(number) {
-  return db.prepare('SELECT * FROM orders WHERE number = ?').get(String(number)) || null;
+  return one('SELECT * FROM tiendas.orders WHERE number = $1', [String(number)]);
 }
 export function getOrderItems(orderId) {
-  return db.prepare('SELECT oi.*, p.supplier FROM order_items oi JOIN products p ON p.id = oi.product_id WHERE order_id = ?').all(orderId);
+  return q(`SELECT oi.*, p.supplier FROM tiendas.order_items oi JOIN tiendas.products p ON p.id = oi.product_id
+    WHERE order_id = $1 ORDER BY oi.id`, [orderId]);
 }
 export function getOrderEvents(orderId) {
-  return db.prepare('SELECT * FROM order_events WHERE order_id = ? ORDER BY id').all(orderId);
+  return q('SELECT * FROM tiendas.order_events WHERE order_id = $1 ORDER BY id', [orderId]);
 }
-export function setPaymentRef(orderId, provider, ref) {
-  db.prepare("UPDATE orders SET payment_provider = ?, payment_ref = ?, updated_at = datetime('now') WHERE id = ?").run(provider, ref, orderId);
+export async function setPaymentRef(orderId, provider, ref) {
+  await q('UPDATE tiendas.orders SET payment_provider = $1, payment_ref = $2, updated_at = now() WHERE id = $3', [provider, ref, orderId]);
 }
 
-function logEvent(orderId, type, message) {
-  db.prepare('INSERT INTO order_events (order_id, type, message) VALUES (?, ?, ?)').run(orderId, type, message);
+async function logEvent(orderId, type, message) {
+  await q('INSERT INTO tiendas.order_events (order_id, type, message) VALUES ($1, $2, $3)', [orderId, type, message]);
 }
 
 // Marca el pedido como pagado y registra la ganancia (venta - costo proveedor - comisión de pago).
-export function markPaid(orderId, ref) {
-  const o = getOrder(orderId);
+export async function markPaid(orderId, ref) {
+  const o = await getOrder(orderId);
   if (!o || o.status !== 'pending_payment') return false;
   const fee = estimateFeeCents(o.total_cents);
-  const changed = db.prepare(`UPDATE orders SET status = 'paid', payment_ref = ?, payment_fee_cents = ?, profit_cents = ?,
-    updated_at = datetime('now') WHERE id = ? AND status = 'pending_payment'`)
-    .run(ref, fee, o.total_cents - o.supplier_cost_cents - fee, orderId).changes;
-  if (changed) logEvent(orderId, 'paid', `Pago confirmado (${ref})`);
-  return changed > 0;
+  const changed = await q(`UPDATE tiendas.orders SET status = 'paid', payment_ref = $1, payment_fee_cents = $2, profit_cents = $3,
+    updated_at = now() WHERE id = $4 AND status = 'pending_payment' RETURNING id`,
+  [ref, fee, o.total_cents - o.supplier_cost_cents - fee, orderId]);
+  if (changed.length) await logEvent(orderId, 'paid', `Pago confirmado (${ref})`);
+  return changed.length > 0;
 }
 
 // Envía el pedido al proveedor. Si hay artículos de varios proveedores, se crea un pedido en cada uno.
 export async function forwardToSupplier(orderId) {
-  const o = getOrder(orderId);
+  const o = await getOrder(orderId);
   if (!o || !['paid', 'supplier_error'].includes(o.status)) return o;
   // Reclamamos el pedido de forma atómica para no enviarlo dos veces.
-  const claimed = db.prepare("UPDATE orders SET status = 'sent_to_supplier', updated_at = datetime('now') WHERE id = ? AND status IN ('paid','supplier_error')").run(orderId).changes;
-  if (!claimed) return getOrder(orderId);
+  const claimed = await q(`UPDATE tiendas.orders SET status = 'sent_to_supplier', updated_at = now()
+    WHERE id = $1 AND status IN ('paid','supplier_error') RETURNING id`, [orderId]);
+  if (!claimed.length) return getOrder(orderId);
 
-  const items = getOrderItems(orderId);
+  const items = await getOrderItems(orderId);
   const bySupplier = Map.groupBy(items, (i) => i.supplier);
   const ids = [];
   try {
@@ -137,19 +139,19 @@ export async function forwardToSupplier(orderId) {
       });
       ids.push(`${name}:${supplierOrderId}`);
     }
-    db.prepare("UPDATE orders SET supplier = ?, supplier_order_id = ?, last_error = NULL, updated_at = datetime('now') WHERE id = ?")
-      .run([...bySupplier.keys()].join(','), ids.join(','), orderId);
-    logEvent(orderId, 'forwarded', `Pedido enviado al proveedor: ${ids.join(', ')}`);
+    await q('UPDATE tiendas.orders SET supplier = $1, supplier_order_id = $2, last_error = NULL, updated_at = now() WHERE id = $3',
+      [[...bySupplier.keys()].join(','), ids.join(','), orderId]);
+    await logEvent(orderId, 'forwarded', `Pedido enviado al proveedor: ${ids.join(', ')}`);
   } catch (err) {
-    db.prepare("UPDATE orders SET status = 'supplier_error', supplier_order_id = ?, last_error = ?, updated_at = datetime('now') WHERE id = ?")
-      .run(ids.join(',') || null, String(err.message).slice(0, 500), orderId);
-    logEvent(orderId, 'supplier_error', `Falló el envío al proveedor: ${err.message}`);
+    await q("UPDATE tiendas.orders SET status = 'supplier_error', supplier_order_id = $1, last_error = $2, updated_at = now() WHERE id = $3",
+      [ids.join(',') || null, String(err.message).slice(0, 500), orderId]);
+    await logEvent(orderId, 'supplier_error', `Falló el envío al proveedor: ${err.message}`);
   }
   return getOrder(orderId);
 }
 
 export async function refreshTracking(orderId) {
-  const o = getOrder(orderId);
+  const o = await getOrder(orderId);
   if (!o?.supplier_order_id || !['sent_to_supplier', 'shipped'].includes(o.status)) return o;
   const parts = o.supplier_order_id.split(',').map((s) => s.split(/:(.*)/s));
   const results = [];
@@ -161,14 +163,14 @@ export async function refreshTracking(orderId) {
   const status = worst === 'processing' ? 'sent_to_supplier' : worst;
   const tracking = results.map((r) => r.trackingNumber).filter(Boolean).join(', ') || null;
   if (status !== o.status || tracking !== o.tracking_number) {
-    db.prepare("UPDATE orders SET status = ?, tracking_number = ?, updated_at = datetime('now') WHERE id = ?").run(status, tracking, orderId);
-    logEvent(orderId, status, `${STATUS_LABELS[status]}${tracking ? ` · guía ${tracking}` : ''}`);
+    await q('UPDATE tiendas.orders SET status = $1, tracking_number = $2, updated_at = now() WHERE id = $3', [status, tracking, orderId]);
+    await logEvent(orderId, status, `${STATUS_LABELS[status]}${tracking ? ` · guía ${tracking}` : ''}`);
   }
   return getOrder(orderId);
 }
 
 export async function refreshAllTracking() {
-  const open = db.prepare("SELECT id FROM orders WHERE status IN ('sent_to_supplier','shipped')").all();
+  const open = await q("SELECT id FROM tiendas.orders WHERE status IN ('sent_to_supplier','shipped')");
   for (const { id } of open) {
     try { await refreshTracking(id); } catch (err) { console.error(`[rastreo] pedido ${id}:`, err.message); }
   }
@@ -176,13 +178,14 @@ export async function refreshAllTracking() {
 }
 
 export async function retryFailedForwards() {
-  const failed = db.prepare("SELECT id FROM orders WHERE status IN ('paid','supplier_error')").all();
+  const failed = await q("SELECT id FROM tiendas.orders WHERE status IN ('paid','supplier_error')");
   for (const { id } of failed) await forwardToSupplier(id);
   return failed.length;
 }
 
-export function cancelOrder(orderId) {
-  const changed = db.prepare("UPDATE orders SET status = 'cancelled', profit_cents = 0, updated_at = datetime('now') WHERE id = ? AND status IN ('pending_payment','supplier_error')").run(orderId).changes;
-  if (changed) logEvent(orderId, 'cancelled', 'Pedido cancelado por el administrador');
-  return changed > 0;
+export async function cancelOrder(orderId) {
+  const changed = await q(`UPDATE tiendas.orders SET status = 'cancelled', profit_cents = 0, updated_at = now()
+    WHERE id = $1 AND status IN ('pending_payment','supplier_error') RETURNING id`, [orderId]);
+  if (changed.length) await logEvent(orderId, 'cancelled', 'Pedido cancelado por el administrador');
+  return changed.length > 0;
 }

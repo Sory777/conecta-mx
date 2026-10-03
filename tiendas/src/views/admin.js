@@ -206,3 +206,45 @@ export function storesPage({ rows, flash }) {
   </section>`)}</div>`;
   return layout({ title: 'Tiendas', active: 'stores', body, flash });
 }
+
+// Sincronización por partes: la página llama al servidor en bucle hasta terminar.
+export function syncPage({ state, supplierLabel }) {
+  const running = state?.run && !state.finished_at;
+  const pctDone = state?.total ? Math.round((state.cursor / state.total) * 100) : 0;
+  const body = html`<div class="head"><h1>Sincronizar catálogo</h1>
+  <form method="post" action="/admin/sync"><button class="btn sm ${running ? 'ghost' : ''}">${running ? 'Reiniciar' : 'Iniciar sincronización'}</button></form></div>
+  <section class="panel sync" data-running="${running ? '1' : '0'}">
+    <p>Proveedor: <strong>${supplierLabel}</strong>. Se buscan los más vendidos de cada nicho y se asignan a su tienda.
+    Con CJ tarda entre 20 y 40 minutos: <strong>deja esta página abierta</strong> hasta que termine.</p>
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctDone}"><span data-bar style="width:${pctDone}%"></span></div>
+    <p data-status>${!state?.run ? 'Aún no se ha sincronizado.'
+      : state.finished_at ? `Terminó el ${state.finished_at}: ${state.imported} productos importados.`
+      : `Búsqueda ${state.cursor} de ${state.total} · ${state.imported} productos importados…`}</p>
+    <p class="flash warn" data-error ${raw(state?.last_error ? '' : 'hidden')}>${state?.last_error || ''}</p>
+  </section>
+  <script>
+  (() => {
+    const box = document.querySelector('.sync');
+    if (box.dataset.running !== '1') return;
+    const bar = box.querySelector('[data-bar]'), status = box.querySelector('[data-status]'), error = box.querySelector('[data-error]');
+    async function step() {
+      try {
+        const res = await fetch('/admin/sync/step', { method: 'POST' });
+        const s = await res.json();
+        if (!res.ok) throw new Error(s.error || res.status);
+        const p = s.total ? Math.round(s.cursor / s.total * 100) : 0;
+        bar.style.width = p + '%';
+        if (s.last_error) { error.hidden = false; error.textContent = 'Último aviso: ' + s.last_error; }
+        if (s.finished_at) { status.textContent = 'Listo: ' + s.imported + ' productos importados. Ya puedes ver tus tiendas.'; return; }
+        status.textContent = 'Búsqueda ' + s.cursor + ' de ' + s.total + ' · ' + s.imported + ' productos importados…';
+        step();
+      } catch (e) {
+        error.hidden = false; error.textContent = 'Error: ' + e.message + '. Reintentando en 15 s…';
+        setTimeout(step, 15000);
+      }
+    }
+    step();
+  })();
+  </script>`;
+  return layout({ title: 'Sincronizar', active: 'products', body });
+}

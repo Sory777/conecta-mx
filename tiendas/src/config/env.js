@@ -16,7 +16,14 @@ const e = process.env;
 export const env = {
   port: Number(e.PORT || 3000),
   baseUrl: (e.BASE_URL || `http://localhost:${e.PORT || 3000}`).replace(/\/$/, ''),
-  dbPath: e.DB_PATH || path.resolve(import.meta.dirname, '../../data/tiendas.db'),
+  // Producción: cadena de conexión de Postgres (Supabase). Sin ella se usa PGlite local:
+  // PGLITE_DIR=memory:// (pruebas) o una carpeta (por defecto data/pglite).
+  databaseUrl: e.DATABASE_URL || '',
+  pgliteDir: e.PGLITE_DIR || path.resolve(import.meta.dirname, '../../data/pglite'),
+  // Secreto para las tareas programadas de Vercel (Cron).
+  cronSecret: e.CRON_SECRET || '',
+  // Tiempo máximo de cada paso de sincronización (debe caber en el límite de la función de Vercel).
+  syncStepMs: Number(e.SYNC_STEP_MS || 45_000),
   adminPassword: e.ADMIN_PASSWORD || '',
   sessionSecret: e.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
 

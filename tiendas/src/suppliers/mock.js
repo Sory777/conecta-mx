@@ -19,7 +19,7 @@ export const mockSupplier = {
   label: 'Proveedor demo (simulado)',
 
   // Genera, por cada búsqueda del nicho de cada tienda, los N productos "más vendidos".
-  async fetchCatalog({ searches, perSearch = 6 } = {}) {
+  async fetchCatalog({ searches, perSearch = 6, exclude = [] } = {}) {
     const out = [];
     for (const s of searches) {
       for (let i = 0; i < perSearch; i++) {

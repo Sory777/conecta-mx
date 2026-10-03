@@ -100,18 +100,15 @@ export const cjSupplier = {
 
   // searches: [{ store, category, query, label, icon }]. Cada producto se asigna a una sola
   // tienda: si dos búsquedas encuentran el mismo, se queda con la primera y la otra toma el siguiente.
-  async fetchCatalog({ searches, perSearch = env.cjPerSearch } = {}) {
-    const used = new Set();
+  // exclude: ids de producto que ya tomó otra tienda en esta sincronización.
+  async fetchCatalog({ searches, perSearch = env.cjPerSearch, exclude = [] } = {}) {
+    const used = new Set(exclude);
     const out = [];
     for (const s of searches) {
-      let candidates;
-      try {
-        candidates = await topProducts(s.query, Math.min(100, perSearch * 4));
-      } catch (err) {
-        console.error(`[cj] búsqueda "${s.query}" (${s.store}):`, err.message);
-        continue;
-      }
+      // Si CJ falla (llave inválida, límite…) el error sube y queda registrado en la sincronización.
+      const candidates = await topProducts(s.query, Math.min(100, perSearch * 4));
       let taken = 0;
+      let shippingUsd = null; // se cotiza una vez por búsqueda: productos parecidos, envío parecido
       for (const p of candidates) {
         if (taken >= perSearch) break;
         if (!p.pid || used.has(p.pid) || p.inventory === 0) continue;
@@ -128,7 +125,7 @@ export const cjSupplier = {
         const vid = v?.vid || p.pid;
         const costUsd = num(v?.variantSellPrice ?? p.price);
         if (!costUsd) continue;
-        await sleep(env.cjDelayMs);
+        if (shippingUsd == null) await sleep(env.cjDelayMs);
         used.add(p.pid);
         taken += 1;
         out.push({
@@ -145,7 +142,7 @@ export const cjSupplier = {
           imageUrl: v?.variantImage || p.image || null,
           icon: s.icon,
           costUsd,
-          shippingUsd: await shippingFor(vid),
+          shippingUsd: (shippingUsd ??= await shippingFor(vid)),
         });
       }
       await sleep(env.cjDelayMs);

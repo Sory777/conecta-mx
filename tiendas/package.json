@@ -4,14 +4,20 @@
   "version": "1.0.0",
   "description": "10 tiendas online con branding propio, catálogo de proveedores chinos (dropshipping) y panel central.",
   "type": "module",
-  "engines": { "node": ">=22.5" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "start": "node --disable-warning=ExperimentalWarning src/server.js",
-    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.js",
-    "sync": "node --disable-warning=ExperimentalWarning scripts/sync-catalog.js",
-    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "sync": "node scripts/sync-catalog.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8"
   }
 }

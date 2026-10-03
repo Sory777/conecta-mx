@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 process.env.CJ_API_KEY = 'test';
 process.env.CJ_DELAY_MS = '0';
 process.env.CJ_PER_SEARCH = '2';
-process.env.DB_PATH = ':memory:';
+process.env.PGLITE_DIR = 'memory://';
 
 const calls = [];
 // API de CJ simulada: dos búsquedas que comparten el producto más vendido.
