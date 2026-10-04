@@ -339,6 +339,13 @@ class handler(BaseHTTPRequestHandler):
             # Telegram reintenta si tardamos; se atiende cada update una sola vez.
             if rpc("agente_marcar_update", p_update_id=update.get("update_id", 0)):
                 atender(update)
-        except Exception:  # noqa: BLE001 - siempre devolvemos 200 para que Telegram no reintente en bucle
+        except Exception as e:  # noqa: BLE001 - siempre devolvemos 200 para que Telegram no reintente en bucle
             log.exception("Error atendiendo el update")
+            chat_id = (update.get("message") or {}).get("chat", {}).get("id")
+            if chat_id:
+                try:
+                    detalle = str(e).replace(TOKEN, "***").replace(SECRETO_DB, "***")[:300]
+                    enviar(chat_id, f"Error interno del bot: {type(e).__name__}: {detalle}")
+                except Exception:  # noqa: BLE001
+                    pass
         self._responder(200)
