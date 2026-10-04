@@ -118,8 +118,16 @@ minutos. En producción (`NODE_ENV=production`) los pagos demo se bloquean.
    HTTPS, y `TRUST_PROXY=1` si estás detrás de un proxy (Render, Railway, Nginx).
 4. **Dominios propios** (opcional): agrega el dominio en `domains` de cada tienda en
    `src/config/stores.js` y apunta su DNS al servidor. Ej.: `domains: ['voltia.mx', 'www.voltia.mx']`.
-5. **Hospedaje**: cualquier servidor con Node 22 y disco persistente para `data/tiendas.db`
-   (Render, Railway, Fly.io, un VPS). Respalda ese archivo: contiene pedidos y ganancias.
+5. **Hospedaje gratuito (Vercel + Supabase)**: el proyecto `tiendas-mx` en Vercel usa `vercel.json`
+   y guarda todo en Postgres (Supabase), en el esquema `tiendas` con un usuario propio (`tiendas_app`).
+   Variables de entorno en Vercel → Settings → Environment Variables (Production):
+   `DATABASE_URL`, `SESSION_SECRET`, `CRON_SECRET` (ya configuradas), y las que agregas tú:
+   `CJ_API_KEY`, `ADMIN_PASSWORD` y, para cobrar, `STRIPE_SECRET_KEY`. Después de cambiarlas hay que
+   volver a publicar (Deployments → ⋯ → Redeploy).
+   La importación de CJ se hace por partes: entra a `/admin`, pulsa «Sincronizar catálogo» y deja la
+   página abierta. Además, Vercel Cron llama a `/api/cron` una vez al día para reintentar pedidos,
+   actualizar rastreos y refrescar el catálogo.
+   Sin `DATABASE_URL` (en tu computadora) se usa PGlite, un Postgres local en `data/pglite`.
 
 Para agregar otro proveedor (AliExpress Dropshipping, Spocket, etc.) crea un módulo en
 `src/suppliers/` con `fetchCatalog`, `createOrder` y `getOrderStatus` y regístralo en `src/suppliers/index.js`.
