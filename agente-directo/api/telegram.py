@@ -300,7 +300,10 @@ def atender(update: dict) -> None:
         enviar(chat_id, "Límite de uso alcanzado; espera un momento y reintenta.")
     except anthropic.APIStatusError as e:
         log.exception("Error de la API")
-        enviar(chat_id, f"Error de la API ({e.status_code}). Intenta de nuevo.")
+        if "credit balance" in str(e.message):
+            enviar(chat_id, "Tu cuenta de Anthropic no tiene saldo. Recarga en console.anthropic.com → Billing.")
+        else:
+            enviar(chat_id, f"Error de la API ({e.status_code}). Intenta de nuevo.")
     except anthropic.APIConnectionError:
         enviar(chat_id, "El servidor no pudo conectarse con la API. Intenta de nuevo.")
     if not ok:
