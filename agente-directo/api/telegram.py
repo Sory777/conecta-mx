@@ -254,7 +254,7 @@ def atender(update: dict) -> None:
     chat_id, usuario = msg["chat"]["id"], msg["from"]["id"]
     texto = msg.get("text", "").strip()
     comando, _, argumento = texto.partition(" ")
-    comando = comando.split("@")[0]
+    comando = comando.split("@")[0].lower()
 
     if comando == "/id":
         return enviar(chat_id, f"Tu ID de Telegram es {usuario}")
