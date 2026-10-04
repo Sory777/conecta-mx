@@ -17,15 +17,16 @@ globalThis.fetch = async (url, opts = {}) => {
     const kw = u.searchParams.get('keyWord');
     const list = {
       'wireless earbuds': [
-        { id: 'P1', nameEn: 'TWS Earbuds', bigImage: 'https://img/p1.jpg', sellPrice: '5.10', listedNum: 9000, warehouseInventoryNum: 50 },
-        { id: 'P2', nameEn: 'Earbuds Pro', bigImage: 'https://img/p2.jpg', sellPrice: '3.20 -- 4.80', listedNum: 7000 },
-        { id: 'P3', nameEn: 'Earbuds Mini', bigImage: 'https://img/p3.jpg', sellPrice: '2.00', listedNum: 100 },
+        { id: 'P0', nameEn: 'Self Cleaning Hair Brush', bigImage: 'https://img/p0.jpg', sellPrice: '2.00', listedNum: 99999 },
+        { id: 'P1', nameEn: 'TWS Wireless Earbuds', bigImage: 'https://img/p1.jpg', sellPrice: '5.10', listedNum: 9000, warehouseInventoryNum: 50 },
+        { id: 'P2', nameEn: 'Wireless Earbuds Pro', bigImage: 'https://img/p2.jpg', sellPrice: '3.20 -- 4.80', listedNum: 7000 },
+        { id: 'P3', nameEn: 'Wireless Earbuds Mini', bigImage: 'https://img/p3.jpg', sellPrice: '2.00', listedNum: 100 },
       ],
       'bluetooth earphones': [
-        { id: 'P1', nameEn: 'TWS Earbuds', bigImage: 'https://img/p1.jpg', sellPrice: '5.10', listedNum: 9000 },
-        { id: 'P4', nameEn: 'Sport Earphones', bigImage: 'https://img/p4.jpg', sellPrice: '4.00', listedNum: 5000, warehouseInventoryNum: 0 },
-        { id: 'P5', nameEn: 'Neckband', bigImage: 'https://img/p5.jpg', sellPrice: '6.00', listedNum: 4000 },
-        { id: 'P6', nameEn: 'Clip Earbuds', bigImage: 'https://img/p6.jpg', sellPrice: '7.00', listedNum: 3000 },
+        { id: 'P1', nameEn: 'TWS Wireless Earbuds', bigImage: 'https://img/p1.jpg', sellPrice: '5.10', listedNum: 9000 },
+        { id: 'P4', nameEn: 'Sport Bluetooth Earphones', bigImage: 'https://img/p4.jpg', sellPrice: '4.00', listedNum: 5000, warehouseInventoryNum: 0 },
+        { id: 'P5', nameEn: 'Neckband Bluetooth Earphones', bigImage: 'https://img/p5.jpg', sellPrice: '6.00', listedNum: 4000 },
+        { id: 'P6', nameEn: 'Clip Bluetooth Earphones', bigImage: 'https://img/p6.jpg', sellPrice: '7.00', listedNum: 3000 },
       ],
     }[kw];
     return ok({ content: [{ productList: list }] });
@@ -38,7 +39,7 @@ globalThis.fetch = async (url, opts = {}) => {
   throw new Error(`URL inesperada ${url}`);
 };
 
-const { cjSupplier, pickColorVariant } = await import('../src/suppliers/cj.js');
+const { cjSupplier, pickColorVariant, isRelevant } = await import('../src/suppliers/cj.js');
 
 test('CJ: toma los más vendidos de cada búsqueda sin repetir productos entre tiendas', async () => {
   const out = await cjSupplier.fetchCatalog({
@@ -48,11 +49,11 @@ test('CJ: toma los más vendidos de cada búsqueda sin repetir productos entre t
     ],
   });
   assert.deepEqual(out.map((p) => [p.store, p.supplierProductId]), [
-    ['voltia', 'P1'], ['voltia', 'P2'], // los 2 más vendidos
+    ['voltia', 'P1'], ['voltia', 'P2'], // los 2 más vendidos que sí son audífonos (P0 es un cepillo)
     ['pixelpop', 'P5'], ['pixelpop', 'P6'], // P1 ya es de voltia y P4 está agotado
   ]);
   const listCall = calls.find((c) => c.includes('listV2'));
-  assert.match(listCall, /orderBy=1&sort=desc/, 'ordenado por ventas (listedNum)');
+  assert.doesNotMatch(listCall, /orderBy/, 'CJ ordena por relevancia; la popularidad se aplica después');
   assert.equal(out[0].supplierVariantId, 'V-P1');
   assert.equal(out[0].costUsd, 4.5);
   assert.equal(out[0].shippingUsd, 2.75);
@@ -68,4 +69,15 @@ test('CJ: tiendas en negro y blanco solo toman variantes de esos colores', () =>
   assert.equal(pick(['White XL']).colorEs, 'Blanco');
   assert.equal(pick(['Black Red-L', 'Pink-S', 'Blackish-M']), null, 'combinados, otros colores o falsos positivos se descartan');
   assert.equal(pick([]), null);
+});
+
+test('relevancia: solo productos que coinciden con la búsqueda y su público', () => {
+  assert.ok(isRelevant('Rhinestone Skull Print T-Shirt Women Y2K', 'women rhinestone skull t-shirt'));
+  assert.ok(isRelevant('Skull Graphic Tee Oversized', 'men rhinestone skull t-shirt'), 'basta con 2 de 3 palabras si incluye el tipo');
+  assert.ok(!isRelevant('Self Cleaning Hair Brush For Women', 'women rhinestone skull t-shirt'));
+  assert.ok(!isRelevant('Rhinestone Skull Hoodie', 'women rhinestone skull t-shirt'), 'el tipo de prenda es obligatorio');
+  assert.ok(!isRelevant('Women Rhinestone Skull T-Shirt', 'men rhinestone skull t-shirt'), 'caballero no acepta dama');
+  assert.ok(!isRelevant('Newborn Baby Anime Hoodie', 'anime hoodie'), 'nada de bebé');
+  assert.ok(isRelevant('Anime Print Hooded Sweatshirt', 'anime hoodie'), 'sinónimos del tipo');
+  assert.ok(isRelevant('Fidget Toy Pop Set', 'fidget toys'), 'singular y plural');
 });

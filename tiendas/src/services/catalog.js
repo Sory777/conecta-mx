@@ -130,7 +130,9 @@ export async function syncStep({ budgetMs = 45_000 } = {}) {
   if (!state?.run || state.finished_at) return state;
   const supplier = getSupplier(state.supplier);
   const searches = nicheSearches();
-  while (state.cursor < searches.length && Date.now() < deadline) {
+  let first = true; // cada paso avanza al menos una búsqueda, aunque el tiempo sea muy corto
+  while (state.cursor < searches.length && (first || Date.now() < deadline)) {
+    first = false;
     const search = searches[state.cursor];
     const claimed = (await q('SELECT supplier_product_id FROM tiendas.products WHERE sync_run = $1', [state.run]))
       .map((r) => r.supplier_product_id);

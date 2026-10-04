@@ -75,23 +75,70 @@ export function pickColorVariant(variants, colors) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Busca los productos más vendidos para una palabra clave. CJ no publica ventas
-// reales; usamos su orden por "listedNum" (cuántas tiendas venden el producto),
-// que es su indicador público de demanda.
+// --- Relevancia -------------------------------------------------------------
+// CJ, al ordenar por popularidad, devuelve productos muy vendidos aunque no tengan que ver
+// con la búsqueda (cepillos de cabello al buscar "playera calavera"). Por eso primero pedimos
+// los resultados por relevancia, descartamos los que no coinciden con la búsqueda y, entre
+// los que sí, nos quedamos con los más vendidos (listedNum: tiendas que lo venden en CJ).
+const STOP = new Set(['women', 'men', 'for', 'and', 'with', 'the', 'a', 'of', 'style']);
+// Sinónimos del tipo de producto (la última palabra de cada búsqueda).
+const SYN = {
+  't-shirt': ['t-shirt', 'tshirt', 't shirt', 'tee', 'shirt'],
+  shirt: ['shirt', 'blouse', 'top'],
+  hoodie: ['hoodie', 'hooded', 'sweatshirt'],
+  sweater: ['sweater', 'pullover', 'cardigan', 'jumper'],
+  pants: ['pants', 'trousers', 'joggers', 'sweatpants'],
+  jeans: ['jeans', 'denim pants'],
+  jacket: ['jacket', 'coat', 'outerwear'],
+  shorts: ['shorts'],
+  trunks: ['trunks', 'board shorts', 'swim shorts'],
+  swimsuit: ['swimsuit', 'swimwear', 'bikini', 'one piece', 'monokini'],
+  dress: ['dress'],
+  skirt: ['skirt'],
+  leggings: ['leggings', 'legging'],
+  socks: ['socks'],
+  pajamas: ['pajamas', 'pajama', 'pyjama', 'sleepwear'],
+  earbuds: ['earbuds', 'earphones', 'headphones', 'headset'],
+  headphones: ['headphones', 'headset', 'earphones'],
+  watch: ['watch', 'smartwatch'],
+  bag: ['bag', 'handbag', 'purse', 'tote'],
+  case: ['case', 'cover'],
+};
+const norm = (s) => ` ${String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()} `;
+
+export function isRelevant(name, query) {
+  const n = norm(name);
+  const words = String(query).toLowerCase().split(/\s+/);
+  // Público: una búsqueda de caballero no acepta productos de dama y viceversa.
+  if (words[0] === 'men' && /\s(women|woman|womens|ladies|lady|girl|girls)\s/.test(n)) return false;
+  if (words[0] === 'women' && /\s(men|mens|man|boys)\s/.test(n)) return false;
+  // Ropa de bebé o niño nunca entra (las tiendas son de adultos).
+  if (/\s(baby|babies|newborn|infant|toddler|kids|children|child)\s/.test(n)) return false;
+  const tokens = words.filter((t) => t && !STOP.has(t));
+  if (!tokens.length) return true;
+  // Coincidencia por inicio de palabra; acepta singular y plural (toys/toy, lights/light).
+  const has = (t) => (SYN[t] || [t]).flatMap((v) => [v, v.replace(/s$/, '')]).some((v) => n.includes(norm(v).trimEnd()));
+  if (!has(tokens.at(-1))) return false; // el tipo de producto es obligatorio
+  return tokens.filter(has).length / tokens.length >= 0.6;
+}
+
 async function topProducts(keyword, size) {
+  let list;
   try {
-    const data = await cj('GET', `/product/listV2?keyWord=${encodeURIComponent(keyword)}&orderBy=1&sort=desc&page=1&size=${size}`);
-    return (data?.content || []).flatMap((g) => g.productList || []).map((p) => ({
+    // Sin orderBy = orden por relevancia de CJ.
+    const data = await cj('GET', `/product/listV2?keyWord=${encodeURIComponent(keyword)}&page=1&size=${size}`);
+    list = (data?.content || []).flatMap((g) => g.productList || []).map((p) => ({
       pid: p.id, name: p.nameEn, image: p.bigImage, price: p.sellPrice, listed: Number(p.listedNum) || 0,
       inventory: p.warehouseInventoryNum,
     }));
   } catch {
-    // Cuentas/versiones antiguas: endpoint clásico, ordenamos nosotros por listedNum.
+    // Cuentas/versiones antiguas: endpoint clásico.
     const data = await cj('GET', `/product/list?pageNum=1&pageSize=${size}&productNameEn=${encodeURIComponent(keyword)}`);
-    return (data?.list || []).map((p) => ({
+    list = (data?.list || []).map((p) => ({
       pid: p.pid, name: p.productNameEn, image: p.productImage, price: p.sellPrice, listed: Number(p.listedNum) || 0,
-    })).sort((a, b) => b.listed - a.listed);
+    }));
   }
+  return list.filter((p) => isRelevant(p.name, keyword)).sort((a, b) => b.listed - a.listed);
 }
 
 export const cjSupplier = {
@@ -106,7 +153,7 @@ export const cjSupplier = {
     const out = [];
     for (const s of searches) {
       // Si CJ falla (llave inválida, límite…) el error sube y queda registrado en la sincronización.
-      const candidates = await topProducts(s.query, Math.min(100, perSearch * 4));
+      const candidates = await topProducts(s.query, 100);
       let taken = 0;
       let shippingUsd = null; // se cotiza una vez por búsqueda: productos parecidos, envío parecido
       for (const p of candidates) {
