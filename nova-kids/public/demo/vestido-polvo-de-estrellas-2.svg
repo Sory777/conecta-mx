@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="170 310 460 575" width="800" height="1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6E0FA"/><stop offset="1" stop-color="#D7E3FB"/></linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient>
+    <radialGradient id="shadow"><stop offset="0" stop-color="#1E1B4B" stop-opacity=".22"/><stop offset="1" stop-color="#1E1B4B" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="880" rx="300" ry="40" fill="url(#shadow)"/>
+  
+  <path d="M330 170 Q400 226 470 170 L522 190 L546 332 L522 364 Q650 650 684 826 Q400 880 116 826 Q150 650 278 364 L254 332 L278 190 Z" fill="#A78BFA"/>
+  <path d="M330 170 Q400 226 470 170 L522 190 L546 332 L522 364 Q650 650 684 826 Q400 880 116 826 Q150 650 278 364 L254 332 L278 190 Z" fill="url(#shade)"/>
+  
+      <path d="M278 364 Q400 392 522 364" stroke="#000000" stroke-width="14" fill="none" opacity=".45"/>
+      <path d="M126 790 Q400 842 674 790" stroke="#000000" stroke-width="10" fill="none" opacity=".3"/>
+  <g transform="translate(400 600) scale(0.95)">
+    <path d="M0 -84 Q8 -8 84 0 Q8 8 0 84 Q-8 8 -84 0 Q-8 -8 0 -84 Z" fill="#FFFFFF"/>
+    <path d="M86 -66 Q90 -36 120 -32 Q90 -28 86 2 Q82 -28 52 -32 Q82 -36 86 -66 Z" fill="#4FD8FF"/>
+    <path d="M-92 52 Q-89 74 -66 78 Q-89 82 -92 104 Q-95 82 -118 78 Q-95 74 -92 52 Z" fill="#4FD8FF"/></g>
+</svg>

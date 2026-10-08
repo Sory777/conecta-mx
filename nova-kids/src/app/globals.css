@@ -1,0 +1,263 @@
+@import "tailwindcss";
+
+/* ============================================================
+   NOVA KIDS — Design system
+   Derivado del logotipo: blanco, cian brillante, azul profundo,
+   morado y magenta sobre un fondo espacial oscuro.
+   ============================================================ */
+
+@theme {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-body), ui-sans-serif, sans-serif;
+
+  /* Espacio (superficies) */
+  --color-space-950: #04040d;
+  --color-space-900: #080819;
+  --color-space-850: #0c0c22;
+  --color-space-800: #12122e;
+  --color-space-700: #1b1b40;
+  --color-space-600: #2a2a5c;
+
+  /* Marca */
+  --color-nova-cyan: #1fd1ff;
+  --color-nova-blue: #2f6bff;
+  --color-nova-purple: #8b3dff;
+  --color-nova-magenta: #ff2bb8;
+  --color-nova-white: #f7f8ff;
+
+  /* Texto sobre fondo oscuro */
+  --color-ink: #f7f8ff;
+  --color-ink-muted: #a9aed6;
+  --color-ink-faint: #6e7299;
+
+  /* Estados */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #fb7185;
+
+  --radius-card: 1.25rem;
+
+  --animate-twinkle: twinkle 4s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-orbit: orbit-spin 40s linear infinite;
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes orbit-spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+/* ---------- Degradado de marca ---------- */
+@utility bg-nova-gradient {
+  background-image: linear-gradient(100deg, var(--color-nova-cyan) 0%, var(--color-nova-blue) 30%, var(--color-nova-purple) 65%, var(--color-nova-magenta) 100%);
+}
+@utility text-nova-gradient {
+  background-image: linear-gradient(100deg, var(--color-nova-cyan), var(--color-nova-purple) 55%, var(--color-nova-magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-space-950 text-ink font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-nova-purple) 60%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-nova-cyan);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* ---------- Botones ---------- */
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 font-display font-semibold tracking-wide transition-all duration-200 select-none disabled:cursor-not-allowed disabled:opacity-50;
+    min-height: 3rem;
+  }
+  .btn-sm {
+    min-height: 2.5rem;
+    @apply px-4 text-sm;
+  }
+  .btn-lg {
+    min-height: 3.5rem;
+    @apply px-8 text-base;
+  }
+  .btn-primary {
+    @apply bg-nova-gradient text-white;
+    background-size: 160% 100%;
+    background-position: 0% 50%;
+    box-shadow: 0 6px 24px -8px color-mix(in oklab, var(--color-nova-purple) 70%, transparent);
+  }
+  .btn-primary:not(:disabled):hover {
+    background-position: 100% 50%;
+    box-shadow:
+      0 10px 32px -8px color-mix(in oklab, var(--color-nova-magenta) 60%, transparent),
+      0 0 0 1px color-mix(in oklab, white 18%, transparent) inset;
+  }
+  .btn-primary:not(:disabled):active {
+    transform: translateY(1px) scale(0.99);
+  }
+  .btn-secondary {
+    @apply text-ink;
+    background:
+      linear-gradient(var(--color-space-900), var(--color-space-900)) padding-box,
+      linear-gradient(100deg, var(--color-nova-cyan), var(--color-nova-purple)) border-box;
+    border: 1.5px solid transparent;
+  }
+  .btn-secondary:not(:disabled):hover {
+    box-shadow: 0 0 22px -6px color-mix(in oklab, var(--color-nova-cyan) 70%, transparent);
+  }
+  .btn-ghost {
+    @apply text-ink-muted hover:bg-white/5 hover:text-ink;
+  }
+  .btn-light {
+    @apply bg-white text-space-900 hover:bg-nova-white;
+  }
+
+  /* Cohete del botón principal: despega levemente al pasar el cursor */
+  .rocket-icon {
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .btn:hover .rocket-icon,
+  .group:hover .rocket-icon {
+    transform: translate(3px, -3px) rotate(-6deg);
+  }
+
+  /* ---------- Superficies ---------- */
+  .surface {
+    @apply rounded-[var(--radius-card)] border border-white/8 bg-space-850;
+  }
+  .surface-glass {
+    @apply border border-white/10 bg-space-900/70 backdrop-blur-xl;
+  }
+
+  /* ---------- Formularios ---------- */
+  .field {
+    @apply block w-full rounded-xl border border-white/10 bg-space-900 px-4 text-ink placeholder:text-ink-faint transition outline-none focus:border-nova-cyan/70 focus:ring-2 focus:ring-nova-cyan/20;
+    min-height: 3rem;
+  }
+  textarea.field {
+    @apply py-3;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-muted;
+  }
+
+  /* ---------- Chips / selectores ---------- */
+  .chip {
+    @apply inline-flex min-h-10 min-w-10 items-center justify-center rounded-full border border-white/12 px-3.5 text-sm font-medium text-ink transition hover:border-white/30;
+  }
+  .chip[aria-pressed="true"],
+  .chip[aria-checked="true"],
+  .chip.is-active {
+    @apply border-transparent text-white;
+    background:
+      linear-gradient(var(--color-space-800), var(--color-space-800)) padding-box,
+      linear-gradient(100deg, var(--color-nova-cyan), var(--color-nova-magenta)) border-box;
+    border: 1.5px solid transparent;
+    box-shadow: 0 0 16px -6px color-mix(in oklab, var(--color-nova-cyan) 80%, transparent);
+  }
+  .chip:disabled {
+    @apply cursor-not-allowed line-through opacity-35;
+  }
+
+  /* ---------- Etiquetas ---------- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.12em] uppercase;
+  }
+  .badge-new {
+    @apply bg-nova-cyan text-space-950;
+  }
+  .badge-sale {
+    @apply bg-nova-magenta text-white;
+  }
+
+  /* ---------- Encabezado de sección con órbita ---------- */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-display text-xs font-semibold tracking-[0.3em] text-nova-cyan uppercase;
+  }
+}
+
+/* ---------- Fondo de estrellas (solo CSS, sin JS) ---------- */
+.starfield {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.starfield::before,
+.starfield::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-repeat: repeat;
+}
+.starfield::before {
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 120px 80px, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 200px 150px, #bfefff 50%, transparent 51%),
+    radial-gradient(1px 1px at 60px 210px, rgba(255, 255, 255, 0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 260px 40px, rgba(255, 255, 255, 0.6) 50%, transparent 51%);
+  background-size: 300px 260px;
+  opacity: 0.5;
+}
+.starfield::after {
+  background-image:
+    radial-gradient(2px 2px at 80px 120px, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 330px 60px, #ffc6ee 50%, transparent 51%),
+    radial-gradient(2px 2px at 220px 300px, #c7d6ff 50%, transparent 51%);
+  background-size: 420px 380px;
+  animation: twinkle 5s ease-in-out infinite;
+}
+
+/* Animación del producto volando al carrito */
+.fly-to-cart {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  border-radius: 1rem;
+  object-fit: cover;
+  box-shadow: 0 0 30px color-mix(in oklab, var(--color-nova-cyan) 50%, transparent);
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
