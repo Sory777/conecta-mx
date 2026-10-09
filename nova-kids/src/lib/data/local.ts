@@ -28,7 +28,9 @@ interface StoreFile {
   orderSeq: number;
 }
 
-export const DATA_DIR = path.join(process.cwd(), ".data");
+// En Vercel el disco es de solo lectura salvo /tmp (temporal): sirve como modo demostración.
+// Para datos permanentes en Vercel usa DATA_PROVIDER=supabase.
+export const DATA_DIR = process.env.VERCEL ? "/tmp/nova-kids-data" : path.join(process.cwd(), ".data");
 const FILE = path.join(DATA_DIR, "store.json");
 
 // Estado en globalThis: Next puede instanciar este módulo varias veces en el mismo proceso.
